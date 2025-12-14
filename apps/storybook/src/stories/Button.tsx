@@ -1,4 +1,5 @@
 import './button.css';
+import { JSX } from 'react';
 
 export interface ButtonProps {
   /** Is this the principal call to action on the page? */
@@ -20,12 +21,16 @@ export const Button = ({
   backgroundColor,
   label,
   ...props
-}: ButtonProps) => {
-  const mode = primary ? 'storybook-button--primary' : 'storybook-button--secondary';
+}: ButtonProps): JSX.Element => {
+  const mode = primary
+    ? 'storybook-button--primary'
+    : 'storybook-button--secondary';
   return (
     <button
       type="button"
-      className={['storybook-button', `storybook-button--${size}`, mode].join(' ')}
+      className={['storybook-button', `storybook-button--${size}`, mode].join(
+        ' ',
+      )}
       {...props}
     >
       {label}
