@@ -1,16 +1,40 @@
 {
   "name": "animemoria",
   "version": "1.0.0",
+  "packageManager": "npm@11.6.2",
   "scripts": {
     "build": "turbo run build",
-    "test": "turbo run test"
+    "build:packages": "turbo run build --filter='./packages/*'",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
+    "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
+    "prepare": "husky",
+    "commitlint": "commitlint --edit"
   },
-  "packageManager": "npm@11.6.2",
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix --no-warn-ignored",
+      "prettier --write"
+    ],
+    "*.{json,css,md}": [
+      "prettier --write"
+    ]
+  },
   "workspaces": [
     "apps/*",
     "packages/*"
   ],
   "devDependencies": {
-    "turbo": "^2.6.3"
+    "@commitlint/cli": "^20.2.0",
+    "@commitlint/config-conventional": "^20.2.0",
+    "@packages/eslint-config-base": "*",
+    "conventional-changelog-atom": "^5.0.0",
+    "eslint": "^9.39.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.4.2",
+    "turbo": "^2.6.3",
+    "typescript": "5.9.3"
   }
 }

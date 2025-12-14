@@ -1,5 +1,4 @@
-//  @ts-check
+// @ts-check
+import uiConfig from '@packages/eslint-config-ui';
 
-import { tanstackConfig } from '@tanstack/eslint-config'
-
-export default [...tanstackConfig]
+export default [...uiConfig];
