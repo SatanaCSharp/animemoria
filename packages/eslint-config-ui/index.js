@@ -1,14 +1,10 @@
-// @ts-check
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 import baseConfig from '@packages/eslint-config-base';
 import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const baseConfigArray = baseConfig;
 export default [
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   ...baseConfigArray,
   {
     ignores: [
@@ -27,11 +23,8 @@ export default [
   },
   {
     plugins: {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       react,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       'react-hooks': reactHooks,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       'jsx-a11y': jsxA11y,
     },
     settings: {

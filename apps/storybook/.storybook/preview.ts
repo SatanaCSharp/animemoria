@@ -4,8 +4,8 @@ const preview: Preview = {
   parameters: {
     controls: {
       matchers: {
-        color: /(?<group>background|color)$/iu,
-        date: /Date$/iu,
+        color: /(background|color)$/i,
+        date: /Date$/i,
       },
     },
 
