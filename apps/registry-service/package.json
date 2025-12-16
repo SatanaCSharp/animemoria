@@ -1,5 +1,5 @@
 {
-  "name": "users-service",
+  "name": "registry-service",
   "version": "0.0.1",
   "description": "",
   "author": "",
@@ -18,21 +18,23 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand"
   },
   "dependencies": {
-    "@packages/nest-shared": "workspace:*",
     "@nestjs/common": "catalog:",
     "@nestjs/core": "catalog:",
+    "@nestjs/platform-express": "catalog:",
+    "@packages/nest-shared": "workspace:*",
+    "@packages/utils": "workspace:*",
+    "@packages/shared-types": "workspace:*",
     "nestjs-pino": "catalog:",
     "pino-http": "catalog:",
-    "@nestjs/platform-express": "catalog:",
     "reflect-metadata": "catalog:",
     "rxjs": "catalog:"
   },
   "devDependencies": {
-    "@packages/eslint-config-service": "workspace:*",
-    "@packages/tsconfig": "workspace:*",
     "@nestjs/cli": "catalog:",
     "@nestjs/schematics": "catalog:",
     "@nestjs/testing": "catalog:",
+    "@packages/eslint-config-service": "workspace:*",
+    "@packages/tsconfig": "workspace:*",
     "@types/express": "catalog:",
     "@types/jest": "catalog:",
     "@types/node": "catalog:",

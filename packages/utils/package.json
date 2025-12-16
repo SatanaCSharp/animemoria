@@ -1,0 +1,37 @@
+{
+  "name": "@packages/utils",
+  "version": "1.0.0",
+  "description": "",
+  "license": "MIT",
+  "author": "",
+  "type": "commonjs",
+  "exports": {
+    "./asserts": {
+      "types": "./dist/asserts/index.d.ts",
+      "default": "./dist/asserts/index.js"
+    },
+    "./predicates": {
+      "types": "./dist/predicates/index.d.ts",
+      "default": "./dist/predicates/index.js"
+    },
+    "./errors": {
+      "types": "./dist/errors/index.d.ts",
+      "default": "./dist/errors/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc && tsc-alias",
+    "start:dev": "tsc && (concurrently \"tsc -w\" \"tsc-alias -w\")",
+    "lint": "eslint 'src/**/*.ts' --max-warnings=0",
+    "lint:fix": "eslint 'src/**/*.ts' --max-warnings=0 --fix"
+  },
+  "dependencies": {
+    "@packages/shared-types": "workspace:*"
+  },
+  "devDependencies": {
+    "@packages/eslint-config-base": "workspace:*",
+    "@packages/tsconfig": "workspace:*",
+    "tsc-alias": "catalog:",
+    "typescript": "catalog:"
+  }
+}

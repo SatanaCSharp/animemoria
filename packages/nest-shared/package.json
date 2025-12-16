@@ -1,10 +1,28 @@
 {
-  "name": "users-service",
+  "name": "@packages/nest-shared",
   "version": "0.0.1",
   "description": "",
   "author": "",
   "private": true,
   "license": "UNLICENSED",
+  "exports": {
+    "./shared": {
+      "types": "./dist/shared/index.d.ts",
+      "default": "./dist/shared/index.js"
+    },
+    "./registry-service": {
+      "types": "./dist/registry-service/index.d.ts",
+      "default": "./dist/registry-service/index.js"
+    },
+    "./config": {
+      "types": "./dist/config/index.d.ts",
+      "default": "./dist/config/index.js"
+    },
+    "./app-logger": {
+      "types": "./dist/app-logger/index.d.ts",
+      "default": "./dist/app-logger/index.js"
+    }
+  },
   "scripts": {
     "build": "nest build",
     "start": "nest start",
@@ -18,11 +36,12 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand"
   },
   "dependencies": {
-    "@packages/nest-shared": "workspace:*",
+    "@nestjs/axios": "catalog:",
     "@nestjs/common": "catalog:",
-    "@nestjs/core": "catalog:",
+    "@nestjs/config": "catalog:",
     "nestjs-pino": "catalog:",
-    "pino-http": "catalog:",
+    "pino-pretty": "catalog:",
+    "@nestjs/core": "catalog:",
     "@nestjs/platform-express": "catalog:",
     "reflect-metadata": "catalog:",
     "rxjs": "catalog:"

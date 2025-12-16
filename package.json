@@ -1,7 +1,10 @@
 {
   "name": "animemoria",
   "version": "1.0.0",
-  "packageManager": "npm@11.6.2",
+  "packageManager": "pnpm@9.15.3",
+  "engines": {
+    "node": ">=24.11.1"
+  },
   "scripts": {
     "build": "turbo run build",
     "build:packages": "turbo run build --filter='./packages/*'",
@@ -28,13 +31,11 @@
   "devDependencies": {
     "@commitlint/cli": "^20.2.0",
     "@commitlint/config-conventional": "^20.2.0",
-    "@packages/eslint-config-base": "*",
     "conventional-changelog-atom": "^5.0.0",
     "eslint": "^9.39.2",
     "husky": "^9.1.7",
-    "lint-staged": "^16.2.7",
-    "prettier": "^3.4.2",
-    "turbo": "^2.6.3",
-    "typescript": "5.9.3"
+    "lint-staged": "^15.2.0",
+    "prettier": "^3.3.3",
+    "turbo": "^2.6.3"
   }
 }
