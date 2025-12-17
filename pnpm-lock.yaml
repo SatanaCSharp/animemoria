@@ -414,6 +414,9 @@ importers:
       '@packages/nest-shared':
         specifier: workspace:*
         version: link:../../packages/nest-shared
+      '@packages/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
       nestjs-pino:
         specifier: 'catalog:'
         version: 4.5.0(@nestjs/common@11.1.9(reflect-metadata@0.2.2)(rxjs@7.8.2))(pino-http@11.0.0)(pino@10.1.0)(rxjs@7.8.2)
@@ -577,6 +580,12 @@ importers:
       '@nestjs/platform-express':
         specifier: 'catalog:'
         version: 11.1.9(@nestjs/common@11.1.9(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.9)
+      '@packages/shared-types':
+        specifier: workspace:*
+        version: link:../shared-types
+      '@packages/utils':
+        specifier: workspace:*
+        version: link:../utils
       nestjs-pino:
         specifier: 'catalog:'
         version: 4.5.0(@nestjs/common@11.1.9(reflect-metadata@0.2.2)(rxjs@7.8.2))(pino-http@11.0.0)(pino@10.1.0)(rxjs@7.8.2)
@@ -677,6 +686,9 @@ importers:
       '@packages/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig
+      '@types/node':
+        specifier: 'catalog:'
+        version: 22.19.3
       tsc-alias:
         specifier: 'catalog:'
         version: 1.8.16

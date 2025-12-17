@@ -26,13 +26,11 @@ export class UnregisterServiceCommandProcessor implements CommandProcessor<
   process(command: Command): void {
     const { appVariant, serviceId } = command;
 
-    this.logger.debug('Processing unregister service command', {
-      appVariant,
-      serviceId,
-    });
-
     this.registryRepository.removeServiceDescription(appVariant, serviceId);
 
-    this.logger.debug('Processing unregister service command finished');
+    this.logger.debug(
+      { appVariant, serviceId },
+      'Processing unregister service command finished',
+    );
   }
 }

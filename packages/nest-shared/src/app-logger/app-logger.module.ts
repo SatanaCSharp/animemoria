@@ -11,28 +11,30 @@ export class AppLoggerModule {
       module: AppLoggerModule,
       imports: [
         LoggerModule.forRootAsync({
-          imports: [ConfigModule.forRoot()],
+          imports: [ConfigModule],
           inject: [ConfigService],
           useFactory: (config: ConfigService) => {
-            const logPretty = config.getOrThrow<string>('LOG_PRETTY');
-            const nodeEnv = config.getOrThrow<string>('NODE_ENV');
+            const logPretty = config.get<string>('LOG_PRETTY', 'false');
             const logLevel = config.getOrThrow<string>('LOG_LEVEL');
 
-            const isPretty = logPretty === 'true' || nodeEnv !== 'production';
+            const isPretty = logPretty === 'true';
 
             const transportOptions = {
               target: 'pino-pretty',
               options: {
                 colorize: true,
-                translateTime: 'SYS:standard',
-                ignore: 'pid,hostname',
+                translateTime: 'SYS:yyyy-mm-ddTHH:MM:ss.lZ',
+                ignore: 'pid,hostname,reqId',
+                singleLine: true,
               },
             };
 
             return {
               pinoHttp: {
                 level: logLevel,
-                transport: isPretty ? transportOptions : undefined,
+                autoLogging: false,
+                quietReqLogger: true,
+                transport: !isPretty ? undefined : transportOptions,
               },
             };
           },

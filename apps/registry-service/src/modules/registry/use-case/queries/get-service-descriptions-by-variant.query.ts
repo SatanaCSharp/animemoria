@@ -11,7 +11,7 @@ type Query = {
   appVariant: AppVariant;
 };
 @Injectable()
-export class GetServiceDescriptionsQueryProcessor implements QueryProcessor<
+export class GetServiceDescriptionsByVariantQueryProcessor implements QueryProcessor<
   Query,
   ServiceDescription[]
 > {
@@ -19,7 +19,7 @@ export class GetServiceDescriptionsQueryProcessor implements QueryProcessor<
     private readonly registryRepository: RegistryRepository,
     private readonly logger: PinoLogger,
   ) {
-    this.logger.setContext(GetServiceDescriptionsQueryProcessor.name);
+    this.logger.setContext(GetServiceDescriptionsByVariantQueryProcessor.name);
   }
   process(query: Query): ServiceDescription[] {
     const { appVariant } = query;

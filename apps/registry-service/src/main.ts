@@ -6,8 +6,8 @@ async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
   const port = process.env.APP_PORT;
   assertDefined(port, 'Port is required');
+
   await app.listen(port);
 }
 
-// eslint-disable-next-line no-console
-bootstrap().catch((err) => console.error(err));
+bootstrap().catch((err: unknown): unknown => err);

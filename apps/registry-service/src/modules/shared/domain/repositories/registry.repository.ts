@@ -20,10 +20,12 @@ export class RegistryRepository {
     registry.set(appVariant, new Map<ServiceId, ServiceDescription>());
   }
 
-  addServiceDescription(serviceDescription: ServiceDescription): void {
-    const serviceDescriptionRegistry = this.getServiceDescriptionByAppVariant(
-      serviceDescription.appVariant as AppVariant,
-    );
+  addServiceDescription(
+    appVariant: AppVariant,
+    serviceDescription: ServiceDescription,
+  ): void {
+    const serviceDescriptionRegistry =
+      this.getServiceDescriptionByAppVariant(appVariant);
 
     if (!serviceDescriptionRegistry.has(serviceDescription.serviceId)) {
       serviceDescriptionRegistry.set(
@@ -53,7 +55,7 @@ export class RegistryRepository {
     const serviceDescriptionRegistry =
       this.getServiceDescriptionByAppVariant(appVariant);
 
-    const serviceDescription = serviceDescriptionRegistry.get(appVariant);
+    const serviceDescription = serviceDescriptionRegistry.get(serviceId);
 
     assertDefined(
       serviceDescription,

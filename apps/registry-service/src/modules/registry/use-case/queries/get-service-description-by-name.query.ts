@@ -25,9 +25,7 @@ export class GetServiceDescriptionByNameQueryProcessor implements QueryProcessor
   process(query: Query): ServiceDescription {
     const { appVariant, serviceName } = query;
 
-    this.logger.debug('Processing get service description by name', {
-      appVariant,
-    });
+    this.logger.debug(appVariant, 'Processing get service description by name');
 
     return this.registryRepository.getServiceDescriptionByServiceName(
       appVariant,

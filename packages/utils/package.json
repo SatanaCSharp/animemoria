@@ -17,6 +17,10 @@
     "./errors": {
       "types": "./dist/errors/index.d.ts",
       "default": "./dist/errors/index.js"
+    },
+    "./async": {
+      "types": "./dist/async/index.d.ts",
+      "default": "./dist/async/index.js"
     }
   },
   "scripts": {
@@ -31,6 +35,7 @@
   "devDependencies": {
     "@packages/eslint-config-base": "workspace:*",
     "@packages/tsconfig": "workspace:*",
+    "@types/node": "catalog:",
     "tsc-alias": "catalog:",
     "typescript": "catalog:"
   }

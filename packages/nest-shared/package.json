@@ -21,6 +21,10 @@
     "./app-logger": {
       "types": "./dist/app-logger/index.d.ts",
       "default": "./dist/app-logger/index.js"
+    },
+    "./graceful-shutdown": {
+      "types": "./dist/graceful-shutdown/index.d.ts",
+      "default": "./dist/graceful-shutdown/index.js"
     }
   },
   "scripts": {
@@ -36,6 +40,8 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand"
   },
   "dependencies": {
+    "@packages/utils": "workspace:*",
+    "@packages/shared-types": "workspace:*",
     "@nestjs/axios": "catalog:",
     "@nestjs/common": "catalog:",
     "@nestjs/config": "catalog:",

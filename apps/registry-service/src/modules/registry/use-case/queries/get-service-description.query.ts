@@ -26,10 +26,10 @@ export class GetServiceDescriptionQueryProcessor implements QueryProcessor<
   process(query: Query): ServiceDescription {
     const { appVariant, serviceId } = query;
 
-    this.logger.debug('Processing get service description', {
-      appVariant,
-      serviceId,
-    });
+    this.logger.debug(
+      { appVariant, serviceId },
+      'Processing get service description',
+    );
 
     return this.registryRepository.getServiceDescription(appVariant, serviceId);
   }

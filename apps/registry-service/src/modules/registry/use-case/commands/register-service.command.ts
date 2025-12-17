@@ -8,6 +8,7 @@ import {
 import { RegistryRepository } from 'modules/shared/domain/repositories/registry.repository';
 
 type Command = {
+  appVariant: AppVariant;
   serviceDescription: ServiceDescription;
 };
 
@@ -24,23 +25,18 @@ export class RegisterServiceCommandProcessor implements CommandProcessor<
   }
 
   process(command: Command): void {
-    const { serviceDescription } = command;
+    const { serviceDescription, appVariant } = command;
 
-    this.logger.debug('Processing register service command', {
+    this.registryRepository.addAppVariantRegistry(appVariant);
+
+    this.registryRepository.addServiceDescription(
+      appVariant,
       serviceDescription,
-    });
-
-    this.registryRepository.addAppVariantRegistry(
-      serviceDescription.appVariant as AppVariant,
     );
 
-    this.logger.debug('Adding service description to registry', {
-      serviceName: serviceDescription.serviceName,
-      serviceId: serviceDescription.serviceId,
-    });
-
-    this.registryRepository.addServiceDescription(serviceDescription);
-
-    this.logger.debug('Service registration completed successfully');
+    this.logger.debug(
+      serviceDescription,
+      'Service registration completed successfully',
+    );
   }
 }

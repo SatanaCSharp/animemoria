@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@packages/nest-shared": "workspace:*",
+    "@packages/utils": "workspace:*",
     "@nestjs/common": "catalog:",
     "@nestjs/core": "catalog:",
     "nestjs-pino": "catalog:",
