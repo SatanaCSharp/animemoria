@@ -1,0 +1,14 @@
+{
+  "name": "@packages/graphql-generated",
+  "version": "1.0.0",
+  "description": "",
+  "license": "MIT",
+  "author": "",
+  "type": "module",
+  "exports": {
+    "./schema": "./schema.gql"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

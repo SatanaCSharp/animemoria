@@ -1,9 +1,0 @@
-import { Global, Module } from '@nestjs/common';
-import { repositories } from 'modules/shared/domain/repositories/repositories';
-
-@Global()
-@Module({
-  providers: [...repositories],
-  exports: [...repositories],
-})
-export class SharedModule {}
