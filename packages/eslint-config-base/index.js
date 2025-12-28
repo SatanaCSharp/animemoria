@@ -51,6 +51,7 @@ export default [
       'no-continue': ['off'],
       curly: ['warn', 'all'],
       'linebreak-style': ['error', 'unix'],
+      '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/explicit-member-accessibility': [
         'error',
         { accessibility: 'no-public' },

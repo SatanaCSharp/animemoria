@@ -14,7 +14,7 @@
     "react-dom": "19.2.1"
   },
   "devDependencies": {
-    "@packages/eslint-config-ui": "*",
+    "@packages/eslint-config-ui": "workspace:*",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
