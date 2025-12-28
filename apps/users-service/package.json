@@ -20,8 +20,12 @@
   "dependencies": {
     "@packages/nest-shared": "workspace:*",
     "@packages/utils": "workspace:*",
+    "@packages/graphql-definitions": "workspace:*",
+    "@apollo/server": "catalog:",
     "@nestjs/common": "catalog:",
     "@nestjs/core": "catalog:",
+    "@nestjs/graphql": "catalog:",
+    "@nestjs/apollo": "catalog:",
     "nestjs-pino": "catalog:",
     "pino-http": "catalog:",
     "@nestjs/platform-express": "catalog:",

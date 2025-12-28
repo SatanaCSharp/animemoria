@@ -39,5 +39,15 @@
     "lint-staged": "^16.2.7",
     "prettier": "^3.7.4",
     "turbo": "^2.6.3"
+  },
+  "pnpm": {
+    "peerDependencyRules": {
+      "ignoreMissing": [
+        "@apollo/server-plugin-landing-page-graphql-playground"
+      ],
+      "allowedVersions": {
+        "@apollo/server": "5"
+      }
+    }
   }
 }
