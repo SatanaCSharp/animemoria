@@ -1,0 +1,45 @@
+{
+  "name": "@packages/ui-shared",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./buttons": {
+      "types": "./dist/buttons/index.d.ts",
+      "default": "./dist/buttons/index.js"
+    },
+    "./inputs": {
+      "types": "./dist/inputs/index.d.ts",
+      "default": "./dist/inputs/index.js"
+    },
+    "./hero-ui": {
+      "types": "./dist/hero-ui/index.d.ts",
+      "default": "./dist/hero-ui/index.js"
+    },
+    "./hero-ui/styles.css": "./src/hero-ui/styles.css"
+  },
+  "scripts": {
+    "dev": "tsup --config tsup.config.ts --watch",
+    "build": "tsup --config tsup.config.ts",
+    "preview": "vite preview",
+    "lint": "eslint 'src/**/*.{ts,tsx}' --fix"
+  },
+  "dependencies": {
+    "@heroui/button": "^2.2.29",
+    "@heroui/input": "^2.4.30",
+    "@heroui/react": "catalog:",
+    "@heroui/theme": "catalog:",
+    "framer-motion": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "tailwindcss": "catalog:"
+  },
+  "devDependencies": {
+    "@packages/eslint-config-ui": "workspace:*",
+    "@tailwindcss/vite": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "tsup": "^8.5.1",
+    "typescript": "catalog:"
+  }
+}

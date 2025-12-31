@@ -1,4 +1,8 @@
+/* App-specific styles */
+/* UI library styles are imported from @packages/ui-shared/ui/styles.css */
 @import 'tailwindcss';
+/* Scan app source files for Tailwind classes */
+@source './**/*.{js,ts,jsx,tsx}';
 
 body {
   @apply m-0;

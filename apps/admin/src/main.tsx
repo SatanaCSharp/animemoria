@@ -1,5 +1,7 @@
+import '@packages/ui-shared/hero-ui/styles.css';
 import '@/styles.css';
 
+import { UIProvider } from '@packages/ui-shared/hero-ui';
 import { RouterProvider } from '@tanstack/react-router';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -16,6 +18,8 @@ declare module '@tanstack/react-router' {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <UIProvider>
+      <RouterProvider router={router} />
+    </UIProvider>
   </StrictMode>,
 );
