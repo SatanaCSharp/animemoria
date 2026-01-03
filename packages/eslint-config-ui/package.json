@@ -6,10 +6,15 @@
   "author": "",
   "type": "module",
   "main": "index.js",
+  "types": "index.d.ts",
   "publishConfig": {
     "access": "public"
   },
   "devDependencies": {
+    "@packages/eslint-config-base": "workspace:*",
+    "@types/eslint-plugin-jsx-a11y": "^6.10.1",
+    "eslint-import-resolver-typescript": "^3.7.0",
+    "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1"

@@ -7,23 +7,36 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint",
-    "check": "eslint --fix"
+    "check": "eslint --fix",
+    "codegen": "graphql-codegen --config node_modules/@packages/graphql-generated/codegen.config.ts",
+    "codegen:watch": "graphql-codegen --config node_modules/@packages/graphql-generated/codegen.config.ts --watch"
   },
   "dependencies": {
-    "@tanstack/react-router": "^1.132.0",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "tailwindcss": "^4.0.6"
+    "@apollo/client": "catalog:",
+    "@graphql-typed-document-node/core": "catalog:",
+    "@packages/ui-shared": "workspace:*",
+    "@tanstack/react-router": "^1.144.0",
+    "graphql": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "rxjs": "catalog:",
+    "tailwindcss": "catalog:"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "catalog:",
+    "@graphql-codegen/typescript": "catalog:",
+    "@graphql-codegen/typescript-operations": "catalog:",
+    "@graphql-codegen/near-operation-file-preset": "catalog:",
+    "@graphql-codegen/typed-document-node": "catalog:",
     "@packages/eslint-config-ui": "workspace:*",
-    "@tailwindcss/vite": "^4.0.6",
-    "@types/node": "^22.10.2",
-    "@types/react": "^19.2.0",
-    "@types/react-dom": "^19.2.0",
-    "@vitejs/plugin-react": "^5.0.4",
-    "typescript": "5.9.3",
-    "vite": "^7.1.7",
-    "vite-tsconfig-paths": "^5.1.4"
+    "@packages/graphql-generated": "workspace:*",
+    "@tailwindcss/vite": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-tsconfig-paths": "catalog:"
   }
 }

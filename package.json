@@ -34,6 +34,7 @@
     "@commitlint/cli": "^20.2.0",
     "@commitlint/config-conventional": "^20.2.0",
     "conventional-changelog-atom": "^5.0.0",
+    "@packages/eslint-config-base": "workspace:*",
     "eslint": "^9.39.2",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",

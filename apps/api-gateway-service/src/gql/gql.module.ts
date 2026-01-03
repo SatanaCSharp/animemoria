@@ -17,6 +17,13 @@ import { GetSubgraphServicesQueryProcessor } from 'gql/use-case/queries/get-subg
         getSubgraphServicesQueryProcessor: GetSubgraphServicesQueryProcessor,
       ) => {
         const subgraphs = await getSubgraphServicesQueryProcessor.process();
+        const isDevelopment = process.env.NODE_ENV !== 'production';
+        const corsOrigins = isDevelopment
+          ? '*'
+          : process.env.CORS_ORIGINS?.split(',').map((origin) =>
+              origin.trim(),
+            ) || [];
+
         return {
           path: '/graphql',
 
@@ -32,6 +39,10 @@ import { GetSubgraphServicesQueryProcessor } from 'gql/use-case/queries/get-subg
               ApolloServerPluginLandingPageLocalDefault({ embed: true }),
             ],
             context: () => ({}),
+            cors: {
+              origin: corsOrigins,
+              credentials: true,
+            },
           },
         };
       },

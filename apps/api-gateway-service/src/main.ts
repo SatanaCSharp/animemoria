@@ -8,6 +8,23 @@ async function bootstrap(): Promise<void> {
 
   assertDefined(port, 'Port is required');
 
+  // Configure CORS
+  const isDevelopment = process.env.NODE_ENV !== 'production';
+  const corsOrigins = isDevelopment
+    ? '*' // Allow all origins in development
+    : process.env.CORS_ORIGINS?.split(',').map((origin) => origin.trim()) || [];
+
+  app.enableCors({
+    origin: corsOrigins,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'Apollo-Require-Preflight',
+    ],
+  });
+
   await app.listen(port);
 
   app.enableShutdownHooks();

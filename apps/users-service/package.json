@@ -26,6 +26,7 @@
     "@nestjs/core": "catalog:",
     "@nestjs/graphql": "catalog:",
     "@nestjs/apollo": "catalog:",
+    "@as-integrations/express5": "catalog:",
     "nestjs-pino": "catalog:",
     "pino-http": "catalog:",
     "@nestjs/platform-express": "catalog:",

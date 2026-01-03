@@ -29,6 +29,7 @@
     "@nestjs/core": "catalog:",
     "@nestjs/graphql": "catalog:",
     "@nestjs/platform-express": "catalog:",
+    "@as-integrations/express5": "catalog:",
     "@packages/nest-shared": "workspace:*",
     "@packages/shared-types": "workspace:*",
     "@packages/utils": "workspace:*",
