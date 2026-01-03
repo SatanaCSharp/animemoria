@@ -1,4 +1,5 @@
 import baseConfig from '@packages/eslint-config-base';
+import importPlugin from 'eslint-plugin-import';
 import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
@@ -26,11 +27,22 @@ export default [
       react,
       'react-hooks': reactHooks,
       'jsx-a11y': jsxA11y,
+      import: importPlugin,
     },
     settings: {
       react: {
         version: 'detect',
       },
+      'import/resolver': {
+        typescript: {
+          alwaysTryTypes: true,
+          project: './tsconfig.json',
+        },
+        node: {
+          extensions: ['.js', '.jsx', '.ts', '.tsx'],
+        },
+      },
+      'import/extensions': ['.js', '.jsx', '.ts', '.tsx'],
     },
     languageOptions: {
       parserOptions: {
@@ -40,6 +52,55 @@ export default [
       },
     },
     rules: {
+      // Import plugin rules for TypeScript path resolution
+      // Note: import/no-unresolved is turned off because TypeScript handles this
+      // and the resolver can have issues with baseUrl paths
+      'import/no-unresolved': 'off',
+      'import/named': 'error',
+      'import/no-self-import': 'error',
+      'import/no-cycle': 'warn',
+      'import/no-useless-path-segments': 'warn',
+      'import/newline-after-import': 'warn',
+      'import/no-duplicates': 'warn',
+      'import/first': 'warn',
+      // Configure import/order for consistent import organization
+      'import/order': [
+        'warn',
+        {
+          groups: [
+            'builtin',
+            'external',
+            'internal',
+            'parent',
+            'sibling',
+            'index',
+            'object',
+            'type',
+          ],
+          'newlines-between': 'always',
+          alphabetize: {
+            order: 'asc',
+            caseInsensitive: true,
+          },
+        },
+      ],
+
+      // Disable simple-import-sort rules from base config in favor of import/order
+      'simple-import-sort/imports': 'off',
+      'simple-import-sort/exports': 'off',
+
+      // Import rules
+      'import/extensions': [
+        'error',
+        'ignorePackages',
+        {
+          ts: 'never',
+          tsx: 'never',
+          js: 'never',
+          jsx: 'never',
+        },
+      ],
+
       // React plugin rules
       'react/react-in-jsx-scope': 'off', // Not needed in React 17+
       'react/prop-types': 'off', // Using TypeScript for type checking

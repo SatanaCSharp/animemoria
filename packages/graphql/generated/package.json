@@ -6,9 +6,23 @@
   "author": "",
   "type": "module",
   "exports": {
-    "./schema": "./schema.gql"
+    "./schema": "./schema.gql",
+    "./codegen.config": "./codegen.config.ts"
   },
   "publishConfig": {
     "access": "public"
+  },
+  "scripts": {
+    "codegen": "graphql-codegen --config codegen.config.ts"
+  },
+  "devDependencies": {
+    "@packages/eslint-config-base": "workspace:*",
+    "@packages/tsconfig": "workspace:*",
+    "@graphql-codegen/cli": "catalog:",
+    "@graphql-codegen/typescript": "catalog:",
+    "@graphql-codegen/typescript-operations": "catalog:",
+    "@graphql-codegen/near-operation-file-preset": "catalog:",
+    "@graphql-codegen/typed-document-node": "catalog:",
+    "@types/node": "catalog:"
   }
 }

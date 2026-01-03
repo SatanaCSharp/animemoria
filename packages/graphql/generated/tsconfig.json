@@ -1,0 +1,9 @@
+{
+  "extends": "@packages/tsconfig/tsconfig.node.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "types": ["node"]
+  },
+  "include": ["codegen.config.ts"]
+}

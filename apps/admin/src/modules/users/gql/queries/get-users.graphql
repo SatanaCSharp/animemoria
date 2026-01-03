@@ -1,0 +1,10 @@
+#import "../fragments/user-fields.graphql"
+
+query GetUsers {
+  getUsers {
+    id
+    email
+    nickname
+  }
+}
+
