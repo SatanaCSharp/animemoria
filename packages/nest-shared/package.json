@@ -25,6 +25,10 @@
     "./graceful-shutdown": {
       "types": "./dist/graceful-shutdown/index.d.ts",
       "default": "./dist/graceful-shutdown/index.js"
+    },
+    "./orm": {
+      "types": "./dist/orm/index.d.ts",
+      "default": "./dist/orm/index.js"
     }
   },
   "scripts": {
@@ -45,12 +49,15 @@
     "@nestjs/axios": "catalog:",
     "@nestjs/common": "catalog:",
     "@nestjs/config": "catalog:",
+    "@nestjs/typeorm": "catalog:",
     "nestjs-pino": "catalog:",
     "pino-pretty": "catalog:",
     "@nestjs/core": "catalog:",
     "@nestjs/platform-express": "catalog:",
     "reflect-metadata": "catalog:",
-    "rxjs": "catalog:"
+    "rxjs": "catalog:",
+    "typeorm": "catalog:",
+    "pg": "catalog:"
   },
   "devDependencies": {
     "@packages/eslint-config-service": "workspace:*",
