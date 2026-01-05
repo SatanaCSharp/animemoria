@@ -1,0 +1,27 @@
+services:
+  db:
+    container_name: postgres
+    image: postgres:16-alpine
+    env_file: .env.docker
+    volumes:
+      - db:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    shm_size: 128mb
+
+networks:
+  db:
+    driver: bridge
+
+volumes:
+  db:
+    name: animemoria_postgres_data
