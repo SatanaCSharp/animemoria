@@ -20,18 +20,22 @@
   "dependencies": {
     "@packages/nest-shared": "workspace:*",
     "@packages/utils": "workspace:*",
+    "@packages/shared-types": "workspace:*",
     "@packages/graphql-definitions": "workspace:*",
     "@apollo/server": "catalog:",
     "@nestjs/common": "catalog:",
     "@nestjs/core": "catalog:",
     "@nestjs/graphql": "catalog:",
+    "@nestjs/typeorm": "catalog:",
     "@nestjs/apollo": "catalog:",
     "@as-integrations/express5": "catalog:",
     "nestjs-pino": "catalog:",
     "pino-http": "catalog:",
     "@nestjs/platform-express": "catalog:",
     "reflect-metadata": "catalog:",
-    "rxjs": "catalog:"
+    "rxjs": "catalog:",
+    "pg": "catalog:",
+    "typeorm": "catalog:"
   },
   "devDependencies": {
     "@packages/eslint-config-service": "workspace:*",

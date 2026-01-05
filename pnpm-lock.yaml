@@ -655,18 +655,27 @@ importers:
       '@nestjs/platform-express':
         specifier: 'catalog:'
         version: 11.1.9(@nestjs/common@11.1.9(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.9)
+      '@nestjs/typeorm':
+        specifier: 'catalog:'
+        version: 11.0.0(@nestjs/common@11.1.9(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.9)(reflect-metadata@0.2.2)(rxjs@7.8.2)(typeorm@0.3.28(pg@8.16.3)(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3)))
       '@packages/graphql-definitions':
         specifier: workspace:*
         version: link:../../packages/graphql/definitions
       '@packages/nest-shared':
         specifier: workspace:*
         version: link:../../packages/nest-shared
+      '@packages/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared-types
       '@packages/utils':
         specifier: workspace:*
         version: link:../../packages/utils
       nestjs-pino:
         specifier: 'catalog:'
         version: 4.5.0(@nestjs/common@11.1.9(reflect-metadata@0.2.2)(rxjs@7.8.2))(pino-http@11.0.0)(pino@10.1.0)(rxjs@7.8.2)
+      pg:
+        specifier: 'catalog:'
+        version: 8.16.3
       pino-http:
         specifier: 'catalog:'
         version: 11.0.0
@@ -676,6 +685,9 @@ importers:
       rxjs:
         specifier: 'catalog:'
         version: 7.8.2
+      typeorm:
+        specifier: 'catalog:'
+        version: 0.3.28(pg@8.16.3)(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))
     devDependencies:
       '@nestjs/cli':
         specifier: 'catalog:'
