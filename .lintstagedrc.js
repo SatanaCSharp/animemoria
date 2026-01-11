@@ -9,13 +9,16 @@
  * How it works:
  * 1. Groups staged files by their nearest package directory
  * 2. Runs ESLint from each package directory with its local config
- * 3. Applies Prettier formatting after linting
+ * 3. Auto-fixes issues where possible
+ * 4. Validates no warnings/errors remain (fails commit if any exist)
+ * 5. Applies Prettier formatting after linting
  *
  * Benefits:
  * - Only staged files are processed (memory efficient)
  * - Each package uses its own ESLint rules (respects local configs)
  * - Automatic fixes are applied and re-staged
  * - Clean separation: linting per package, formatting globally
+ * - Zero tolerance: Any remaining warnings or errors will fail the commit
  *
  * Performance:
  * - Time Complexity: O(n*m) where n=files, m=directory depth
@@ -91,6 +94,7 @@ const groupFilesByPackage = (files) => {
 
 /**
  * Generates ESLint commands for each package group
+ * Uses shell subcommands to ensure proper error handling
  * @param {string[]} filenames - Array of absolute staged file paths
  * @returns {string[]} - Array of shell commands to execute
  */
@@ -105,7 +109,15 @@ const generateEslintCommands = (filenames) => {
   packageGroups.forEach((files, packageDir) => {
     // Escape file paths for shell execution
     const filesArg = files.map((f) => `"${f}"`).join(' ');
-    const command = `cd "${packageDir}" && npx eslint ${filesArg} --fix`;
+    
+    // Combined command: fix, then check with exit on error
+    // Wrap in sh -c to ensure proper shell execution
+    const command = 
+      `sh -c 'cd "${packageDir}" && ` +
+      `npx eslint ${filesArg} --fix && ` +
+      `npx eslint ${filesArg} --max-warnings=0 || ` +
+      `(echo "\\n  ❌ ESLint failed in ${packageDir}\\nFiles: ${files.join(', ')}\\n" >&2 && exit 1)'`;
+    
     commands.push(command);
   });
 
