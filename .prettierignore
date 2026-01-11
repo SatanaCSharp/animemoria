@@ -48,3 +48,4 @@ public
 # Config files that might have specific formatting
 *.min.js
 *.min.css
+.lintstagedrc.js

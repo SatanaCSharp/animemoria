@@ -37,6 +37,7 @@ export class ModuleInitializerService {
   async register(): Promise<void> {
     const url = `${this.registryServer}/registry/${this.options.appVariant}/register`;
 
+    // TODO ADD automatic registration services from env variables, based on variant
     const payload: ServiceDescription = {
       serviceName: this.options.serviceName,
       host: this.options.host,

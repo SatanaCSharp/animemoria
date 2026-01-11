@@ -17,15 +17,6 @@
     "prepare": "husky",
     "commitlint": "commitlint --edit"
   },
-  "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "eslint --fix --no-warn-ignored",
-      "prettier --write"
-    ],
-    "*.{json,css,md}": [
-      "prettier --write"
-    ]
-  },
   "workspaces": [
     "apps/*",
     "packages/*"

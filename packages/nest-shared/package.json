@@ -29,6 +29,22 @@
     "./orm": {
       "types": "./dist/orm/index.d.ts",
       "default": "./dist/orm/index.js"
+    },
+    "./orm/migration": {
+      "types": "./dist/orm/migration/index.d.ts",
+      "default": "./dist/orm/migration/index.js"
+    },
+    "./orm/migration/run-migration": {
+      "types": "./dist/orm/migration/run-migration.d.ts",
+      "default": "./dist/orm/migration/run-migration.js"
+    },
+    "./orm/migration/undo-migration": {
+      "types": "./dist/orm/migration/undo-migration.d.ts",
+      "default": "./dist/orm/migration/undo-migration.js"
+    },
+    "./orm/migration/undo-all-migrations": {
+      "types": "./dist/orm/migration/undo-all-migrations.d.ts",
+      "default": "./dist/orm/migration/undo-all-migrations.js"
     }
   },
   "scripts": {
@@ -51,6 +67,7 @@
     "@nestjs/config": "catalog:",
     "@nestjs/typeorm": "catalog:",
     "nestjs-pino": "catalog:",
+    "pino": "catalog:",
     "pino-pretty": "catalog:",
     "@nestjs/core": "catalog:",
     "@nestjs/platform-express": "catalog:",

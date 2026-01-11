@@ -8,13 +8,13 @@ import { DataSource } from 'typeorm';
 
 @Module({})
 export class OrmDbModule implements OnModuleInit {
-  private readonly MAX_QUERY_EXECUTION_TIME_MS = 5000;
-  private readonly INITIAL_CONNECTION_RETRY_DELAY = 2000;
-  private readonly INITIAL_CONNECTION_RETRY_ATTEMPTS = 3;
-  private readonly CONNECTION_TIMEOUT_MS = 5000;
-  private readonly POOL_SIZE = 800;
-  private readonly LOCK_TIMEOUT_MS = 100;
-  private readonly MIGRATION_TABLE_NAME = '_migrations';
+  private static readonly MAX_QUERY_EXECUTION_TIME_MS = 5000;
+  private static readonly INITIAL_CONNECTION_RETRY_DELAY = 2000;
+  private static readonly INITIAL_CONNECTION_RETRY_ATTEMPTS = 3;
+  private static readonly CONNECTION_TIMEOUT_MS = 5000;
+  private static readonly POOL_SIZE = 800;
+  private static readonly LOCK_TIMEOUT_MS = 100;
+  private static readonly MIGRATION_TABLE_NAME = '_migrations';
 
   constructor(
     private readonly logger: PinoLogger,
@@ -33,7 +33,7 @@ export class OrmDbModule implements OnModuleInit {
     );
   }
 
-  forRoot(): DynamicModule {
+  static forRoot(): DynamicModule {
     return {
       module: OrmDbModule,
       global: true,
@@ -61,7 +61,7 @@ export class OrmDbModule implements OnModuleInit {
               migrationsTransactionMode: 'all',
               type: 'postgres',
               entities: [`${process.cwd()}/dist*/**/*.entity.js`],
-              migrations: [`${process.cwd()}/dist/database/migrations/*.js`],
+              migrations: [`${process.cwd()}/dist/db/migrations/*.js`],
               useUTC: true,
               migrationsRun: false,
               extra: {

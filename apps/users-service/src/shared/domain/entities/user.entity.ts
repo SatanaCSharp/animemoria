@@ -1,4 +1,5 @@
 import { BaseEntity } from '@packages/nest-shared/orm';
+import { UserStatus } from '@packages/shared-types/enums';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
@@ -20,7 +21,7 @@ export class User extends BaseEntity {
   nickname!: string;
 
   @Column()
-  status!: boolean;
+  status!: UserStatus;
 
   @Column()
   password!: string;
