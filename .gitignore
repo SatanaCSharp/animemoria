@@ -66,6 +66,8 @@ storybook-static
 .env.local
 .env.dev
 
+.env.docker
+
 # temp directory
 .temp
 .tmp

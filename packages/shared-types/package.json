@@ -10,9 +10,13 @@
       "types": "./dist/errors/index.d.ts",
       "default": "./dist/errors/index.js"
     },
-    "./shared": {
-      "types": "./dist/shared/index.d.ts",
-      "default": "./dist/shared/index.js"
+    "./enums": {
+      "types": "./dist/enums/index.d.ts",
+      "default": "./dist/enums/index.js"
+    },
+    "./utils": {
+      "types": "./dist/utils/index.d.ts",
+      "default": "./dist/utils/index.js"
     }
   },
   "scripts": {

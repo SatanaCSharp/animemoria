@@ -1,0 +1,17 @@
+{
+  "name": "@packages/scripts",
+  "version": "1.0.0",
+  "description": "Shared scripts for the monorepo",
+  "license": "MIT",
+  "author": "",
+  "type": "commonjs",
+  "bin": {
+    "create-migration": "./bin/create-migration.sh",
+    "run-migrations": "./bin/run-migrations.sh",
+    "undo-migration": "./bin/undo-migration.sh",
+    "undo-all-migrations": "./bin/undo-all-migrations.sh"
+  },
+  "files": [
+    "bin"
+  ]
+}

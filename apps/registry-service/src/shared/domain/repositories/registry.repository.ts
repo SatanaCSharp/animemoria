@@ -5,7 +5,7 @@ import {
   ServiceId,
 } from '@packages/nest-shared/shared';
 import { SystemError } from '@packages/shared-types/errors';
-import type { Maybe } from '@packages/shared-types/shared';
+import type { Maybe } from '@packages/shared-types/utils';
 import { assertDefined } from '@packages/utils/asserts';
 
 const registry: Map<AppVariant, Map<ServiceId, ServiceDescription>> = new Map();

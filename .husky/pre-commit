@@ -1,1 +1,5 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# This command finds the staged files and runs the config above
 npx lint-staged
