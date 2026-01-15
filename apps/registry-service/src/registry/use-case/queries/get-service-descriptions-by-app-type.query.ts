@@ -1,17 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { PinoLogger } from '@packages/nest-shared/app-logger';
 import {
-  AppVariant,
+  AppType,
   QueryProcessor,
   ServiceDescription,
 } from '@packages/nest-shared/shared';
 import { RegistryRepository } from 'shared/domain/repositories/registry.repository';
 
 type Query = {
-  appVariant: AppVariant;
+  appType: AppType;
 };
 @Injectable()
-export class GetServiceDescriptionsByVariantQueryProcessor implements QueryProcessor<
+export class GetServiceDescriptionsByAppTypeQueryProcessor implements QueryProcessor<
   Query,
   ServiceDescription[]
 > {
@@ -19,13 +19,13 @@ export class GetServiceDescriptionsByVariantQueryProcessor implements QueryProce
     private readonly registryRepository: RegistryRepository,
     private readonly logger: PinoLogger,
   ) {
-    this.logger.setContext(GetServiceDescriptionsByVariantQueryProcessor.name);
+    this.logger.setContext(GetServiceDescriptionsByAppTypeQueryProcessor.name);
   }
   process(query: Query): ServiceDescription[] {
-    const { appVariant } = query;
+    const { appType } = query;
 
-    this.logger.debug('Processing get service descriptions', { appVariant });
+    this.logger.debug('Processing get service descriptions', { appType });
 
-    return this.registryRepository.getServiceDescriptions(appVariant);
+    return this.registryRepository.getServiceDescriptions(appType);
   }
 }

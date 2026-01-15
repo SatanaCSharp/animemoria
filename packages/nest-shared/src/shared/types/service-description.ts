@@ -1,11 +1,9 @@
-import { AppVariant } from 'shared/enums/app-variant';
+import { AppType } from 'shared/enums/app-type';
 
 export type ServiceId = string;
 
 export interface ServiceInitializationOptions {
-  appVariant: AppVariant;
-  serviceName: string;
-  host: string;
+  appType: AppType;
 }
 
 export interface ServiceDescription {

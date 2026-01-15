@@ -4,10 +4,13 @@ import { HttpService } from '@nestjs/axios';
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SystemError } from '@packages/shared-types/errors';
-import { assert } from '@packages/utils/asserts';
+import { Maybe } from '@packages/shared-types/utils';
+import { assert, assertDefined } from '@packages/utils/asserts';
 import { PinoLogger } from 'app-logger';
+import { snakeCase } from 'lodash';
 import { SERVICE_INITIALIZATION_OPTIONS } from 'registry-service/injections.token';
 import { lastValueFrom } from 'rxjs';
+import { AppType } from 'shared';
 import {
   ServiceDescription,
   ServiceInitializationOptions,
@@ -34,13 +37,44 @@ export class ModuleInitializerService {
     return this.config.getOrThrow<string>('INTERNAL_REGISTRY_SERVER_HOST');
   }
 
-  async register(): Promise<void> {
-    const url = `${this.registryServer}/registry/${this.options.appVariant}/register`;
+  private get appName(): string {
+    return this.config.getOrThrow<string>('APP_NAME');
+  }
 
-    // TODO ADD automatic registration services from env variables, based on variant
+  private get appHost(): string {
+    const envTransportPrefix = snakeCase(this.appName).toUpperCase();
+
+    const envVarGrpcName = `${envTransportPrefix}_GRPC_URL`;
+    const envVarRestName = `${envTransportPrefix}_REST_URL`;
+    const envVarGraphqlName = `${envTransportPrefix}_GRAPHQL_URL`;
+
+    const grpcHost = this.config.get<string>(envVarGrpcName);
+    const restHost = this.config.get<string>(envVarRestName);
+    const graphqlHost = this.config.get<string>(envVarGraphqlName);
+
+    const hostMap = new Map<AppType, Maybe<string>>([
+      [AppType.GQL, `${graphqlHost}/graphql`],
+      [AppType.GRPC, grpcHost],
+      [AppType.REST, restHost],
+    ]);
+
+    const { appType } = this.options;
+    const host = hostMap.get(appType);
+
+    assertDefined(
+      host,
+      new SystemError(`host for ${appType} has not been added`),
+    );
+
+    return host;
+  }
+
+  async register(): Promise<void> {
+    const url = `${this.registryServer}/registry/${this.options.appType}/register`;
+
     const payload: ServiceDescription = {
-      serviceName: this.options.serviceName,
-      host: this.options.host,
+      serviceName: this.appName,
+      host: this.appHost,
       serviceId: this.serviceId,
     };
 
@@ -55,7 +89,7 @@ export class ModuleInitializerService {
       new SystemError('serviceId has not been registered'),
     );
 
-    const url = `${this.registryServer}/registry/${this.options.appVariant}/unregister/${this.serviceId}`;
+    const url = `${this.registryServer}/registry/${this.options.appType}/unregister/${this.serviceId}`;
     await lastValueFrom(this.httpService.delete(url));
 
     this.logger.debug(this.serviceId, 'Unregistered service');

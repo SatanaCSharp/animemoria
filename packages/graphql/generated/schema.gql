@@ -1,19 +1,44 @@
+type AccountResponse {
+  accessToken: String!
+}
+
 type User {
   id: ID!
   email: String!
   nickname: String!
 }
 
+type Account {
+  id: ID!
+  email: String!
+  user: User!
+}
+
 type Query {
   getUsers: [User!]!
+  me(id: String!): Account!
 }
 
 type Mutation {
-  blockUser(id: String!): User!
   createUser(input: CreateUserInput!): User!
+  signUp(input: SignUpInput!): AccountResponse!
+  signIn(input: SignInInput!): AccountResponse!
+  blockAccount(id: String!): Account!
+  unblockAccount(id: String!): Account!
 }
 
 input CreateUserInput {
   nickname: String!
   email: String!
+}
+
+input SignUpInput {
+  nickname: String!
+  email: String!
+  password: String!
+}
+
+input SignInInput {
+  email: String!
+  password: String!
 }

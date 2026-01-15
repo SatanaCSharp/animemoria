@@ -1,10 +1,16 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from 'app/app.module';
+import { assertDefined } from '@packages/utils/asserts';
+import { AppModule } from 'app.module';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
-  await app.listen(process.env.PORT ?? 3000);
+  const port = process.env.APP_PORT;
+
+  assertDefined(port, 'Port is required');
+
+  await app.listen(port);
+
+  app.enableShutdownHooks();
 }
 
-// eslint-disable-next-line no-console
-bootstrap().catch((err) => console.error(err));
+bootstrap().catch((err: unknown): unknown => err);

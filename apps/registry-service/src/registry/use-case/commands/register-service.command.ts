@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { PinoLogger } from '@packages/nest-shared/app-logger';
 import {
-  AppVariant,
+  AppType,
   CommandProcessor,
   ServiceDescription,
 } from '@packages/nest-shared/shared';
 import { RegistryRepository } from 'shared/domain/repositories/registry.repository';
 
 type Command = {
-  appVariant: AppVariant;
+  appType: AppType;
   serviceDescription: ServiceDescription;
 };
 
@@ -25,14 +25,11 @@ export class RegisterServiceCommandProcessor implements CommandProcessor<
   }
 
   process(command: Command): void {
-    const { serviceDescription, appVariant } = command;
+    const { serviceDescription, appType } = command;
 
-    this.registryRepository.addAppVariantRegistry(appVariant);
+    this.registryRepository.addAppTypeRegistry(appType);
 
-    this.registryRepository.addServiceDescription(
-      appVariant,
-      serviceDescription,
-    );
+    this.registryRepository.addServiceDescription(appType, serviceDescription);
 
     this.logger.debug(
       serviceDescription,

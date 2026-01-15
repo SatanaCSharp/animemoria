@@ -1,17 +1,17 @@
 import { Query, Resolver } from '@nestjs/graphql';
-import { User, UserQueryInterface } from '@packages/graphql-definitions/user';
+import * as userGql from '@packages/graphql-definitions/user';
 
-@Resolver(() => User)
-export class UserQuery extends UserQueryInterface {
-  @Query(() => [User])
-  override getUsers(): Promise<User[]> {
+@Resolver(() => userGql.User)
+export class UserQuery extends userGql.UserQueryInterface {
+  @Query(() => [userGql.User])
+  override getUsers(): Promise<userGql.User[]> {
     return Promise.resolve([
-      Object.assign(User, {
+      Object.assign(userGql.User, {
         id: 'mock_id_1',
         email: 'testemail@email.cns',
         nickname: 'ansss',
       }),
-      Object.assign(User, {
+      Object.assign(userGql.User, {
         id: 'mock_id_2',
         email: 'testemail2@email.cns',
         nickname: 'ddbd',

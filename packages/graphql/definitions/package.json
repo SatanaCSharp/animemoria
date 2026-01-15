@@ -9,6 +9,10 @@
     "./user": {
       "types": "./dist/user/index.d.ts",
       "default": "./dist/user/index.js"
+    },
+    "./account": {
+      "types": "./dist/account/index.d.ts",
+      "default": "./dist/account/index.js"
     }
   },
   "scripts": {
@@ -21,24 +25,25 @@
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix"
   },
   "dependencies": {
-    "@packages/utils": "workspace:*",
-    "@packages/shared-types": "workspace:*",
-    "@nestjs/graphql": "catalog:",
+    "@apollo/server": "catalog:",
+    "@apollo/subgraph": "catalog:",
     "@nestjs/apollo": "catalog:",
     "@nestjs/common": "catalog:",
     "@nestjs/core": "catalog:",
-    "@apollo/subgraph": "catalog:",
-    "@apollo/server": "catalog:",
+    "@nestjs/graphql": "catalog:",
+    "@packages/shared-types": "workspace:*",
+    "@packages/utils": "workspace:*",
+    "class-validator": "catalog:",
     "graphql": "catalog:",
     "reflect-metadata": "catalog:",
     "rxjs": "catalog:"
   },
   "devDependencies": {
-    "@packages/eslint-config-service": "workspace:*",
-    "@packages/tsconfig": "workspace:*",
     "@nestjs/cli": "catalog:",
     "@nestjs/schematics": "catalog:",
     "@nestjs/testing": "catalog:",
+    "@packages/eslint-config-service": "workspace:*",
+    "@packages/tsconfig": "workspace:*",
     "@types/jest": "catalog:",
     "@types/node": "catalog:",
     "@types/supertest": "catalog:",

@@ -66,6 +66,7 @@
     "@nestjs/common": "catalog:",
     "@nestjs/config": "catalog:",
     "@nestjs/typeorm": "catalog:",
+    "@nestjs/microservices": "catalog:",
     "nestjs-pino": "catalog:",
     "pino": "catalog:",
     "pino-pretty": "catalog:",
@@ -74,7 +75,8 @@
     "reflect-metadata": "catalog:",
     "rxjs": "catalog:",
     "typeorm": "catalog:",
-    "pg": "catalog:"
+    "pg": "catalog:",
+    "lodash": "catalog:"
   },
   "devDependencies": {
     "@packages/eslint-config-service": "workspace:*",
@@ -95,7 +97,8 @@
     "ts-node": "catalog:",
     "tsc-alias": "catalog:",
     "tsconfig-paths": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "@types/lodash": "catalog:"
   },
   "jest": {
     "moduleFileExtensions": [

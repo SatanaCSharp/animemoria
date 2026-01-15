@@ -2,6 +2,7 @@ import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
+  AppType,
   QueryProcessor,
   ServiceDescription,
 } from '@packages/nest-shared/shared';
@@ -29,7 +30,7 @@ export class GetSubgraphServicesQueryProcessor implements QueryProcessor<
   }
 
   async process(): Promise<SubgraphService[]> {
-    const url = `${this.registryServer}/registry/gql`;
+    const url = `${this.registryServer}/registry/${AppType.GQL}`;
 
     const { data } = await lastValueFrom(
       this.httpService.get<{

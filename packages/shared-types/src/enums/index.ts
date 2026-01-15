@@ -1,2 +1,2 @@
+export { AccountStatus } from './account-status';
 export { ErrorType } from './error-type';
-export { UserStatus } from './user-status';

@@ -5,7 +5,7 @@ import {
 } from '@nestjs/apollo';
 import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
-import { User } from '@packages/graphql-definitions/user';
+import * as userGql from '@packages/graphql-definitions/user';
 import { userMutations } from 'users/graphql/mutations/mutations';
 import { userQueries } from 'users/graphql/queries/queries';
 
@@ -14,7 +14,7 @@ import { userQueries } from 'users/graphql/queries/queries';
     GraphQLModule.forRoot<ApolloFederationDriverConfig>({
       driver: ApolloFederationDriver,
       buildSchemaOptions: {
-        orphanedTypes: [User],
+        orphanedTypes: [userGql.User],
       },
       autoSchemaFile: {
         federation: 2,

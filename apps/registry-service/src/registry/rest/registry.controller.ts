@@ -1,14 +1,22 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import {
-  AppVariant,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseArrayPipe,
+  Post,
+} from '@nestjs/common';
+import {
+  AppType,
   ServiceDescription,
   ServiceId,
 } from '@packages/nest-shared/shared';
 import { RegisterServiceCommandProcessor } from 'registry/use-case/commands/register-service.command';
 import { UnregisterServiceCommandProcessor } from 'registry/use-case/commands/unregister-service.command';
 import { GetServiceDescriptionQueryProcessor } from 'registry/use-case/queries/get-service-description.query';
-import { GetServiceDescriptionByNameQueryProcessor } from 'registry/use-case/queries/get-service-description-by-name.query';
-import { GetServiceDescriptionsByVariantQueryProcessor } from 'registry/use-case/queries/get-service-descriptions-by-variant.query';
+import { GetServiceDescriptionByNamesQueryProcessor } from 'registry/use-case/queries/get-service-description-by-names.query';
+import { GetServiceDescriptionsByAppTypeQueryProcessor } from 'registry/use-case/queries/get-service-descriptions-by-app-type.query';
 
 @Controller('registry')
 export class ServiceRegistryController {
@@ -16,68 +24,74 @@ export class ServiceRegistryController {
     private readonly registerServiceCommandProcessor: RegisterServiceCommandProcessor,
     private readonly unregisterServiceCommandProcessor: UnregisterServiceCommandProcessor,
     private readonly getServiceDescriptionQueryProcessor: GetServiceDescriptionQueryProcessor,
-    private readonly getServiceDescriptionByNameQueryProcessor: GetServiceDescriptionByNameQueryProcessor,
-    private readonly getServiceDescriptionsByVariantQueryProcessor: GetServiceDescriptionsByVariantQueryProcessor,
+    private readonly getServiceDescriptionsByAppTypeQueryProcessor: GetServiceDescriptionsByAppTypeQueryProcessor,
+    private readonly getServiceDescriptionByNamesQueryProcessor: GetServiceDescriptionByNamesQueryProcessor,
   ) {}
 
-  @Get('/:app_variant')
-  getByAppVariant(@Param('app_variant') appVariant: AppVariant): {
+  @Get('/:app_type')
+  getByAppType(@Param('app_type') appType: AppType): {
     serviceDescriptions: ServiceDescription[];
   } {
     const serviceDescriptions =
-      this.getServiceDescriptionsByVariantQueryProcessor.process({
-        appVariant,
+      this.getServiceDescriptionsByAppTypeQueryProcessor.process({
+        appType,
       });
 
     return { serviceDescriptions };
   }
 
-  @Get('/:app_variant/service-descriptions/ids/:service_id')
+  @Get('/:app_type/service-descriptions/ids/:service_id')
   getByServiceId(
-    @Param('app_variant') appVariant: AppVariant,
+    @Param('app_type') appType: AppType,
     @Param('service_id') serviceId: ServiceId,
   ): { serviceDescription: ServiceDescription } {
     const serviceDescription = this.getServiceDescriptionQueryProcessor.process(
       {
-        appVariant,
+        appType,
         serviceId,
       },
     );
     return { serviceDescription };
   }
 
-  @Get('/:app_variant/service-descriptions/service-names/:service_name')
-  getByServiceName(
-    @Param('app_variant') appVariant: AppVariant,
-    @Param('service_name') serviceName: string,
-  ): { serviceDescription: ServiceDescription } {
-    const serviceDescription =
-      this.getServiceDescriptionByNameQueryProcessor.process({
-        appVariant,
-        serviceName,
+  @Get('/:app_type/service-descriptions/service-names/:service_names')
+  getByServiceNames(
+    @Param('app_type') appType: AppType,
+    @Param(
+      'service_names',
+      new ParseArrayPipe({ items: String, separator: ',' }),
+    )
+    serviceNames: string[],
+  ): {
+    serviceDescriptions: ServiceDescription[];
+  } {
+    const serviceDescriptions =
+      this.getServiceDescriptionByNamesQueryProcessor.process({
+        appType,
+        serviceNames,
       });
 
-    return { serviceDescription };
+    return { serviceDescriptions };
   }
 
-  @Post('/:app_variant/register')
+  @Post('/:app_type/register')
   registerServiceDescription(
-    @Param('app_variant') appVariant: AppVariant,
+    @Param('app_type') appType: AppType,
     @Body() serviceDescription: ServiceDescription,
   ): void {
     this.registerServiceCommandProcessor.process({
-      appVariant,
+      appType,
       serviceDescription,
     });
   }
 
-  @Delete('/:app_variant/unregister/:service_id')
+  @Delete('/:app_type/unregister/:service_id')
   unregisterServiceDescription(
-    @Param('app_variant') appVariant: AppVariant,
+    @Param('app_type') appType: AppType,
     @Param('service_id') serviceId: string,
   ): void {
     this.unregisterServiceCommandProcessor.process({
-      appVariant,
+      appType,
       serviceId,
     });
   }
