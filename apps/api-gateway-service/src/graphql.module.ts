@@ -6,4 +6,4 @@ import { GqlModule } from 'gql/gql.module';
 @Module({
   imports: [ConfigModule.forRoot(), AppLoggerModule.forRoot(), GqlModule],
 })
-export class AppModule {}
+export class GraphqlModule {}

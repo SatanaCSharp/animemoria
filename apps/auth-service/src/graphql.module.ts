@@ -1,0 +1,17 @@
+import { Module } from '@nestjs/common';
+import * as accountGql from '@packages/graphql-definitions/account';
+import { ApolloGqlGraphQLModule } from '@packages/nest-shared/graphql';
+import { ClientRegistrationModule } from '@packages/nest-shared/registry-service';
+import { AppType } from '@packages/nest-shared/shared';
+import { AccountGraphqlModule } from 'account/account.graphql.module';
+import { AppBaseModule } from 'app-base.module';
+
+@Module({
+  imports: [
+    AppBaseModule,
+    AccountGraphqlModule,
+    ApolloGqlGraphQLModule.forRoot({ orphanedTypes: [accountGql.Account] }),
+    ClientRegistrationModule.forRoot({ appType: AppType.GQL }),
+  ],
+})
+export class GraphqlModule {}

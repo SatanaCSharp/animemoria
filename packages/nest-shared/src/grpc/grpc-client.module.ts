@@ -13,7 +13,7 @@ import { snakeCase } from 'lodash';
 
 @Module({})
 export class GrpcClientModule {
-  static registerAsync(
+  static register(
     serviceNames: string[],
     isGlobal: boolean = false,
   ): DynamicModule {
@@ -32,8 +32,8 @@ export class GrpcClientModule {
     };
   }
 
-  static forRootAsync(serviceNames: string[]) {
-    return GrpcClientModule.registerAsync(serviceNames, true);
+  static forRoot(serviceNames: string[]) {
+    return GrpcClientModule.register(serviceNames, true);
   }
 
   private static buildClientProviderOptions(

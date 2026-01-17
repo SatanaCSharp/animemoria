@@ -6,4 +6,4 @@ import { repositories } from 'shared/domain/repositories/repositories';
   providers: [...repositories],
   exports: [...repositories],
 })
-export class AppSharedModule {}
+export class SharedModule {}

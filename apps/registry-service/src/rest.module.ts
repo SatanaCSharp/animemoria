@@ -15,4 +15,4 @@ import { SharedModule } from 'shared/shared.module';
     RegistryModule,
   ],
 })
-export class AppModule {}
+export class RestModule {}
