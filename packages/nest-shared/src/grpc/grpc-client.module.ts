@@ -4,12 +4,12 @@ import {
   ClientsProviderAsyncOptions,
   Transport,
 } from '@nestjs/microservices';
+import { getProtoPath } from 'grpc/grpc.utils';
 import {
   GrpcServiceUrlMapModule,
   SERVICE_URL_MAP_TOKEN,
 } from 'grpc/grpc-service-url-map.module';
 import { snakeCase } from 'lodash';
-import { join } from 'path';
 
 @Module({})
 export class GrpcClientModule {
@@ -36,15 +36,9 @@ export class GrpcClientModule {
     return GrpcClientModule.registerAsync(serviceNames, true);
   }
 
-  private static getProtoPath(serviceName: string) {
-    const protoDirectory = 'node_modules/@packages/grpc/protobufs';
-    return `${protoDirectory}/${serviceName}.proto`;
-  }
-
   private static buildClientProviderOptions(
     serviceName: string,
   ): ClientsProviderAsyncOptions {
-    const protoPath = this.getProtoPath(serviceName);
     const injectionToken = Symbol.for(`${snakeCase(serviceName)}_grpc_client`);
 
     return {
@@ -57,7 +51,7 @@ export class GrpcClientModule {
           transport: Transport.GRPC,
           options: {
             package: serviceName,
-            protoPath: join(__dirname, protoPath),
+            protoPath: getProtoPath(serviceName),
             url,
             loader: {
               defaults: true,
