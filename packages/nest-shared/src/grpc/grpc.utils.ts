@@ -2,6 +2,7 @@ import * as grpc from '@grpc/grpc-js';
 import { PackageDefinition } from '@grpc/proto-loader';
 import { ReflectionService } from '@grpc/reflection';
 import { GrpcOptions, Transport } from '@nestjs/microservices';
+import { snakeCase } from 'lodash';
 import { join } from 'path';
 
 export const getProtoPath = (serviceName: string): string => {
@@ -24,3 +25,6 @@ export const getGrpcOptions = (serviceNames: string[]): GrpcOptions => {
     },
   };
 };
+
+export const getGrpcServiceInjectionToken = (serviceName: string): string =>
+  `${snakeCase(serviceName)}_grpc_injection_token`;

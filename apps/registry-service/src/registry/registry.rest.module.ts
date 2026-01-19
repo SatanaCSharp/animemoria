@@ -6,4 +6,4 @@ import { UseCaseModule } from 'registry/use-case/use-case.module';
   imports: [UseCaseModule],
   controllers: [ServiceRegistryController],
 })
-export class RegistryModule {}
+export class RegistryRestModule {}

@@ -30,6 +30,7 @@
     "@packages/utils": "workspace:*",
     "@packages/shared-types": "workspace:*",
     "@packages/graphql-definitions": "workspace:*",
+    "@packages/grpc": "workspace:*",
     "@apollo/server": "catalog:",
     "@nestjs/common": "catalog:",
     "@nestjs/microservices": "catalog:",

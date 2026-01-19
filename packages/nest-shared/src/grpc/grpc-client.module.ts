@@ -4,12 +4,11 @@ import {
   ClientsProviderAsyncOptions,
   Transport,
 } from '@nestjs/microservices';
-import { getProtoPath } from 'grpc/grpc.utils';
+import { getGrpcServiceInjectionToken, getProtoPath } from 'grpc/grpc.utils';
 import {
   GrpcServiceUrlMapModule,
   SERVICE_URL_MAP_TOKEN,
 } from 'grpc/grpc-service-url-map.module';
-import { snakeCase } from 'lodash';
 
 @Module({})
 export class GrpcClientModule {
@@ -39,7 +38,7 @@ export class GrpcClientModule {
   private static buildClientProviderOptions(
     serviceName: string,
   ): ClientsProviderAsyncOptions {
-    const injectionToken = Symbol.for(`${snakeCase(serviceName)}_grpc_client`);
+    const injectionToken = getGrpcServiceInjectionToken(serviceName);
 
     return {
       inject: [SERVICE_URL_MAP_TOKEN],

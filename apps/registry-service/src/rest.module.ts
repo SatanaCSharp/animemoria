@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AppLoggerModule } from '@packages/nest-shared/app-logger';
 import { ConfigModule } from '@packages/nest-shared/config';
-import { RegistryModule } from 'registry/registry.module';
+import { RegistryRestModule } from 'registry/registry.rest.module';
 import { SharedModule } from 'shared/shared.module';
 
 @Module({
@@ -12,7 +12,7 @@ import { SharedModule } from 'shared/shared.module';
     AppLoggerModule.forRoot(),
     // Application modules
     SharedModule,
-    RegistryModule,
+    RegistryRestModule,
   ],
 })
 export class RestModule {}

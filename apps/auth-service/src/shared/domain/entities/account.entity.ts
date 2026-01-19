@@ -1,6 +1,7 @@
 import { BaseEntity } from '@packages/nest-shared/orm';
 import { AccountStatus } from '@packages/shared-types/enums';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Session } from 'shared/domain/entities/session.entity';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Account extends BaseEntity {
@@ -17,9 +18,12 @@ export class Account extends BaseEntity {
   @Column()
   email!: string;
 
-  @Column()
+  @Column('enum', { enum: AccountStatus })
   status!: AccountStatus;
 
   @Column()
   password!: string;
+
+  @OneToMany(() => Session, (session) => session.account)
+  sessions!: Session[];
 }

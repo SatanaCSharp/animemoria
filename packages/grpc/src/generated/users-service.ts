@@ -17,16 +17,18 @@ import { Observable } from 'rxjs';
 export interface CreateUserRequest {
   email: string;
   nickname: string;
+  accountId: string;
 }
 
 export interface CreateUserResponse {
   id: string;
   email: string;
   nickname: string;
+  accountId: string;
 }
 
 function createBaseCreateUserRequest(): CreateUserRequest {
-  return { email: '', nickname: '' };
+  return { email: '', nickname: '', accountId: '' };
 }
 
 export const CreateUserRequest: MessageFns<CreateUserRequest> = {
@@ -39,6 +41,9 @@ export const CreateUserRequest: MessageFns<CreateUserRequest> = {
     }
     if (message.nickname !== '') {
       writer.uint32(18).string(message.nickname);
+    }
+    if (message.accountId !== '') {
+      writer.uint32(26).string(message.accountId);
     }
     return writer;
   },
@@ -67,6 +72,14 @@ export const CreateUserRequest: MessageFns<CreateUserRequest> = {
           message.nickname = reader.string();
           continue;
         }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.accountId = reader.string();
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -78,7 +91,7 @@ export const CreateUserRequest: MessageFns<CreateUserRequest> = {
 };
 
 function createBaseCreateUserResponse(): CreateUserResponse {
-  return { id: '', email: '', nickname: '' };
+  return { id: '', email: '', nickname: '', accountId: '' };
 }
 
 export const CreateUserResponse: MessageFns<CreateUserResponse> = {
@@ -94,6 +107,9 @@ export const CreateUserResponse: MessageFns<CreateUserResponse> = {
     }
     if (message.nickname !== '') {
       writer.uint32(26).string(message.nickname);
+    }
+    if (message.accountId !== '') {
+      writer.uint32(34).string(message.accountId);
     }
     return writer;
   },
@@ -131,6 +147,14 @@ export const CreateUserResponse: MessageFns<CreateUserResponse> = {
           }
 
           message.nickname = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.accountId = reader.string();
           continue;
         }
       }

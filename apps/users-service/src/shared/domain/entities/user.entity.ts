@@ -18,4 +18,7 @@ export class User extends BaseEntity {
 
   @Column()
   nickname!: string;
+
+  @Column()
+  accountId!: string;
 }
