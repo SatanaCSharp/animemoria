@@ -10,7 +10,7 @@ import { InjectGrpcServiceClient } from '@packages/nest-shared/grpc';
 import { firstValueFrom } from 'rxjs';
 
 @Injectable()
-export class UsersService implements OnModuleInit {
+export class UsersClientService implements OnModuleInit {
   private usersServiceClient!: UsersServiceClient;
 
   constructor(

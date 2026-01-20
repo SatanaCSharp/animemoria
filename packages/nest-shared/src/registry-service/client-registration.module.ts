@@ -13,7 +13,7 @@ import {
   GracefulShutdownService,
 } from 'graceful-shutdown';
 import { SERVICE_INITIALIZATION_OPTIONS } from 'registry-service/injections.token';
-import { ModuleInitializerService } from 'registry-service/module-initializer.service';
+import { ModuleInitializerClientService } from 'registry-service/module-initializer.client-service';
 import { ServiceInitializationOptions } from 'shared/types/service-description';
 
 @Module({})
@@ -21,7 +21,7 @@ export class ClientRegistrationModule
   implements OnModuleInit, OnApplicationBootstrap
 {
   constructor(
-    private readonly moduleInitializerService: ModuleInitializerService,
+    private readonly moduleInitializerClientService: ModuleInitializerClientService,
     private readonly gracefulShutdownService: GracefulShutdownService,
     private readonly logger: PinoLogger,
   ) {
@@ -34,28 +34,28 @@ export class ClientRegistrationModule
       imports: [HttpModule, ConfigModule, GracefulShutdownModule],
       module: ClientRegistrationModule,
       providers: [
-        ModuleInitializerService,
+        ModuleInitializerClientService,
         ConfigService,
         {
           provide: SERVICE_INITIALIZATION_OPTIONS,
           useValue: options,
         },
       ],
-      exports: [ModuleInitializerService],
+      exports: [ModuleInitializerClientService],
     };
   }
 
   onModuleInit(): void {
-    this.moduleInitializerService.setServiceId();
+    this.moduleInitializerClientService.setServiceId();
   }
 
   onApplicationBootstrap(): void {
-    this.moduleInitializerService.register().catch((err) => {
+    this.moduleInitializerClientService.register().catch((err) => {
       this.logger.error('Failed to register service', err);
     });
 
     this.gracefulShutdownService.registerShutdownCallback(() =>
-      this.moduleInitializerService.unregister(),
+      this.moduleInitializerClientService.unregister(),
     );
   }
 }

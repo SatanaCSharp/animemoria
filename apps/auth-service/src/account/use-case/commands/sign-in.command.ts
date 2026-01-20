@@ -2,10 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { CommandProcessor } from '@packages/nest-shared/shared';
 import { AccountStatus } from '@packages/shared-types/enums';
 import { ApplicationError } from '@packages/shared-types/errors';
-import { assert } from '@packages/utils/asserts';
-import { isNull } from '@packages/utils/predicates';
+import { assert, assertDefined } from '@packages/utils/asserts';
 import * as bcrypt from 'bcrypt';
-import { UsersClientService } from 'shared/client-services/users.client-service';
 import { AccountRepository } from 'shared/domain/repositories/account.repository';
 import { SessionRepository } from 'shared/domain/repositories/session.repository';
 import { AuthService, TokenPair } from 'shared/domain/services/auth.service';
@@ -14,15 +12,15 @@ import { AppType } from 'shared/types/app-type.enum';
 const BCRYPT_SALT_ROUNDS = 10;
 
 type Command = {
-  nickname: string;
   email: string;
   password: string;
+  appType: AppType;
 };
 
 type Response = TokenPair;
 
 @Injectable()
-export class SignUpCommandProcessor implements CommandProcessor<
+export class SignInCommandProcessor implements CommandProcessor<
   Command,
   Response
 > {
@@ -30,40 +28,29 @@ export class SignUpCommandProcessor implements CommandProcessor<
     private readonly authService: AuthService,
     private readonly accountRepository: AccountRepository,
     private readonly sessionRepository: SessionRepository,
-    private readonly usersClientService: UsersClientService,
   ) {}
 
   async process(command: Command): Promise<Response> {
-    const { nickname, email, password } = command;
+    const { email, password, appType } = command;
 
-    // Check if email already exists
-    const existingAccount = await this.accountRepository.findByEmail(email);
+    // Find account
+    const account = await this.accountRepository.findByEmail(email);
+    assertDefined(account, new ApplicationError('Invalid credentials'));
+
+    // Verify account is active
     assert(
-      isNull(existingAccount),
-      new ApplicationError('User already signed up'),
+      account.status === AccountStatus.ACTIVE,
+      new ApplicationError('Account is not active'),
     );
 
-    // Hash password
-    const passwordHash = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
+    // Verify password
+    const passwordValid = await bcrypt.compare(password, account.password);
+    assert(passwordValid, new ApplicationError('Invalid credentials'));
 
-    // Create account
-    const account = await this.accountRepository.create({
-      email,
-      status: AccountStatus.ACTIVE,
-      password: passwordHash,
-    });
-
-    // Create user via gRPC
-    await this.usersClientService.createUser({
-      email,
-      nickname,
-      accountId: account.id,
-    });
-
-    // Create session (Web only for sign up)
+    // Create new session
     const session = await this.sessionRepository.create({
       accountId: account.id,
-      appType: AppType.WEB,
+      appType,
       refreshTokenHash: null,
     });
 

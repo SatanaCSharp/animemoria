@@ -1,4 +1,5 @@
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
+import { GraphQLContext } from '@packages/nest-shared/graphql';
 import { NotImplementedError } from '@packages/shared-types/errors';
 import { assertFail } from '@packages/utils/asserts';
 import { AccountResponse } from 'account/dto/account.response';
@@ -9,12 +10,18 @@ import { Account } from 'account/entities/account';
 @Resolver(() => Account)
 export class AccountMutationInterface {
   @Mutation(() => AccountResponse)
-  signUp(@Args('input') input: SignUpInput): Promise<AccountResponse> {
+  signUp(
+    @Args('input') input: SignUpInput,
+    context: GraphQLContext,
+  ): Promise<AccountResponse> {
     assertFail(new NotImplementedError(undefined, input));
   }
 
   @Mutation(() => AccountResponse)
-  signIn(@Args('input') input: SignInInput): Promise<AccountResponse> {
+  signIn(
+    @Args('input') input: SignInInput,
+    context: GraphQLContext,
+  ): Promise<AccountResponse> {
     assertFail(new NotImplementedError(undefined, input));
   }
 

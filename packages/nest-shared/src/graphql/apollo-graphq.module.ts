@@ -5,11 +5,18 @@ import {
 } from '@nestjs/apollo';
 import { DynamicModule, Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
+import { Request, Response } from 'express';
 
 type Args = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   orphanedTypes?: (Function | object)[];
 };
+
+export type GraphQLContext = {
+  req: Request;
+  res: Response;
+};
+
 @Module({})
 export class ApolloGqlGraphQLModule {
   static forRoot(args: Args): DynamicModule {
@@ -31,6 +38,10 @@ export class ApolloGqlGraphQLModule {
           plugins: [
             ApolloServerPluginLandingPageLocalDefault({ embed: true }), // Enable Sandbox
           ],
+          context: ({ req, res }: GraphQLContext): GraphQLContext => ({
+            req,
+            res,
+          }),
         }),
       ],
     };

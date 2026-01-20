@@ -7,7 +7,7 @@ import { lastValueFrom } from 'rxjs';
 import { AppType, ServiceDescription } from 'shared';
 
 @Injectable()
-export class GrpcRegistryService {
+export class GrpcRegistryClientService {
   constructor(
     private readonly config: ConfigService,
     private readonly httpService: HttpService,

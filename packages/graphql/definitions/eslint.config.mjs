@@ -12,4 +12,10 @@ export default [
             '@typescript-eslint/no-unsafe-function-type': 'off',
         },
     },
+    {
+        files: ['src/**/*.ts'],
+        rules: {
+            '@typescript-eslint/no-unused-vars': 'off',
+        },
+    },
 ];

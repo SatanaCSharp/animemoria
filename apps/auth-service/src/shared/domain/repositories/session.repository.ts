@@ -8,4 +8,11 @@ export class SessionRepository extends BaseRepository<Session> {
   constructor(dataSource: DataSource) {
     super(dataSource, Session);
   }
+
+  async update(
+    id: string,
+    data: Partial<Pick<Session, 'refreshTokenHash'>>,
+  ): Promise<void> {
+    await this.repository.update(id, data);
+  }
 }

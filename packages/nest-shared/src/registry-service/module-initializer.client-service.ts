@@ -17,7 +17,7 @@ import {
 } from 'shared/types/service-description';
 
 @Injectable()
-export class ModuleInitializerService {
+export class ModuleInitializerClientService {
   private serviceId: string = '';
 
   constructor(
@@ -27,7 +27,7 @@ export class ModuleInitializerService {
     private options: ServiceInitializationOptions,
     private readonly logger: PinoLogger,
   ) {
-    this.logger.setContext(ModuleInitializerService.name);
+    this.logger.setContext(ModuleInitializerClientService.name);
   }
   setServiceId(): void {
     this.serviceId = randomUUID();

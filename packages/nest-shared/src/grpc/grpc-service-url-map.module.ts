@@ -1,6 +1,6 @@
 import { HttpModule } from '@nestjs/axios';
 import { DynamicModule, Module } from '@nestjs/common';
-import { GrpcRegistryService } from 'grpc/grpc-registry.service';
+import { GrpcRegistryClientService } from 'grpc/grpc-registry.client-service';
 import { ServiceDescription } from 'shared/types/service-description';
 
 export const SERVICE_URL_MAP_TOKEN = Symbol('SERVICE_URL_MAP');
@@ -10,12 +10,12 @@ export class GrpcServiceUrlMapModule {
   static register(serviceNames: string[]): DynamicModule {
     const serviceUrlMapProvider = {
       provide: SERVICE_URL_MAP_TOKEN,
-      inject: [GrpcRegistryService],
+      inject: [GrpcRegistryClientService],
       useFactory: async (
-        grpcRegistryService: GrpcRegistryService,
+        grpcRegistryClientService: GrpcRegistryClientService,
       ): Promise<Map<string, string>> => {
         const serviceDescriptions =
-          await grpcRegistryService.getGrpcServiceDescriptionsByNames(
+          await grpcRegistryClientService.getGrpcServiceDescriptionsByNames(
             serviceNames,
           );
         return this.createServiceUrlMap(serviceDescriptions);
@@ -25,7 +25,7 @@ export class GrpcServiceUrlMapModule {
     return {
       module: GrpcServiceUrlMapModule,
       imports: [HttpModule],
-      providers: [GrpcRegistryService, serviceUrlMapProvider],
+      providers: [GrpcRegistryClientService, serviceUrlMapProvider],
       exports: [SERVICE_URL_MAP_TOKEN],
     };
   }

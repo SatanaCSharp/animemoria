@@ -1,9 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { assertDefined } from '@packages/utils/asserts';
+import cookieParser from 'cookie-parser';
 import { RestModule } from 'rest.module';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(RestModule);
+  app.use(cookieParser());
   const port = process.env.APP_PORT;
 
   assertDefined(port, 'Port is required');
