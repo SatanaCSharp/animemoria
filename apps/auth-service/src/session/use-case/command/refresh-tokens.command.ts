@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { CommandProcessor } from '@packages/nest-shared/shared';
 import { AccountStatus } from '@packages/shared-types/enums';
 import { ApplicationError } from '@packages/shared-types/errors';
-import { Maybe } from '@packages/shared-types/utils';
 import { assert, assertDefined } from '@packages/utils/asserts';
 import * as bcrypt from 'bcrypt';
 import { AccountRepository } from 'shared/domain/repositories/account.repository';
@@ -14,7 +13,7 @@ const BCRYPT_SALT_ROUNDS = 10;
 type Command = {
   accountId: string;
   sessionId: string;
-  oldRefreshToken: Maybe<string>;
+  oldRefreshToken: string;
 };
 
 type Response = TokenPair;
@@ -31,11 +30,6 @@ export class RefreshTokensCommandProcessor implements CommandProcessor<
 
   async process(command: Command): Promise<TokenPair> {
     const { accountId, oldRefreshToken, sessionId } = command;
-
-    assertDefined(
-      oldRefreshToken,
-      new ApplicationError('Old Refresh token was not provided '),
-    );
 
     // Find session
     const session = await this.sessionRepository.findById(sessionId);

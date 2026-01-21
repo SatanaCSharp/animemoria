@@ -47,13 +47,12 @@ export class ClientRegistrationModule
 
   onModuleInit(): void {
     this.moduleInitializerClientService.setServiceId();
-  }
-
-  onApplicationBootstrap(): void {
     this.moduleInitializerClientService.register().catch((err) => {
       this.logger.error('Failed to register service', err);
     });
+  }
 
+  onApplicationBootstrap(): void {
     this.gracefulShutdownService.registerShutdownCallback(() =>
       this.moduleInitializerClientService.unregister(),
     );

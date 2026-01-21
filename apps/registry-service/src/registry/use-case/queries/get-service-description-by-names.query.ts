@@ -24,6 +24,7 @@ export class GetServiceDescriptionByNamesQueryProcessor implements QueryProcesso
   ) {
     this.logger.setContext(GetServiceDescriptionByNamesQueryProcessor.name);
   }
+
   process(query: Query): ServiceDescription[] {
     const { appType, serviceNames } = query;
 
@@ -44,6 +45,7 @@ export class GetServiceDescriptionByNamesQueryProcessor implements QueryProcesso
         `Inconsistent result for serviceNames: ${serviceNames.join(', ')}`,
       ),
     );
+    this.logger.debug(appType, 'Retrieving service descriptions finished');
 
     return serviceDescriptions;
   }

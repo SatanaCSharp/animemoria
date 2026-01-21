@@ -45,6 +45,7 @@
     "nestjs-pino": "catalog:",
     "pino-http": "catalog:",
     "@nestjs/platform-express": "catalog:",
+    "class-transformer": "catalog:",
     "reflect-metadata": "catalog:",
     "rxjs": "catalog:",
     "pg": "catalog:",

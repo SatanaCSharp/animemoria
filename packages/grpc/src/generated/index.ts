@@ -5,4 +5,5 @@
 
 /* eslint-disable */
 
+export * as auth_service from './index.auth_service';
 export * as users_service from './index.users_service';

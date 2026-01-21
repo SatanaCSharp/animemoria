@@ -26,13 +26,14 @@ export class RegisterServiceCommandProcessor implements CommandProcessor<
 
   process(command: Command): void {
     const { serviceDescription, appType } = command;
+    this.logger.debug(command, 'Service registration start');
 
     this.registryRepository.addAppTypeRegistry(appType);
 
     this.registryRepository.addServiceDescription(appType, serviceDescription);
 
     this.logger.debug(
-      serviceDescription,
+      { appType, serviceDescription },
       'Service registration completed successfully',
     );
   }

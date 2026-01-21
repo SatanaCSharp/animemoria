@@ -5,4 +5,4 @@
 
 /* eslint-disable */
 
-export * from './users-service';
+export * from './users_service';

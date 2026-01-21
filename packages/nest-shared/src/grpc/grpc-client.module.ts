@@ -9,6 +9,7 @@ import {
   GrpcServiceUrlMapModule,
   SERVICE_URL_MAP_TOKEN,
 } from 'grpc/grpc-service-url-map.module';
+import { snakeCase } from 'lodash';
 
 @Module({})
 export class GrpcClientModule {
@@ -25,9 +26,9 @@ export class GrpcClientModule {
       module: GrpcClientModule,
       imports: [
         GrpcServiceUrlMapModule.register(serviceNames),
-        ClientsModule.registerAsync({ clients: clientProviders }),
+        ClientsModule.registerAsync({ clients: clientProviders, isGlobal }),
       ],
-      exports: [ClientsModule],
+      exports: [GrpcServiceUrlMapModule, ClientsModule],
     };
   }
 
@@ -44,12 +45,12 @@ export class GrpcClientModule {
       inject: [SERVICE_URL_MAP_TOKEN],
       name: injectionToken,
       useFactory: (serviceUrlMap: Map<string, string>) => {
-        const url = serviceUrlMap.get(serviceName)!;
+        const url = serviceUrlMap.get(serviceName);
 
         return {
           transport: Transport.GRPC,
           options: {
-            package: serviceName,
+            package: snakeCase(serviceName),
             protoPath: getProtoPath(serviceName),
             url,
             loader: {

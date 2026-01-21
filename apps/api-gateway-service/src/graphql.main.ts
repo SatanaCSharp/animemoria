@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { assertDefined } from '@packages/utils/asserts';
+import cookieParser from 'cookie-parser';
 import { GraphqlModule } from 'graphql.module';
 
 async function bootstrap(): Promise<void> {
@@ -19,12 +20,13 @@ async function bootstrap(): Promise<void> {
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: [
+      'x-app-type',
       'Content-Type',
       'Authorization',
       'Apollo-Require-Preflight',
     ],
   });
-
+  app.use(cookieParser());
   await app.listen(port);
 
   app.enableShutdownHooks();

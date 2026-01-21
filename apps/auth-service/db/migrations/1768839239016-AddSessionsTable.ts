@@ -10,7 +10,7 @@ export class AddSessionsTable1768839239016 implements MigrationInterface {
             CREATE TABLE "sessions" (
                 "id" uuid NOT NULL UNIQUE DEFAULT uuid_generate_v4(),
                 "account_id" uuid NOT NULL,
-                "refresh_token_hash" TEXT NOT NULL,
+                "refresh_token_hash" VARCHAR DEFAULT NULL ,
                 "app_type" "app_type_enum" NOT NULL,
                 "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 "updated_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -19,7 +19,7 @@ export class AddSessionsTable1768839239016 implements MigrationInterface {
         `);
 
     await queryRunner.query(`
-            CREATE INDEX "IDX_sessions_account_id" ON "session" ("account_id")
+            CREATE INDEX "IDX_sessions_account_id" ON "sessions" ("account_id")
         `);
 
     await queryRunner.query(`

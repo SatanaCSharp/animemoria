@@ -77,7 +77,6 @@ export class ModuleInitializerClientService {
       host: this.appHost,
       serviceId: this.serviceId,
     };
-
     await lastValueFrom(this.httpService.post(url, payload));
 
     this.logger.debug(payload, 'Registered service');

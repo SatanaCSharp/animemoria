@@ -3,7 +3,7 @@ import { AccountStatus } from '@packages/shared-types/enums';
 import { Session } from 'shared/domain/entities/session.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity()
+@Entity('accounts')
 export class Account extends BaseEntity {
   constructor(args?: Partial<Account>) {
     super();

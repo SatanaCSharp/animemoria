@@ -15,6 +15,26 @@
     "dev": {
       "cache": false,
       "persistent": true
+    },
+    "rest:dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "graphql:dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "grpc:dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "migration:run": {
+      "cache": false,
+      "outputs": []
+    },
+    "migration:run:prod": {
+      "cache": false,
+      "outputs": []
     }
   }
 }

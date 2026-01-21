@@ -1,5 +1,4 @@
 import { BaseEntity } from '@packages/nest-shared/orm';
-import { Maybe } from '@packages/shared-types/utils';
 import { Account } from 'shared/domain/entities/account.entity';
 import { AppType } from 'shared/types/app-type.enum';
 import {
@@ -10,7 +9,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-@Entity()
+@Entity('sessions')
 export class Session extends BaseEntity {
   constructor(args?: Partial<Session>) {
     super();
@@ -21,8 +20,8 @@ export class Session extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column({ nullable: true })
-  refreshTokenHash: Maybe<string>;
+  @Column('varchar', { name: 'refresh_token_hash', nullable: true })
+  refreshTokenHash!: string | null;
 
   @Column('enum', { enum: AppType })
   appType!: AppType;

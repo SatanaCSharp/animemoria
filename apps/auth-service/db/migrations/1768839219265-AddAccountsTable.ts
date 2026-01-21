@@ -19,7 +19,7 @@ export class AddAccountsTable1768839219265 implements MigrationInterface {
         `);
 
     await queryRunner.query(`
-            CREATE INDEX "IDX_accounts_email" ON "account" ("email")
+            CREATE INDEX "IDX_accounts_email" ON "accounts" ("email")
         `);
   }
 

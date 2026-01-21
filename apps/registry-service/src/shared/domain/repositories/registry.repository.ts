@@ -7,7 +7,11 @@ import {
 import { SystemError } from '@packages/shared-types/errors';
 import { assertDefined } from '@packages/utils/asserts';
 
-const registry: Map<AppType, Map<ServiceId, ServiceDescription>> = new Map();
+const registry: Map<AppType, Map<ServiceId, ServiceDescription>> = new Map([
+  [AppType.GRPC, new Map([])],
+  [AppType.GQL, new Map([])],
+  [AppType.REST, new Map([])],
+]);
 
 @Injectable()
 export class RegistryRepository {

@@ -11,3 +11,4 @@ export type {
   JwtStrategyPayload,
 } from './types/jwt';
 export type { RequestWithUser } from './types/request';
+export { setRefreshTokenCookie } from './utils/set-refresh-token-cookie';

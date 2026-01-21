@@ -6,16 +6,20 @@ import { snakeCase } from 'lodash';
 import { join } from 'path';
 
 export const getProtoPath = (serviceName: string): string => {
-  const protoDirectory = 'node_modules/@packages/grpc/protobufs';
-  return join(__dirname, `${protoDirectory}/${serviceName}.proto`);
+  const protobufsPath = 'node_modules/@packages/grpc/protobufs';
+  return join(process.cwd(), protobufsPath, `${snakeCase(serviceName)}.proto`);
 };
 
-export const getGrpcOptions = (serviceNames: string[]): GrpcOptions => {
+export const getServerGrpcOption = (
+  serviceName: string,
+  url: string,
+): GrpcOptions => {
   return {
     transport: Transport.GRPC,
     options: {
-      package: serviceNames,
-      protoPath: serviceNames.map(getProtoPath),
+      package: snakeCase(serviceName),
+      protoPath: getProtoPath(serviceName),
+      url,
       onLoadPackageDefinition: (
         pkg: PackageDefinition,
         server: Pick<grpc.Server, 'addService'>,

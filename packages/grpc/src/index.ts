@@ -2,4 +2,5 @@
 export * from './generated/index';
 
 // Re-export users-service for convenience
-export * from './generated/users-service';
+export * from './generated/users_service';
+export * from './generated/auth_service';

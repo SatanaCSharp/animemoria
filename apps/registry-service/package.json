@@ -20,8 +20,9 @@
     "@nestjs/core": "catalog:",
     "@nestjs/platform-express": "catalog:",
     "@packages/nest-shared": "workspace:*",
-    "@packages/utils": "workspace:*",
     "@packages/shared-types": "workspace:*",
+    "@packages/utils": "workspace:*",
+    "class-transformer": "catalog:",
     "reflect-metadata": "catalog:",
     "rxjs": "catalog:"
   },

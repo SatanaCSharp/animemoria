@@ -1,9 +1,8 @@
 import { Module } from '@nestjs/common';
-import { AppLoggerModule } from '@packages/nest-shared/app-logger';
-import { ConfigModule } from '@packages/nest-shared/config';
+import { AppBaseModule } from 'app-base.module';
 import { GqlModule } from 'gql/gql.module';
 
 @Module({
-  imports: [ConfigModule.forRoot(), AppLoggerModule.forRoot(), GqlModule],
+  imports: [AppBaseModule, GqlModule],
 })
 export class GraphqlModule {}

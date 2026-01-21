@@ -1,7 +1,7 @@
 import { BaseEntity } from '@packages/nest-shared/orm';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity()
+@Entity('users')
 export class User extends BaseEntity {
   constructor(args?: Partial<User>) {
     super();

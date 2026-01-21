@@ -1,17 +1,12 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
-import {
-  CreateUserRequest,
-  CreateUserResponse,
-  USERS_SERVICE_NAME,
-  UsersServiceClient,
-} from '@packages/grpc';
+import * as grpc from '@packages/grpc';
 import { InjectGrpcServiceClient } from '@packages/nest-shared/grpc';
 import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class UsersClientService implements OnModuleInit {
-  private usersServiceClient!: UsersServiceClient;
+  private usersServiceClient!: grpc.UsersServiceClient;
 
   constructor(
     @InjectGrpcServiceClient('users-service')
@@ -19,11 +14,14 @@ export class UsersClientService implements OnModuleInit {
   ) {}
 
   onModuleInit(): void {
-    this.usersServiceClient =
-      this.client.getService<UsersServiceClient>(USERS_SERVICE_NAME);
+    this.usersServiceClient = this.client.getService<grpc.UsersServiceClient>(
+      grpc.USERS_SERVICE_NAME,
+    );
   }
 
-  async createUser(request: CreateUserRequest): Promise<CreateUserResponse> {
+  async createUser(
+    request: grpc.CreateUserRequest,
+  ): Promise<grpc.CreateUserResponse> {
     return firstValueFrom(this.usersServiceClient.createUser(request));
   }
 }
