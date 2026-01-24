@@ -3,6 +3,7 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
 import { ApolloGatewayDriver, ApolloGatewayDriverConfig } from '@nestjs/apollo';
 import { Global, Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
+import { GraphQLContext } from '@packages/nest-shared/graphql';
 import { SubgraphModule } from 'gql/subgraph.module';
 import { GetSubgraphServicesQueryProcessor } from 'gql/use-case/queries/get-subgraph-services.query';
 
@@ -38,7 +39,10 @@ import { GetSubgraphServicesQueryProcessor } from 'gql/use-case/queries/get-subg
             plugins: [
               ApolloServerPluginLandingPageLocalDefault({ embed: true }),
             ],
-            context: () => ({}),
+            context: ({ req, res }: GraphQLContext): GraphQLContext => ({
+              req,
+              res,
+            }),
             cors: {
               origin: corsOrigins,
               credentials: true,

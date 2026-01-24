@@ -1,11 +1,7 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from '@packages/nest-shared/auth';
-
-const AT_SECRET = 'access-token-secret-key-change-in-production';
-const RT_SECRET = 'refresh-token-secret-key-change-in-production';
-const AT_EXPIRES_IN = '15m';
-const RT_EXPIRES_IN = '7d';
 
 export type TokenPair = {
   accessToken: string;
@@ -14,7 +10,10 @@ export type TokenPair = {
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly config: ConfigService,
+  ) {}
 
   async getTokens(
     accountId: string,
@@ -29,12 +28,12 @@ export class AuthService {
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
-        secret: AT_SECRET,
-        expiresIn: AT_EXPIRES_IN,
+        secret: this.config.getOrThrow('AT_SECRET'),
+        expiresIn: this.config.getOrThrow('AT_EXPIRES_IN'),
       }),
       this.jwtService.signAsync(payload, {
-        secret: RT_SECRET,
-        expiresIn: RT_EXPIRES_IN,
+        secret: this.config.getOrThrow('RT_SECRET'),
+        expiresIn: this.config.getOrThrow('RT_EXPIRES_IN'),
       }),
     ]);
 

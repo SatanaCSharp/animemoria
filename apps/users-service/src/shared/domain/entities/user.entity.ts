@@ -19,6 +19,6 @@ export class User extends BaseEntity {
   @Column()
   nickname!: string;
 
-  @Column()
+  @Column({ name: 'account_id' })
   accountId!: string;
 }

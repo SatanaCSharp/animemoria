@@ -5,7 +5,7 @@ import { RestModule } from 'rest.module';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(RestModule);
-  const port = process.env.APP_PORT;
+  const port = process.env.APP_REST_PORT;
 
   assertDefined(port, 'Port is required');
 

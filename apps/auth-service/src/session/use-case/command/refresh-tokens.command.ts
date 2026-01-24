@@ -3,12 +3,9 @@ import { CommandProcessor } from '@packages/nest-shared/shared';
 import { AccountStatus } from '@packages/shared-types/enums';
 import { ApplicationError } from '@packages/shared-types/errors';
 import { assert, assertDefined } from '@packages/utils/asserts';
-import * as bcrypt from 'bcrypt';
 import { AccountRepository } from 'shared/domain/repositories/account.repository';
 import { SessionRepository } from 'shared/domain/repositories/session.repository';
 import { AuthService, TokenPair } from 'shared/domain/services/auth.service';
-
-const BCRYPT_SALT_ROUNDS = 10;
 
 type Command = {
   accountId: string;
@@ -34,7 +31,6 @@ export class RefreshTokensCommandProcessor implements CommandProcessor<
     // Find session
     const session = await this.sessionRepository.findById(sessionId);
     assertDefined(session, new ApplicationError('Session not found'));
-
     // Verify session belongs to account
     assert(
       session.accountId === accountId,
@@ -48,11 +44,10 @@ export class RefreshTokensCommandProcessor implements CommandProcessor<
     );
 
     // Verify old refresh token matches stored hash
-    const refreshTokenValid = await bcrypt.compare(
-      oldRefreshToken,
-      session.refreshTokenHash,
+    assert(
+      oldRefreshToken === session.refreshTokenHash,
+      new ApplicationError('Invalid refresh token'),
     );
-    assert(refreshTokenValid, new ApplicationError('Invalid refresh token'));
 
     // Get account for email
     const account = await this.accountRepository.findById(accountId);
@@ -71,13 +66,8 @@ export class RefreshTokensCommandProcessor implements CommandProcessor<
       session.id,
     );
 
-    // Hash and update with new refresh token
-    const newRefreshTokenHash = await bcrypt.hash(
-      tokens.refreshToken,
-      BCRYPT_SALT_ROUNDS,
-    );
     await this.sessionRepository.update(session.id, {
-      refreshTokenHash: newRefreshTokenHash,
+      refreshTokenHash: tokens.refreshToken,
     });
 
     return tokens;

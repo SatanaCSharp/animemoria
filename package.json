@@ -10,7 +10,7 @@
     "registry:rest:dev": "turbo run rest:dev --filter=registry-service",
     "api-gateway:rest:dev": "turbo run rest:dev --filter=api-gateway-service",
     "api-gateway:graphql:dev": "turbo run graphql:dev --filter=api-gateway-service",
-    "graphql:dev": "turbo run graphql:dev --filter='*-service'",
+    "graphql:dev": "turbo run graphql:dev --filter='*-service' --filter='!api-gateway-service'",
     "grpc:dev": "turbo run grpc:dev",
     "build:packages": "turbo run build --filter='./packages/*'",
     "migration:run": "turbo run migration:run",

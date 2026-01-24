@@ -26,12 +26,12 @@ export class Session extends BaseEntity {
   @Column('enum', { enum: AppType })
   appType!: AppType;
 
-  @Column()
+  @Column({ name: 'account_id' })
   accountId!: string;
 
   @ManyToOne(() => Account, (account) => account.sessions, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'accountId' })
+  @JoinColumn({ name: 'account_id' })
   account!: Account;
 }

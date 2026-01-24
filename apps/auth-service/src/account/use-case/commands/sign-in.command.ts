@@ -9,8 +9,6 @@ import { SessionRepository } from 'shared/domain/repositories/session.repository
 import { AuthService, TokenPair } from 'shared/domain/services/auth.service';
 import { AppType } from 'shared/types/app-type.enum';
 
-const BCRYPT_SALT_ROUNDS = 10;
-
 type Command = {
   email: string;
   password: string;
@@ -62,11 +60,9 @@ export class SignInCommandProcessor implements CommandProcessor<
     );
 
     // Hash and store refresh token
-    const refreshTokenHash = await bcrypt.hash(
-      tokens.refreshToken,
-      BCRYPT_SALT_ROUNDS,
-    );
-    await this.sessionRepository.update(session.id, { refreshTokenHash });
+    await this.sessionRepository.update(session.id, {
+      refreshTokenHash: tokens.refreshToken,
+    });
 
     return tokens;
   }

@@ -1,4 +1,5 @@
 import { Controller, Post, Res, UseGuards } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import {
   CurrentUser,
   JwtRtGuard,
@@ -7,12 +8,24 @@ import {
 } from '@packages/nest-shared/auth';
 import { ApplicationError } from '@packages/shared-types/errors';
 import { assertDefined } from '@packages/utils/asserts';
+import { isProd } from '@packages/utils/predicates';
 import { Response } from 'express';
 import { AuthClientService } from 'shared/client-services/auth.client-service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authClientService: AuthClientService) {}
+  constructor(
+    private readonly authClientService: AuthClientService,
+    private readonly config: ConfigService,
+  ) {}
+
+  private get cookiesMaxAge(): number {
+    return Number(this.config.getOrThrow('COOKIES_MAX_AGE'));
+  }
+
+  private get isSecureCookie(): boolean {
+    return isProd(this.config.getOrThrow<string>('NODE_ENV'));
+  }
 
   @Post('refresh')
   @UseGuards(JwtRtGuard)
@@ -34,8 +47,8 @@ export class AuthController {
 
     setRefreshTokenCookie(res, {
       refreshToken,
-      maxAgeInMs: 1,
-      isSecureCookie: true,
+      maxAgeInMs: this.cookiesMaxAge,
+      isSecureCookie: this.isSecureCookie,
     });
     return { accessToken };
   }

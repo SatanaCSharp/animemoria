@@ -75,11 +75,10 @@ export class SignUpCommandProcessor implements CommandProcessor<
     );
 
     // Hash and store refresh token
-    const refreshTokenHash = await bcrypt.hash(
-      tokens.refreshToken,
-      BCRYPT_SALT_ROUNDS,
-    );
-    await this.sessionRepository.update(session.id, { refreshTokenHash });
+
+    await this.sessionRepository.update(session.id, {
+      refreshTokenHash: tokens.refreshToken,
+    });
 
     return tokens;
   }

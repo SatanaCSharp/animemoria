@@ -4,4 +4,4 @@ import { restControllers } from 'rest/controllers/controllers';
 @Module({
   controllers: [...restControllers],
 })
-export class RestModule {}
+export class RestEndpointsModule {}
