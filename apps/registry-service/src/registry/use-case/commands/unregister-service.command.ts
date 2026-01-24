@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { PinoLogger } from '@packages/nest-shared/app-logger';
 import {
-  AppVariant,
+  AppType,
   CommandProcessor,
   ServiceId,
 } from '@packages/nest-shared/shared';
 import { RegistryRepository } from 'shared/domain/repositories/registry.repository';
 
 type Command = {
-  appVariant: AppVariant;
+  appType: AppType;
   serviceId: ServiceId;
 };
 
@@ -24,12 +24,12 @@ export class UnregisterServiceCommandProcessor implements CommandProcessor<
     this.logger.setContext(UnregisterServiceCommandProcessor.name);
   }
   process(command: Command): void {
-    const { appVariant, serviceId } = command;
+    const { appType, serviceId } = command;
 
-    this.registryRepository.removeServiceDescription(appVariant, serviceId);
+    this.registryRepository.removeServiceDescription(appType, serviceId);
 
     this.logger.debug(
-      { appVariant, serviceId },
+      { appType, serviceId },
       'Processing unregister service command finished',
     );
   }

@@ -30,6 +30,18 @@
       "types": "./dist/orm/index.d.ts",
       "default": "./dist/orm/index.js"
     },
+    "./auth": {
+      "types": "./dist/auth/index.d.ts",
+      "default": "./dist/auth/index.js"
+    },
+    "./graphql": {
+      "types": "./dist/graphql/index.d.ts",
+      "default": "./dist/graphql/index.js"
+    },
+    "./grpc": {
+      "types": "./dist/grpc/index.d.ts",
+      "default": "./dist/grpc/index.js"
+    },
     "./orm/migration": {
       "types": "./dist/orm/migration/index.d.ts",
       "default": "./dist/orm/migration/index.js"
@@ -66,15 +78,28 @@
     "@nestjs/common": "catalog:",
     "@nestjs/config": "catalog:",
     "@nestjs/typeorm": "catalog:",
+    "@nestjs/microservices": "catalog:",
+    "@nestjs/jwt": "catalog:",
+    "@nestjs/passport": "catalog:",
+    "@apollo/server": "catalog:",
+    "@nestjs/apollo": "catalog:",
+    "@nestjs/graphql": "catalog:",
+    "@as-integrations/express5": "catalog:",
+    "@grpc/reflection": "catalog:",
+    "@grpc/grpc-js": "catalog:",
+    "@grpc/proto-loader": "catalog:",
     "nestjs-pino": "catalog:",
     "pino": "catalog:",
     "pino-pretty": "catalog:",
     "@nestjs/core": "catalog:",
     "@nestjs/platform-express": "catalog:",
+    "passport": "catalog:",
+    "passport-jwt": "catalog:",
     "reflect-metadata": "catalog:",
     "rxjs": "catalog:",
     "typeorm": "catalog:",
-    "pg": "catalog:"
+    "pg": "catalog:",
+    "lodash": "catalog:"
   },
   "devDependencies": {
     "@packages/eslint-config-service": "workspace:*",
@@ -85,6 +110,7 @@
     "@types/express": "catalog:",
     "@types/jest": "catalog:",
     "@types/node": "catalog:",
+    "@types/passport-jwt": "catalog:",
     "@types/supertest": "catalog:",
     "jest": "catalog:",
     "lint-staged": "catalog:",
@@ -95,7 +121,8 @@
     "ts-node": "catalog:",
     "tsc-alias": "catalog:",
     "tsconfig-paths": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "@types/lodash": "catalog:"
   },
   "jest": {
     "moduleFileExtensions": [

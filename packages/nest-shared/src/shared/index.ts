@@ -1,5 +1,5 @@
 // enums
-export { AppVariant } from './enums/app-variant';
+export { AppType } from './enums/app-type';
 
 //types
 export {

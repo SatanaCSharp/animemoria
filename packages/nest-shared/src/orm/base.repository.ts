@@ -1,6 +1,6 @@
 import { Type } from '@nestjs/common';
 import { Maybe } from '@packages/shared-types/utils';
-import { DataSource, ObjectLiteral, Repository } from 'typeorm';
+import { DataSource, DeepPartial, ObjectLiteral, Repository } from 'typeorm';
 
 export abstract class BaseRepository<TEntity extends ObjectLiteral> {
   protected constructor(
@@ -14,5 +14,9 @@ export abstract class BaseRepository<TEntity extends ObjectLiteral> {
 
   findById(id: TEntity['id']): Promise<Maybe<TEntity>> {
     return this.repository.findOne({ where: { id } });
+  }
+
+  create(entity: DeepPartial<TEntity>): Promise<TEntity> {
+    return this.repository.save(this.repository.create(entity));
   }
 }

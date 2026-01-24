@@ -14,6 +14,10 @@
       "types": "./dist/predicates/index.d.ts",
       "default": "./dist/predicates/index.js"
     },
+    "./type-guards": {
+      "types": "./dist/type-guards/index.d.ts",
+      "default": "./dist/type-guards/index.js"
+    },
     "./errors": {
       "types": "./dist/errors/index.d.ts",
       "default": "./dist/errors/index.js"

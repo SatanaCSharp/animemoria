@@ -1,13 +1,8 @@
-import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import {
-  QueryProcessor,
-  ServiceDescription,
-} from '@packages/nest-shared/shared';
+import { QueryProcessor } from '@packages/nest-shared/shared';
 import { SystemError } from '@packages/shared-types/errors';
 import { assertDefined } from '@packages/utils/asserts';
-import { lastValueFrom } from 'rxjs';
+import { RegistryClientService } from 'shared/client-services/registry.client-service';
 
 type SubgraphService = {
   name: string;
@@ -19,30 +14,18 @@ export class GetSubgraphServicesQueryProcessor implements QueryProcessor<
   void,
   SubgraphService[]
 > {
-  constructor(
-    private readonly config: ConfigService,
-    private readonly httpService: HttpService,
-  ) {}
-
-  private get registryServer(): string {
-    return this.config.getOrThrow<string>('INTERNAL_REGISTRY_SERVER_HOST');
-  }
+  constructor(private readonly registryClientService: RegistryClientService) {}
 
   async process(): Promise<SubgraphService[]> {
-    const url = `${this.registryServer}/registry/gql`;
-
-    const { data } = await lastValueFrom(
-      this.httpService.get<{
-        serviceDescriptions: ServiceDescription[];
-      }>(url),
-    );
+    const serviceDescriptions =
+      await this.registryClientService.getGraphQlServiceDescriptions();
 
     assertDefined(
-      data?.serviceDescriptions,
+      serviceDescriptions,
       new SystemError('Service descriptions not found'),
     );
 
-    return data.serviceDescriptions.map((serviceDescription) => ({
+    return serviceDescriptions.map((serviceDescription) => ({
       name: serviceDescription.serviceName,
       url: serviceDescription.host,
     }));

@@ -3,7 +3,6 @@ import { PinoLogger } from 'app-logger';
 import {
   AbstractLogger,
   Logger,
-  LoggerOptions,
   LogLevel,
   LogMessage,
   QueryRunner,
@@ -13,9 +12,10 @@ import {
 export class PinoTypeormLogger extends AbstractLogger implements Logger {
   constructor(
     private readonly logger: PinoLogger,
-    options?: LoggerOptions,
+    // options?: LoggerOptions,
   ) {
-    super(options);
+    // super(options);
+    super();
     this.logger.setContext(PinoTypeormLogger.name);
   }
   protected writeLog(

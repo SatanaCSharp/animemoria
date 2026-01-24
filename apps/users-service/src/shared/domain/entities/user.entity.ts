@@ -1,8 +1,7 @@
 import { BaseEntity } from '@packages/nest-shared/orm';
-import { UserStatus } from '@packages/shared-types/enums';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity()
+@Entity('users')
 export class User extends BaseEntity {
   constructor(args?: Partial<User>) {
     super();
@@ -20,9 +19,6 @@ export class User extends BaseEntity {
   @Column()
   nickname!: string;
 
-  @Column()
-  status!: UserStatus;
-
-  @Column()
-  password!: string;
+  @Column({ name: 'account_id' })
+  accountId!: string;
 }

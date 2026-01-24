@@ -1,31 +1,34 @@
 import { Injectable } from '@nestjs/common';
 import {
-  AppVariant,
+  AppType,
   ServiceDescription,
   ServiceId,
 } from '@packages/nest-shared/shared';
 import { SystemError } from '@packages/shared-types/errors';
-import type { Maybe } from '@packages/shared-types/utils';
 import { assertDefined } from '@packages/utils/asserts';
 
-const registry: Map<AppVariant, Map<ServiceId, ServiceDescription>> = new Map();
+const registry: Map<AppType, Map<ServiceId, ServiceDescription>> = new Map([
+  [AppType.GRPC, new Map([])],
+  [AppType.GQL, new Map([])],
+  [AppType.REST, new Map([])],
+]);
 
 @Injectable()
 export class RegistryRepository {
-  addAppVariantRegistry(appVariant: AppVariant): void {
-    if (registry.has(appVariant)) {
+  addAppTypeRegistry(appType: AppType): void {
+    if (registry.has(appType)) {
       return;
     }
 
-    registry.set(appVariant, new Map<ServiceId, ServiceDescription>());
+    registry.set(appType, new Map<ServiceId, ServiceDescription>());
   }
 
   addServiceDescription(
-    appVariant: AppVariant,
+    appType: AppType,
     serviceDescription: ServiceDescription,
   ): void {
     const serviceDescriptionRegistry =
-      this.getServiceDescriptionByAppVariant(appVariant);
+      this.getServiceDescriptionByAppType(appType);
 
     if (!serviceDescriptionRegistry.has(serviceDescription.serviceId)) {
       serviceDescriptionRegistry.set(
@@ -35,25 +38,25 @@ export class RegistryRepository {
     }
   }
 
-  removeServiceDescription(appVariant: AppVariant, serviceId: ServiceId): void {
+  removeServiceDescription(appType: AppType, serviceId: ServiceId): void {
     const serviceDescriptionRegistry =
-      this.getServiceDescriptionByAppVariant(appVariant);
+      this.getServiceDescriptionByAppType(appType);
     serviceDescriptionRegistry.delete(serviceId);
   }
 
-  getServiceDescriptions(appVariant: AppVariant): ServiceDescription[] {
+  getServiceDescriptions(appType: AppType): ServiceDescription[] {
     const serviceDescriptionRegistry =
-      this.getServiceDescriptionByAppVariant(appVariant);
+      this.getServiceDescriptionByAppType(appType);
 
     return Array.from(serviceDescriptionRegistry.values());
   }
 
   getServiceDescription(
-    appVariant: AppVariant,
+    appType: AppType,
     serviceId: ServiceId,
   ): ServiceDescription {
     const serviceDescriptionRegistry =
-      this.getServiceDescriptionByAppVariant(appVariant);
+      this.getServiceDescriptionByAppType(appType);
 
     const serviceDescription = serviceDescriptionRegistry.get(serviceId);
 
@@ -67,39 +70,34 @@ export class RegistryRepository {
     return serviceDescription;
   }
 
-  getServiceDescriptionByServiceName(
-    appVariant: AppVariant,
-    serviceName: string,
-  ): ServiceDescription {
+  getServiceDescriptionByServiceNames(
+    appType: AppType,
+    serviceNames: string[],
+  ): ServiceDescription[] {
     const serviceDescriptionRegistry =
-      this.getServiceDescriptionByAppVariant(appVariant);
-    let serviceDescription: Maybe<ServiceDescription> = null;
+      this.getServiceDescriptionByAppType(appType);
+
+    const serviceDescriptions: ServiceDescription[] = [];
+    const serviceNameSet = new Set(serviceNames);
 
     for (const registryServiceDescription of serviceDescriptionRegistry.values()) {
-      if (registryServiceDescription.serviceName === serviceName) {
-        serviceDescription = registryServiceDescription;
+      if (serviceNameSet.has(registryServiceDescription.serviceName)) {
+        serviceDescriptions.push(registryServiceDescription);
       }
     }
 
-    assertDefined(
-      serviceDescription,
-      new SystemError(
-        `serviceDescription does not exist by serviceName: ${serviceName}`,
-      ),
-    );
-
-    return serviceDescription;
+    return serviceDescriptions;
   }
 
-  getServiceDescriptionByAppVariant(
-    appVariant: AppVariant,
+  getServiceDescriptionByAppType(
+    appType: AppType,
   ): Map<ServiceId, ServiceDescription> {
-    const serviceDescriptionRegistry = registry.get(appVariant);
+    const serviceDescriptionRegistry = registry.get(appType);
 
     assertDefined(
       serviceDescriptionRegistry,
       new SystemError(
-        `serviceDescriptionRegistry does not exist by appVariant: ${appVariant}`,
+        `serviceDescriptionRegistry does not exist by appType: ${appType}`,
       ),
     );
 

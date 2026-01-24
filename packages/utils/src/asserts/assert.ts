@@ -1,6 +1,6 @@
 import { AssertionError } from '@packages/shared-types/errors';
 
-/** Checking invariants, condition has to be always true otherwise it throws an error  */
+/** Checking invariants, condition has to be always TRUE otherwise it throws an error  */
 export const assert = <TError extends Error>(
   condition: boolean,
   message: string | TError | (() => TError),

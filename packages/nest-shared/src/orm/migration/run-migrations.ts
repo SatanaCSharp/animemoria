@@ -2,8 +2,8 @@
 
 import { Logger } from 'pino';
 
-import { createMigrationLogger } from '../packages/nest-shared/src/orm/migration/logger';
-import { migrationDataSource } from '../packages/nest-shared/src/orm/migration/migration.config';
+import { createMigrationLogger } from './logger';
+import { migrationDataSource } from './migration.config';
 import {
   cleanupConnection,
   handleError,
@@ -11,7 +11,7 @@ import {
   initializeConnection,
   logMigrationList,
   runMigrations,
-} from '../packages/nest-shared/src/orm/migration/migration.utils';
+} from './migration.utils';
 
 const logger: Logger = createMigrationLogger();
 
