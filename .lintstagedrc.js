@@ -8,13 +8,15 @@
  *
  * How it works:
  * 1. Groups staged files by their nearest package directory
- * 2. Runs ESLint from each package directory with its local config
- * 3. Auto-fixes issues where possible
- * 4. Validates no warnings/errors remain (fails commit if any exist)
- * 5. Applies Prettier formatting after linting
+ * 2. Dynamically filters files using ESLint's ignore patterns from config
+ * 3. Runs ESLint from each package directory with its local config
+ * 4. Auto-fixes issues where possible
+ * 5. Validates no warnings/errors remain (fails commit if any exist)
+ * 6. Applies Prettier formatting after linting
  *
  * Benefits:
  * - Only staged files are processed (memory efficient)
+ * - ESLint config is the single source of truth for ignore patterns
  * - Each package uses its own ESLint rules (respects local configs)
  * - Automatic fixes are applied and re-staged
  * - Clean separation: linting per package, formatting globally
@@ -28,6 +30,7 @@
 
 const path = require('path');
 const fs = require('fs');
+const { ESLint } = require('eslint');
 
 /**
  * Finds the nearest directory containing an ESLint config file
@@ -93,12 +96,49 @@ const groupFilesByPackage = (files) => {
 };
 
 /**
+ * Filters files based on ESLint ignore patterns from the config
+ * @param {string[]} files - Array of file paths (relative to packageDir)
+ * @param {string} packageDir - Absolute path to package directory
+ * @returns {Promise<string[]>} - Filtered array of files not ignored by ESLint
+ */
+const filterIgnoredFiles = async (files, packageDir) => {
+  try {
+    // Create ESLint instance with config from the package directory
+    const eslint = new ESLint({ cwd: packageDir });
+    
+    // Convert relative paths to absolute for ESLint API
+    const absoluteFiles = files.map((f) => path.join(packageDir, f));
+    
+    // Check which files are ignored
+    const results = await Promise.all(
+      absoluteFiles.map(async (filePath) => ({
+        filePath,
+        isIgnored: await eslint.isPathIgnored(filePath),
+      }))
+    );
+    
+    // Filter out ignored files and convert back to relative paths
+    const filteredFiles = results
+      .filter(({ isIgnored }) => !isIgnored)
+      .map(({ filePath }) => path.relative(packageDir, filePath));
+    
+    return filteredFiles;
+  } catch (error) {
+    // If ESLint fails to load config, log warning and return all files
+    console.warn(
+      `⚠️  Failed to load ESLint config in ${packageDir}: ${error.message}`
+    );
+    return files;
+  }
+};
+
+/**
  * Generates ESLint commands for each package group
  * Uses shell subcommands to ensure proper error handling
  * @param {string[]} filenames - Array of absolute staged file paths
- * @returns {string[]} - Array of shell commands to execute
+ * @returns {Promise<string[]>} - Array of shell commands to execute
  */
-const generateEslintCommands = (filenames) => {
+const generateEslintCommands = async (filenames) => {
   if (filenames.length === 0) {
     return [];
   }
@@ -106,9 +146,17 @@ const generateEslintCommands = (filenames) => {
   const packageGroups = groupFilesByPackage(filenames);
   const commands = [];
 
-  packageGroups.forEach((files, packageDir) => {
+  for (const [packageDir, files] of packageGroups.entries()) {
+    // Filter out files that are ignored by ESLint config
+    const filteredFiles = await filterIgnoredFiles(files, packageDir);
+    
+    if (filteredFiles.length === 0) {
+      // All files in this package are ignored, skip
+      continue;
+    }
+    
     // Escape file paths for shell execution
-    const filesArg = files.map((f) => `"${f}"`).join(' ');
+    const filesArg = filteredFiles.map((f) => `"${f}"`).join(' ');
     
     // Combined command: fix, then check with exit on error
     // Wrap in sh -c to ensure proper shell execution
@@ -116,10 +164,10 @@ const generateEslintCommands = (filenames) => {
       `sh -c 'cd "${packageDir}" && ` +
       `npx eslint ${filesArg} --fix && ` +
       `npx eslint ${filesArg} --max-warnings=0 || ` +
-      `(echo "\\n  ❌ ESLint failed in ${packageDir}\\nFiles: ${files.join(', ')}\\n" >&2 && exit 1)'`;
+      `(echo "\\n  ❌ ESLint failed in ${packageDir}\\nFiles: ${filteredFiles.join(', ')}\\n" >&2 && exit 1)'`;
     
     commands.push(command);
-  });
+  }
 
   return commands;
 };
@@ -129,8 +177,8 @@ const generateEslintCommands = (filenames) => {
  */
 module.exports = {
   // Lint JavaScript/TypeScript files with their nearest ESLint config
-  '*.{js,jsx,ts,tsx}': (filenames) => {
-    const eslintCommands = generateEslintCommands(filenames);
+  '*.{js,jsx,ts,tsx}': async (filenames) => {
+    const eslintCommands = await generateEslintCommands(filenames);
     const prettierCommand = `prettier --write ${filenames.map((f) => `"${f}"`).join(' ')}`;
 
     return [...eslintCommands, prettierCommand];

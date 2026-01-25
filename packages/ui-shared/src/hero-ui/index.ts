@@ -1,1 +1,1 @@
-export { UIProvider } from './UIProvider.tsx';
+export { UIProvider } from './UIProvider';

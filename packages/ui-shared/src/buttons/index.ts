@@ -1,1 +1,1 @@
-export { PrimaryButton } from './PrimaryButton.tsx';
+export { Button } from './Button';
