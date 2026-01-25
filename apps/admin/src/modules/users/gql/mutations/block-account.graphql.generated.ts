@@ -2,33 +2,30 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
 
 import * as Types from '__generated__/graphql-shared.type';
 
-export type CreateUserMutationVariables = Types.Exact<{
-  input: Types.CreateUserInput;
+export type BlockAccountMutationVariables = Types.Exact<{
+  id: Types.Scalars['String']['input'];
 }>;
 
-export type CreateUserMutation = {
-  createUser: { __typename: 'User'; id: string };
+export type BlockAccountMutation = {
+  blockAccount: { __typename: 'Account'; id: string };
 };
 
-export const CreateUserDocument = {
+export const BlockAccountDocument = {
   kind: 'Document',
   definitions: [
     {
       kind: 'OperationDefinition',
       operation: 'mutation',
-      name: { kind: 'Name', value: 'CreateUser' },
+      name: { kind: 'Name', value: 'BlockAccount' },
       variableDefinitions: [
         {
           kind: 'VariableDefinition',
-          variable: {
-            kind: 'Variable',
-            name: { kind: 'Name', value: 'input' },
-          },
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
           type: {
             kind: 'NonNullType',
             type: {
               kind: 'NamedType',
-              name: { kind: 'Name', value: 'CreateUserInput' },
+              name: { kind: 'Name', value: 'String' },
             },
           },
         },
@@ -38,14 +35,14 @@ export const CreateUserDocument = {
         selections: [
           {
             kind: 'Field',
-            name: { kind: 'Name', value: 'createUser' },
+            name: { kind: 'Name', value: 'blockAccount' },
             arguments: [
               {
                 kind: 'Argument',
-                name: { kind: 'Name', value: 'input' },
+                name: { kind: 'Name', value: 'id' },
                 value: {
                   kind: 'Variable',
-                  name: { kind: 'Name', value: 'input' },
+                  name: { kind: 'Name', value: 'id' },
                 },
               },
             ],
@@ -60,4 +57,7 @@ export const CreateUserDocument = {
       },
     },
   ],
-} as unknown as DocumentNode<CreateUserMutation, CreateUserMutationVariables>;
+} as unknown as DocumentNode<
+  BlockAccountMutation,
+  BlockAccountMutationVariables
+>;

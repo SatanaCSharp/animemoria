@@ -101,6 +101,7 @@ catalog:
   "@heroui/react": "^2.8.7"
   "@heroui/theme": "^2.4.25"
   "framer-motion": "^12.23.26"
+  "react-hook-form": "^7.71.1"
 
   # Vite & Build Tools
   "vite": "^7.3.0"
@@ -141,3 +142,7 @@ catalog:
   # Code Quality
   "lint-staged": "^16.2.7"
   "prettier": "^3.4.2"
+
+  # Validation schema
+  "yup": "^1.7.1"
+  "@hookform/resolvers": "^3.9.1"

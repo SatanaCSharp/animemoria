@@ -1,0 +1,8 @@
+#import "../fragments/user-fields.graphql"
+
+mutation BlockAccount($id: String!) {
+  blockAccount(id: $id) {
+    id
+  }
+}
+

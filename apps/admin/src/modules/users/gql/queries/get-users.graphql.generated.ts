@@ -1,5 +1,6 @@
-import * as Types from '__generated__/graphql-shared.type';
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
+
+import * as Types from '__generated__/graphql-shared.type';
 
 export type GetUsersQueryVariables = Types.Exact<{ [key: string]: never }>;
 

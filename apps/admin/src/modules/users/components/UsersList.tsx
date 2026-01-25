@@ -1,6 +1,7 @@
 import { useQuery } from '@apollo/client/react';
-import { GetUsersDocument } from 'modules/users/gql/queries/get-users.graphql.generated';
 import { ReactElement } from 'react';
+
+import { GetUsersDocument } from 'modules/users/gql/queries/get-users.graphql.generated';
 
 export const UsersList = (): ReactElement => {
   const { data, loading, error } = useQuery(GetUsersDocument);

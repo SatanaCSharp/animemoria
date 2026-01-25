@@ -1,0 +1,10 @@
+{
+    "head.title": "Sign In",
+    "title": "Sign In",
+    "subtitle": "Enter your credentials to access your account",
+    "email.label": "Email",
+    "email.placeholder": "Enter your email",
+    "password.label": "Password",
+    "password.placeholder": "Enter your password",
+    "submit": "Sign In"
+}

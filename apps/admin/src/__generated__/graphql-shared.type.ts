@@ -27,6 +27,18 @@ export type Scalars = {
   Float: { input: number; output: number };
 };
 
+export type Account = {
+  __typename: 'Account';
+  email: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  user: User;
+};
+
+export type AccountResponse = {
+  __typename: 'AccountResponse';
+  accessToken: Scalars['String']['output'];
+};
+
 export type CreateUserInput = {
   email: Scalars['String']['input'];
   nickname: Scalars['String']['input'];
@@ -34,11 +46,14 @@ export type CreateUserInput = {
 
 export type Mutation = {
   __typename: 'Mutation';
-  blockUser: User;
+  blockAccount: Account;
   createUser: User;
+  signIn: AccountResponse;
+  signUp: AccountResponse;
+  unblockAccount: Account;
 };
 
-export type MutationBlockUserArgs = {
+export type MutationBlockAccountArgs = {
   id: Scalars['String']['input'];
 };
 
@@ -46,9 +61,37 @@ export type MutationCreateUserArgs = {
   input: CreateUserInput;
 };
 
+export type MutationSignInArgs = {
+  input: SignInInput;
+};
+
+export type MutationSignUpArgs = {
+  input: SignUpInput;
+};
+
+export type MutationUnblockAccountArgs = {
+  id: Scalars['String']['input'];
+};
+
 export type Query = {
   __typename: 'Query';
   getUsers: Array<User>;
+  me: Account;
+};
+
+export type QueryMeArgs = {
+  id: Scalars['String']['input'];
+};
+
+export type SignInInput = {
+  email: Scalars['String']['input'];
+  password: Scalars['String']['input'];
+};
+
+export type SignUpInput = {
+  email: Scalars['String']['input'];
+  nickname: Scalars['String']['input'];
+  password: Scalars['String']['input'];
 };
 
 export type User = {
