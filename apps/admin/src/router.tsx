@@ -1,4 +1,5 @@
 import { createRouter } from '@tanstack/react-router';
+
 import { homeRoute } from 'modules/home/route';
 import { usersRoute } from 'modules/users/route';
 import { rootRoute } from 'routes/__root';
