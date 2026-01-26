@@ -1,4 +1,5 @@
 import { Button } from '@packages/ui-shared/buttons';
+import { SpinnerIcon } from '@packages/ui-shared/icons';
 import { EmailInput, PasswordInput } from '@packages/ui-shared/inputs';
 import { ReactElement } from 'react';
 import { Control, Controller, FieldErrors } from 'react-hook-form';
@@ -8,6 +9,7 @@ import { SignInFormData } from 'modules/sign-in/schemas/sign-in.schema';
 
 type Props = {
   onSubmit: () => void;
+  isSubmitting: boolean;
   control: Control<SignInFormData>;
   errors: FieldErrors<SignInFormData>;
 };
@@ -37,7 +39,6 @@ export const SignInForm = (props: Props): ReactElement => {
           />
         )}
       />
-
       <Controller
         name="password"
         control={props.control}
@@ -61,10 +62,11 @@ export const SignInForm = (props: Props): ReactElement => {
       />
 
       <Button
+        isLoading={props.isSubmitting}
         type="submit"
-        color="primary"
         variant="bordered"
-        className="w-full"
+        className="w-full border-gray-900"
+        spinner={<SpinnerIcon className="animate-spin h-5 w-5 text-current" />}
       >
         {t('sign-in:submit')}
       </Button>

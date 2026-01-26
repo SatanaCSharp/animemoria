@@ -2,17 +2,33 @@ import '@packages/ui-shared/hero-ui/styles.css';
 import 'styles.css';
 
 import { ApolloClient, HttpLink, InMemoryCache } from '@apollo/client';
+import { SetContextLink } from '@apollo/client/link/context';
 import { createRoot } from 'react-dom/client';
 
 import { App } from 'App';
 import { getRouter } from 'router';
-
 import 'i18n';
 
 const router = getRouter();
 
+const httpLink = new HttpLink({
+  uri: 'http://localhost:4301/graphql',
+});
+
+const authLink = new SetContextLink(({ headers }) => {
+  // get the authentication token from local storage if it exists
+  const token = localStorage.getItem('token');
+  // return the headers to the context so httpLink can read them
+  return {
+    headers: {
+      ...headers,
+      authorization: token ? `Bearer ${token}` : '',
+    },
+  };
+});
+
 const client = new ApolloClient({
-  link: new HttpLink({ uri: 'http://localhost:4101/graphql' }),
+  link: authLink.concat(httpLink),
   cache: new InMemoryCache(),
 });
 

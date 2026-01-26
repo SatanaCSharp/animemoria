@@ -1,9 +1,13 @@
 import { useMutation } from '@apollo/client/react';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { ApplicationError } from '@packages/shared-types/errors';
+import { assertDefined } from '@packages/utils/asserts';
+import { useNavigate } from '@tanstack/react-router';
 import { ReactElement } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
+import { useAuthContext } from 'context/auth.context';
 import { usePageTitle } from 'hooks/usePageTitle';
 import { SignInForm } from 'modules/sign-in/components/SignInForm';
 import { SignInDocument } from 'modules/sign-in/gql/sign-in.graphql.generated';
@@ -11,10 +15,13 @@ import {
   signInSchema,
   SignInFormData,
 } from 'modules/sign-in/schemas/sign-in.schema';
+import { ROUTES } from 'shared/constants/routes';
 
 export const SignInPage = (): ReactElement => {
   const { t } = useTranslation();
-  const [signIn] = useMutation(SignInDocument, {
+  const navigate = useNavigate();
+  const { setToken } = useAuthContext();
+  const [signIn, { loading }] = useMutation(SignInDocument, {
     context: {
       headers: { 'x-app-type': 'admin' },
     },
@@ -36,7 +43,13 @@ export const SignInPage = (): ReactElement => {
   });
 
   const onSubmit = async (data: SignInFormData): Promise<void> => {
-    await signIn({ variables: { input: data } });
+    const response = await signIn({ variables: { input: data } });
+    assertDefined(
+      response?.data?.signIn?.accessToken,
+      new ApplicationError('No accessToken returned.'),
+    );
+    setToken(response.data.signIn.accessToken);
+    await navigate({ to: ROUTES.HOME });
   };
 
   return (
@@ -51,6 +64,7 @@ export const SignInPage = (): ReactElement => {
         <SignInForm
           errors={errors}
           control={control}
+          isSubmitting={loading}
           onSubmit={handleSubmit(onSubmit)}
         />
       </div>

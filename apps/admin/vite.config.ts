@@ -11,6 +11,17 @@ const config = defineConfig({
     tailwindcss(),
     viteReact(),
   ],
+  optimizeDeps: {
+    include: [
+      '@packages/shared-types/errors',
+      '@packages/shared-types/enums',
+      '@packages/shared-types/utils',
+      '@packages/utils/asserts',
+      '@packages/utils/predicates',
+      '@packages/utils/type-guards',
+      '@packages/utils/async',
+    ],
+  },
 });
 
 export default config;

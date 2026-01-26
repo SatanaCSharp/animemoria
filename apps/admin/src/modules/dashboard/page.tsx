@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next';
 
 import { usePageTitle } from 'hooks/usePageTitle';
 
-export const Home = (): JSX.Element => {
-  const { t } = useTranslation('home');
+export const Dashboard = (): JSX.Element => {
+  const { t } = useTranslation('dashboard');
   usePageTitle(t('head.title'));
 
   return (

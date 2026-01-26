@@ -12,6 +12,8 @@
     "codegen:watch": "graphql-codegen --config node_modules/@packages/graphql-generated/codegen.config.ts --watch"
   },
   "dependencies": {
+    "@packages/utils": "workspace:*",
+    "@packages/shared-types": "workspace:*",
     "@apollo/client": "catalog:",
     "@graphql-typed-document-node/core": "catalog:",
     "@hookform/resolvers": "catalog:",

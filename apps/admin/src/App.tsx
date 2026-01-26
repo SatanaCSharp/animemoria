@@ -4,6 +4,7 @@ import { UIProvider } from '@packages/ui-shared/hero-ui';
 import { createRouter } from '@tanstack/react-router';
 import { ReactElement, StrictMode } from 'react';
 
+import { AuthProvider } from 'context/auth.context';
 import { RouterProvider } from 'context/router.context';
 
 type AppProps = {
@@ -16,7 +17,9 @@ export const App = (props: AppProps): ReactElement => {
     <StrictMode>
       <UIProvider>
         <ApolloProvider client={props.client}>
-          <RouterProvider router={props.router} />
+          <AuthProvider>
+            <RouterProvider router={props.router} />
+          </AuthProvider>
         </ApolloProvider>
       </UIProvider>
     </StrictMode>

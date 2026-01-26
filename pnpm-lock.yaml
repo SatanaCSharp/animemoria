@@ -305,9 +305,15 @@ importers:
       '@hookform/resolvers':
         specifier: 'catalog:'
         version: 3.10.0(react-hook-form@7.71.1(react@19.2.3))
+      '@packages/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared-types
       '@packages/ui-shared':
         specifier: workspace:*
         version: link:../../packages/ui-shared
+      '@packages/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
       '@tanstack/react-router':
         specifier: 'catalog:'
         version: 1.144.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)

@@ -18,10 +18,6 @@
       "types": "./dist/type-guards/index.d.ts",
       "default": "./dist/type-guards/index.js"
     },
-    "./errors": {
-      "types": "./dist/errors/index.d.ts",
-      "default": "./dist/errors/index.js"
-    },
     "./async": {
       "types": "./dist/async/index.d.ts",
       "default": "./dist/async/index.js"
