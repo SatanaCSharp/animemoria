@@ -1,8 +1,0 @@
-#import "../fragments/user-fields.graphql"
-
-mutation BlockUser($id: String!) {
-  blockUser(id: $id) {
-    id
-  }
-}
-

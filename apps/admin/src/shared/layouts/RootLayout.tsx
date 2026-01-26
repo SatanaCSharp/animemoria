@@ -6,10 +6,10 @@ import { Header } from 'shared/components/Header/Header';
 
 export const RootLayout = (): ReactElement => {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col h-screen">
       <Header />
-      <main className="flex-1 overflow-y-auto">
-        <div className="container mx-auto px-4">
+      <main className="flex-1 flex flex-col">
+        <div className="container mx-auto h-full px-4 flex flex-col">
           <Outlet />
         </div>
       </main>

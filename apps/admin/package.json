@@ -12,8 +12,11 @@
     "codegen:watch": "graphql-codegen --config node_modules/@packages/graphql-generated/codegen.config.ts --watch"
   },
   "dependencies": {
+    "@packages/utils": "workspace:*",
+    "@packages/shared-types": "workspace:*",
     "@apollo/client": "catalog:",
     "@graphql-typed-document-node/core": "catalog:",
+    "@hookform/resolvers": "catalog:",
     "@packages/ui-shared": "workspace:*",
     "@tanstack/react-router": "catalog:",
     "graphql": "catalog:",
@@ -22,9 +25,11 @@
     "i18next-http-backend": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
+    "react-hook-form": "catalog:",
     "react-i18next": "catalog:",
     "rxjs": "catalog:",
-    "tailwindcss": "catalog:"
+    "tailwindcss": "catalog:",
+    "yup": "catalog:"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "catalog:",

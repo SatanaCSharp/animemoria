@@ -19,7 +19,7 @@ await i18n
     debug: import.meta.env.DEV,
     supportedLngs: ['en', 'uk'],
     defaultNS: 'common',
-    ns: ['common'],
+    ns: ['common', 'sign-in', 'home', 'users', 'validation'],
     backend: {
       loadPath: '/locales/{{lng}}/{{ns}}.json',
     },

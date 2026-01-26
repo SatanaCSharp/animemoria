@@ -1,30 +1,34 @@
-import * as Types from '__generated__/graphql-shared.type';
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 
-export type BlockUserMutationVariables = Types.Exact<{
-  id: Types.Scalars['String']['input'];
+import * as Types from '__generated__/graphql-shared.type';
+
+export type SignInMutationVariables = Types.Exact<{
+  input: Types.SignInInput;
 }>;
 
-export type BlockUserMutation = {
-  blockUser: { __typename: 'User'; id: string };
+export type SignInMutation = {
+  signIn: { __typename: 'AccountResponse'; accessToken: string };
 };
 
-export const BlockUserDocument = {
+export const SignInDocument = {
   kind: 'Document',
   definitions: [
     {
       kind: 'OperationDefinition',
       operation: 'mutation',
-      name: { kind: 'Name', value: 'BlockUser' },
+      name: { kind: 'Name', value: 'SignIn' },
       variableDefinitions: [
         {
           kind: 'VariableDefinition',
-          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'input' },
+          },
           type: {
             kind: 'NonNullType',
             type: {
               kind: 'NamedType',
-              name: { kind: 'Name', value: 'String' },
+              name: { kind: 'Name', value: 'SignInInput' },
             },
           },
         },
@@ -34,21 +38,21 @@ export const BlockUserDocument = {
         selections: [
           {
             kind: 'Field',
-            name: { kind: 'Name', value: 'blockUser' },
+            name: { kind: 'Name', value: 'signIn' },
             arguments: [
               {
                 kind: 'Argument',
-                name: { kind: 'Name', value: 'id' },
+                name: { kind: 'Name', value: 'input' },
                 value: {
                   kind: 'Variable',
-                  name: { kind: 'Name', value: 'id' },
+                  name: { kind: 'Name', value: 'input' },
                 },
               },
             ],
             selectionSet: {
               kind: 'SelectionSet',
               selections: [
-                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'accessToken' } },
               ],
             },
           },
@@ -56,4 +60,4 @@ export const BlockUserDocument = {
       },
     },
   ],
-} as unknown as DocumentNode<BlockUserMutation, BlockUserMutationVariables>;
+} as unknown as DocumentNode<SignInMutation, SignInMutationVariables>;

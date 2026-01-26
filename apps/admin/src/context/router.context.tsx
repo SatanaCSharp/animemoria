@@ -3,27 +3,35 @@ import {
   RouterProvider as TanstackRouterProvider,
 } from '@tanstack/react-router';
 import { ReactElement, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
 
-import type { TFunction } from 'i18next';
+import {
+  AuthContextValue,
+  defaultAuthContextValue,
+  useAuthContext,
+} from 'context/auth.context';
 
 export interface RouterContext {
-  t: TFunction;
+  auth: AuthContextValue;
 }
+
 export const defaultRouterContext: RouterContext = {
-  t: ((key: string) => key) as TFunction,
+  auth: defaultAuthContextValue,
 };
+
 type RouterProviderProps = {
   router: ReturnType<typeof createRouter>;
 };
+
 export const RouterProvider = (props: RouterProviderProps): ReactElement => {
-  const { t } = useTranslation();
+  const auth = useAuthContext();
+
   const contextValue = useMemo(
     () => ({
-      t,
+      auth,
     }),
-    [t],
+    [auth],
   );
+
   return (
     <TanstackRouterProvider router={props.router} context={contextValue} />
   );
