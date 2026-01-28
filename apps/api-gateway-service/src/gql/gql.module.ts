@@ -40,9 +40,15 @@ import { GetSubgraphServicesQueryProcessor } from 'gql/use-case/queries/get-subg
                   request,
                   context,
                 }: GraphQLDataSourceProcessOptions<GraphQLContext>) {
+                  // Always set apollo-require-preflight header to bypass CSRF protection
+                  request?.http?.headers.set(
+                    'apollo-require-preflight',
+                    'true',
+                  );
+
                   const contextReq = context.req as Request;
                   // Forward the x-app-type header from the gateway to subgraphs
-                  if (contextReq.headers['x-app-type']) {
+                  if (contextReq?.headers?.['x-app-type']) {
                     request?.http?.headers.set(
                       'x-app-type',
                       contextReq.headers['x-app-type'] as string,
@@ -50,14 +56,14 @@ import { GetSubgraphServicesQueryProcessor } from 'gql/use-case/queries/get-subg
                   }
 
                   // Forward other headers as needed (authorization, cookies, etc.)
-                  if (contextReq.headers['authorization']) {
+                  if (contextReq?.headers?.['authorization']) {
                     request?.http?.headers.set(
                       'authorization',
                       contextReq.headers['authorization'],
                     );
                   }
 
-                  if (contextReq.headers['cookie']) {
+                  if (contextReq?.headers?.['cookie']) {
                     request?.http?.headers.set(
                       'cookie',
                       contextReq.headers['cookie'],

@@ -1,0 +1,101 @@
+# Multi-stage Dockerfile for Vite/React applications
+#
+# PREREQUISITES:
+#   Build Dockerfile.base first to create the base image with dependencies:
+#   
+#   docker build -f infra/deployment/Dockerfile.base \
+#     --build-arg APP_NAME=admin \
+#     --build-arg EXCLUDED_PACKAGES="nest-shared scripts graphql/definitions grpc eslint-config-base eslint-config-service eslint-config-ui" \
+#     --build-arg CACHE_ID=pnpm-vite \
+#     -t animemoria/base:admin-deps .
+#
+# THEN BUILD THIS FILE:
+#   docker build -f infra/deployment/Dockerfile.vite \
+#     --build-arg APP_NAME=admin \
+#     -t admin:latest .
+#
+# EXCLUDED PACKAGES (configured in Dockerfile.base build):
+# - nest-shared, scripts, grpc, graphql/definitions (backend-specific)
+# - eslint-config-base, eslint-config-service, eslint-config-ui (dev-only)
+
+# Global build args
+ARG APP_NAME
+ARG EXCLUDED_PACKAGES
+
+# ============================================================================
+# Import base image with pre-installed dependencies
+# ============================================================================
+
+# Import deps stage from base image (contains Node.js, pnpm, and all dependencies)
+FROM animemoria/base:${APP_NAME}-deps AS deps
+
+# ============================================================================
+# Vite-specific stages
+# ============================================================================
+
+# Stage 2: Build stage
+FROM deps AS builder
+
+ARG APP_NAME
+ARG EXCLUDED_PACKAGES
+
+# Copy workspace configuration (deps stage only has package.json files)
+COPY pnpm-workspace.yaml turbo.json package.json ./
+
+# Copy package source code, excluding backend packages
+COPY packages/ ./packages/
+RUN for pkg in ${EXCLUDED_PACKAGES}; do \
+      rm -rf "./packages/${pkg}"; \
+    done
+
+# Copy app source code
+COPY apps/${APP_NAME} ./apps/${APP_NAME}
+
+# Copy cleanup script once (used multiple times)
+COPY infra/deployment/scripts/cleanup-build-artifacts.sh /tmp/cleanup-build-artifacts.sh
+RUN chmod +x /tmp/cleanup-build-artifacts.sh
+
+# Build packages first (workspace dependencies)
+# Note: This will only build packages that are needed for the Vite app
+RUN pnpm turbo run build --filter='./packages/*'
+
+# Optimize packages after build: remove source maps and test files
+RUN /tmp/cleanup-build-artifacts.sh ./packages
+
+# Build Vite app
+RUN pnpm turbo run build --filter=${APP_NAME}
+
+# Optimize final built assets and cleanup script
+RUN /tmp/cleanup-build-artifacts.sh ./apps/${APP_NAME}/dist && \
+    rm /tmp/cleanup-build-artifacts.sh
+
+# Stage 3: Production runtime with nginx
+FROM nginx:alpine AS runner
+
+ARG APP_NAME
+
+# Install dumb-init for proper signal handling
+RUN apk add --no-cache dumb-init
+
+# Copy built static assets (optimized - no source maps)
+COPY --from=builder /app/apps/${APP_NAME}/dist /usr/share/nginx/html
+
+# Copy optimized nginx configuration with compression and caching
+COPY infra/deployment/nginx.conf /etc/nginx/conf.d/default.conf
+
+# Create non-root nginx user (uses nginx-specific setup script)
+COPY infra/deployment/scripts/setup-nginx-user.sh /tmp/setup-nginx-user.sh
+RUN chmod +x /tmp/setup-nginx-user.sh && \
+    /tmp/setup-nginx-user.sh nginx-runner 1001 1001 && \
+    rm /tmp/setup-nginx-user.sh
+
+USER nginx-runner
+
+EXPOSE 80
+
+# Health check to verify nginx is serving content
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:80/ || exit 1
+
+ENTRYPOINT ["dumb-init", "--"]
+CMD ["nginx", "-g", "daemon off;"]

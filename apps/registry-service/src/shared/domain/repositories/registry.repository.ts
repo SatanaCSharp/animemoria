@@ -30,12 +30,10 @@ export class RegistryRepository {
     const serviceDescriptionRegistry =
       this.getServiceDescriptionByAppType(appType);
 
-    if (!serviceDescriptionRegistry.has(serviceDescription.serviceId)) {
-      serviceDescriptionRegistry.set(
-        serviceDescription.serviceId,
-        serviceDescription,
-      );
-    }
+    serviceDescriptionRegistry.set(
+      serviceDescription.serviceId,
+      serviceDescription,
+    );
   }
 
   removeServiceDescription(appType: AppType, serviceId: ServiceId): void {

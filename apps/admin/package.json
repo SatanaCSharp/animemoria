@@ -12,12 +12,12 @@
     "codegen:watch": "graphql-codegen --config node_modules/@packages/graphql-generated/codegen.config.ts --watch"
   },
   "dependencies": {
-    "@packages/utils": "workspace:*",
-    "@packages/shared-types": "workspace:*",
     "@apollo/client": "catalog:",
     "@graphql-typed-document-node/core": "catalog:",
     "@hookform/resolvers": "catalog:",
+    "@packages/shared-types": "workspace:*",
     "@packages/ui-shared": "workspace:*",
+    "@packages/utils": "workspace:*",
     "@tanstack/react-router": "catalog:",
     "graphql": "catalog:",
     "i18next": "catalog:",
@@ -39,6 +39,7 @@
     "@graphql-codegen/typescript-operations": "catalog:",
     "@packages/eslint-config-ui": "workspace:*",
     "@packages/graphql-generated": "workspace:*",
+    "@rollup/plugin-commonjs": "^29.0.0",
     "@tailwindcss/vite": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:",

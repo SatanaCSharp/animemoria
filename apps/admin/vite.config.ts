@@ -22,6 +22,12 @@ const config = defineConfig({
       '@packages/utils/async',
     ],
   },
+  build: {
+    outDir: 'dist',
+    commonjsOptions: {
+      include: [/node_modules/, /packages/],
+    },
+  },
 });
 
 export default config;

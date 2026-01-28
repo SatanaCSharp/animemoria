@@ -1,0 +1,88 @@
+# Git and version control
+.git
+.gitignore
+.gitattributes
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Dependencies (installed fresh in Docker)
+node_modules
+**/node_modules
+.pnpm-store
+
+# Build artifacts (built fresh in Docker)
+dist
+**/dist
+build
+**/build
+.next
+**/.next
+out
+**/out
+
+# Cache directories
+.turbo
+**/.turbo
+.cache
+**/.cache
+.eslintcache
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Testing
+coverage
+**/.coverage
+.nyc_output
+test-results
+playwright-report
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+
+# CI/CD
+.github
+.gitlab-ci.yml
+.circleci
+
+# Documentation
+README.md
+**/README.md
+*.md
+LICENSE
+CHANGELOG.md
+
+# Development tools
+.husky
+.prettierignore
+.prettierrc.js
+.lintstagedrc.js
+commitlint.config.mjs
+
+# Docker
+Dockerfile*
+.dockerignore
+docker-compose*.yml
+
+# Kubernetes (but keep pnpm workspace and lock files)
+*.yaml
+*.yml
+!pnpm-workspace.yaml
+!pnpm-lock.yaml
+
+# Misc
+.editorconfig
