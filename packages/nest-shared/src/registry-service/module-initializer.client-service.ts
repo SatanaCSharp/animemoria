@@ -1,5 +1,3 @@
-import { randomUUID } from 'node:crypto';
-
 import { HttpService } from '@nestjs/axios';
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -18,8 +16,6 @@ import {
 
 @Injectable()
 export class ModuleInitializerClientService {
-  private serviceId: string = '';
-
   constructor(
     private readonly httpService: HttpService,
     private readonly config: ConfigService,
@@ -29,8 +25,9 @@ export class ModuleInitializerClientService {
   ) {
     this.logger.setContext(ModuleInitializerClientService.name);
   }
-  setServiceId(): void {
-    this.serviceId = randomUUID();
+
+  private get serviceId(): string {
+    return `${this.appName}:${this.options.appType}`;
   }
 
   private get registryServer(): string {

@@ -46,7 +46,6 @@ export class ClientRegistrationModule
   }
 
   onModuleInit(): void {
-    this.moduleInitializerClientService.setServiceId();
     this.moduleInitializerClientService.register().catch((err) => {
       this.logger.error('Failed to register service', err);
     });

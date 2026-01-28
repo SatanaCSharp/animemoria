@@ -7,8 +7,10 @@ export class User {
   id!: string;
 
   @Field()
+  @Directive('@shareable')
   email!: string;
 
   @Field()
+  @Directive('@shareable')
   nickname!: string;
 }
