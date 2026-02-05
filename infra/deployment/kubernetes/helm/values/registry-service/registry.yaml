@@ -1,8 +1,14 @@
-# Step 1: Registry service (REST). No dependencies.
-# Config keys from apps/registry-service/.env.example
+# Registry service (REST). Convention: protocol=http -> port 3000/80.
+# Creates global-shared-config ConfigMap (create: true). Install this release first so other services can use it.
 # Install: helm install registry charts/microservice -f values/cluster.yaml -f values/registry-service/registry.yaml -n <ns>
 
 fullnameOverride: registry
+
+portEnvKey: APP_REST_PORT
+
+# Create global-shared-config once; other service values leave this false.
+sharedConfigMap:
+  create: true
 
 image:
   name: registry-service
@@ -13,22 +19,12 @@ command: ["node", "dist/rest.main"]
 
 dependencies: []
 
-port: 3000
-portEnvKey: APP_REST_PORT
+# No service-specific env; use global-shared-config for NODE_ENV, LOG_LEVEL, etc.
+env: []
 
-# Explicit non-sensitive env (from apps/registry-service/.env.example)
-env:
-  - name: NODE_ENV
-    value: "production"
-  - name: LOG_PRETTY
-    value: "false"
-  - name: LOG_LEVEL
-    value: "info"
-
-# No sensitive keys; existingSecret can be empty or omit if no secrets needed
 secretKeys: []
 
-existingSecret: registry-db-config
+existingSecret: registry-service-config
 
 resources:
   requests:
@@ -48,5 +44,3 @@ autoscaling:
 
 service:
   type: ClusterIP
-  targetPort: http
-  name: http

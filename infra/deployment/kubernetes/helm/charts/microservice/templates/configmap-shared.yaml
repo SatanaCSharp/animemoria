@@ -1,0 +1,12 @@
+{{- if .Values.sharedConfigMap.create }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: global-shared-config
+  labels:
+    {{- include "microservice.labels" . | nindent 4 }}
+data:
+  NODE_ENV: {{ .Values.sharedConfigMap.data.NODE_ENV | default "production" | quote }}
+  LOG_LEVEL: {{ .Values.sharedConfigMap.data.LOG_LEVEL | default "info" | quote }}
+  LOG_PRETTY: {{ .Values.sharedConfigMap.data.LOG_PRETTY | default "false" | quote }}
+{{- end }}

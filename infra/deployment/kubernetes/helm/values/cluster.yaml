@@ -4,13 +4,13 @@
 
 imageRepository: ""  # e.g. ghcr.io/org/animemoria or my-registry.io/my-repo
 
-# Port map: release/service name -> port. Resolves dependency wait ports so per-service values don't specify them.
+# Port map: release name -> Service port (convention: http=80, grpc=5000). Used by dependency wait.
 cluster:
   knownServices:
-    registry: 3000
-    users-grpc: 50051
-    users-graphql: 3001
-    auth-grpc: 50052
-    auth-graphql: 3002
-    api-gateway-graphql: 4000
-    api-gateway-rest: 3003
+    registry: 80
+    users-grpc: 5000
+    users-graphql: 80
+    auth-grpc: 5000
+    auth-graphql: 80
+    api-gateway-graphql: 80
+    api-gateway-rest: 80

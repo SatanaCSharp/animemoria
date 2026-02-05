@@ -27,10 +27,10 @@ dependencies: []     # e.g. [ { service: registry }, { service: users-grpc } ]
 cluster:
   knownServices: {}  # e.g. { "registry": 3000, "users-grpc": 50051, "auth-grpc": 50052, ... }
 
-# Single source of truth for this release: container port, Service port, and port env var.
-port: 3000
-# Env key for the port (app-specific: APP_PORT, APP_GRAPHQL_PORT, APP_REST_PORT)
-portEnvKey: APP_PORT
+# Convention over configuration: protocol drives port (http -> 3000/80, grpc -> 5000/5000).
+protocol: http  # or grpc
+# Optional: override port env key (default: APP_PORT for http, APP_GRPC_PORT for grpc). Set e.g. APP_GRAPHQL_PORT, APP_REST_PORT.
+portEnvKey: ""
 
 # Explicit env key-values from values (non-sensitive). Sensitive vars must be in existingSecret.
 # Source: apps/<service>/.env.example. Example: [ { name: NODE_ENV, value: "production" }, { name: LOG_LEVEL, value: "info" } ]
@@ -40,9 +40,18 @@ env: []
 # Documented per service in values/<service>/*.yaml; used for validation/docs and ESO secret key mapping.
 secretKeys: []  # e.g. [ DB_CONNECTION_URL, AT_SECRET, RT_SECRET, INTERNAL_REGISTRY_SERVER_HOST ]
 
-# Env from Secrets/ConfigMaps — all sensitive .env-style variables must live in the Secret.
-existingSecret: ""   # e.g. auth-graphql-db-config — required in production
-existingConfigMap: "" # optional, for non-sensitive config
+# global-shared-config: non-sensitive env (NODE_ENV, LOG_*). Used by default in deployment envFrom.
+# Set create: true on one release (e.g. registry) to create the ConfigMap; others leave false.
+sharedConfigMap:
+  create: false
+  data:
+    NODE_ENV: "production"
+    LOG_LEVEL: "info"
+    LOG_PRETTY: "false"
+
+# Env from Secrets/ConfigMaps — sensitive vars in Secret (default: <fullname>-secrets).
+existingSecret: ""   # default: {{ fullname }}-secrets
+existingConfigMap: "" # optional, for service-specific non-sensitive config
 
 # Resources
 resources:
@@ -71,11 +80,15 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
   targetMemoryUtilizationPercentage: 70
 
-# Service (port defaults to .Values.port when not set)
+# Pod Disruption Budget (use either minAvailable or maxUnavailable, not both)
+pdb:
+  enabled: false  # Default to false, enable per-service for HA
+  minAvailable: 1 # Ensure at least 1 pod is always up
+  # maxUnavailable: 1 # Alternative option (uncomment and remove/zero minAvailable to use)
+
+# Service type only; port/targetPort/name derived from protocol (http -> 80->3000, grpc -> 5000->5000).
 service:
   type: ClusterIP
-  targetPort: http
-  name: http
 
 # Pod annotations / labels
 podAnnotations: {}

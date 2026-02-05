@@ -1,8 +1,10 @@
-# Step 6: API Gateway (REST). Waits for api-gateway-graphql (port from cluster.knownServices).
+# API Gateway (REST). Convention: protocol=http -> port 3000/80.
 # Config keys from apps/api-gateway-service/.env.example
 # Install: helm install api-gateway-rest charts/microservice -f values/cluster.yaml -f values/api-gateway-service/api-gateway-rest.yaml -n <ns>
 
 fullnameOverride: api-gateway-rest
+
+portEnvKey: APP_REST_PORT
 
 image:
   name: api-gateway-service
@@ -14,19 +16,8 @@ command: ["node", "dist/rest.main"]
 dependencies:
   - service: api-gateway-graphql
 
-port: 3003
-portEnvKey: APP_REST_PORT
+env: []
 
-# Explicit non-sensitive env (from apps/api-gateway-service/.env.example)
-env:
-  - name: NODE_ENV
-    value: "production"
-  - name: LOG_PRETTY
-    value: "false"
-  - name: LOG_LEVEL
-    value: "info"
-
-# Required keys in existingSecret (ESO or manual Secret). Source: apps/api-gateway-service/.env.example
 secretKeys:
   - INTERNAL_REGISTRY_SERVER_HOST
   - RT_SECRET
@@ -34,7 +25,7 @@ secretKeys:
   - COOKIES_MAX_AGE
   - CORS_ORIGINS
 
-existingSecret: api-gateway-rest-db-config
+existingSecret: api-gateway-rest-service-config
 
 resources:
   requests:
@@ -54,5 +45,3 @@ autoscaling:
 
 service:
   type: ClusterIP
-  targetPort: http
-  name: http

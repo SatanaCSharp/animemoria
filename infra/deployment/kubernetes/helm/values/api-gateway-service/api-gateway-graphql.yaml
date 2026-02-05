@@ -1,8 +1,10 @@
-# Step 5: API Gateway (GraphQL). Waits for users-graphql and auth-graphql (ports from cluster.knownServices).
+# API Gateway (GraphQL). Convention: protocol=http -> port 3000/80.
 # Config keys from apps/api-gateway-service/.env.example
 # Install: helm install api-gateway-graphql charts/microservice -f values/cluster.yaml -f values/api-gateway-service/api-gateway-graphql.yaml -n <ns>
 
 fullnameOverride: api-gateway-graphql
+
+portEnvKey: APP_GRAPHQL_PORT
 
 image:
   name: api-gateway-service
@@ -15,19 +17,9 @@ dependencies:
   - service: users-graphql
   - service: auth-graphql
 
-port: 4000
-portEnvKey: APP_GRAPHQL_PORT
+# Gateway-specific env only if needed; common vars from global-shared-config.
+env: []
 
-# Explicit non-sensitive env (from apps/api-gateway-service/.env.example)
-env:
-  - name: NODE_ENV
-    value: "production"
-  - name: LOG_PRETTY
-    value: "false"
-  - name: LOG_LEVEL
-    value: "info"
-
-# Required keys in existingSecret (ESO or manual Secret). Source: apps/api-gateway-service/.env.example
 secretKeys:
   - INTERNAL_REGISTRY_SERVER_HOST
   - RT_SECRET
@@ -35,7 +27,7 @@ secretKeys:
   - COOKIES_MAX_AGE
   - CORS_ORIGINS
 
-existingSecret: api-gateway-graphql-db-config
+existingSecret: api-gateway-graphql-service-config
 
 resources:
   requests:
@@ -55,5 +47,3 @@ autoscaling:
 
 service:
   type: ClusterIP
-  targetPort: http
-  name: http

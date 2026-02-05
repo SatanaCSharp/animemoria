@@ -59,26 +59,24 @@ spec:
           command: {{- toYaml .Values.command | nindent 12 }}
           {{- end }}
           ports:
-            - name: http
-              containerPort: {{ .Values.port }}
+            - name: {{ include "microservice.portName" . }}
+              containerPort: {{ include "microservice.containerPort" . }}
               protocol: TCP
           env:
-            - name: {{ .Values.portEnvKey | default "APP_PORT" }}
-              value: "{{ .Values.port }}"
+            - name: {{ .Values.portEnvKey | default (include "microservice.portEnvKey" .) }}
+              value: {{ include "microservice.containerPort" . }}
             {{- with .Values.env }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
-          {{- if or .Values.existingSecret .Values.existingConfigMap }}
           envFrom:
-            {{- if .Values.existingSecret }}
+            - configMapRef:
+                name: global-shared-config
             - secretRef:
-                name: {{ .Values.existingSecret }}
-            {{- end }}
+                name: {{ .Values.existingSecret | default (printf "%s-secrets" (include "microservice.fullname" .)) }}
             {{- if .Values.existingConfigMap }}
             - configMapRef:
                 name: {{ .Values.existingConfigMap }}
             {{- end }}
-          {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           {{- if .Values.livenessProbe }}
@@ -87,7 +85,7 @@ spec:
           {{- else }}
           livenessProbe:
             tcpSocket:
-              port: http
+              port: {{ include "microservice.portName" . }}
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
@@ -99,7 +97,7 @@ spec:
           {{- else }}
           readinessProbe:
             tcpSocket:
-              port: http
+              port: {{ include "microservice.portName" . }}
             initialDelaySeconds: 5
             periodSeconds: 5
             timeoutSeconds: 3

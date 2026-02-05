@@ -5,13 +5,11 @@ metadata:
   labels:
     {{- include "microservice.labels" . | nindent 4 }}
 spec:
-  {{- with .Values.service }}
-  type: {{ .type }}
+  type: {{ .Values.service.type | default "ClusterIP" }}
   ports:
-    - port: {{ .port | default $.Values.port }}
-      targetPort: {{ .targetPort }}
+    - port: {{ include "microservice.servicePort" . }}
+      targetPort: {{ include "microservice.portName" . }}
       protocol: TCP
-      name: {{ .name }}
-  {{ end -}}
+      name: {{ include "microservice.portName" . }}
   selector:
     {{- include "microservice.selectorLabels" . | nindent 4 }}

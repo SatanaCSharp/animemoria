@@ -1,8 +1,10 @@
-# Step 4: Users service (GraphQL). Waits for users-grpc (port from cluster.knownServices).
+# Users service (GraphQL). Convention: protocol=http -> port 3000/80.
 # Config keys from apps/users-service/.env.example
 # Install: helm install users-graphql charts/microservice -f values/cluster.yaml -f values/users-service/users-graphql.yaml -n <ns>
 
 fullnameOverride: users-graphql
+
+portEnvKey: APP_GRAPHQL_PORT
 
 image:
   name: users-service
@@ -14,28 +16,17 @@ command: ["node", "dist/graphql.main"]
 dependencies:
   - service: users-grpc
 
-port: 3001
-portEnvKey: APP_GRAPHQL_PORT
-
-# Explicit non-sensitive env (from apps/users-service/.env.example)
 env:
-  - name: NODE_ENV
-    value: "production"
   - name: APP_NAME
     value: "users-service"
-  - name: LOG_PRETTY
-    value: "false"
-  - name: LOG_LEVEL
-    value: "info"
 
-# Required keys in existingSecret (ESO or manual Secret). Source: apps/users-service/.env.example
 secretKeys:
   - USERS_SERVICE_GRAPHQL_URL
   - USERS_SERVICE_GRPC_URL
   - INTERNAL_REGISTRY_SERVER_HOST
   - DB_CONNECTION_URL
 
-existingSecret: users-graphql-db-config
+existingSecret: users-graphql-service-config
 
 resources:
   requests:
@@ -55,5 +46,3 @@ autoscaling:
 
 service:
   type: ClusterIP
-  targetPort: http
-  name: http
