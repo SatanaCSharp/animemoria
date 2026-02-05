@@ -28,6 +28,7 @@ catalog:
   "@nestjs/microservices": "^11.1.12"
   "@nestjs/jwt": "^11.0.2"
   "@nestjs/passport": "^11.0.5"
+  "@nestjs/terminus": "^11.0.0"
   "nestjs-pino": "^4.5.0"
 
   # Apollo Server & Gateway
