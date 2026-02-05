@@ -1,0 +1,62 @@
+# Step 3: Auth service (gRPC). Waits for users-grpc and registry (ports from cluster.knownServices).
+# Config keys from apps/auth-service/.env.example
+# Install: helm install auth-grpc charts/microservice -f values/cluster.yaml -f values/auth-service/auth-grpc.yaml -n <ns>
+
+fullnameOverride: auth-grpc
+
+image:
+  name: auth-service
+  tag: latest
+  pullPolicy: IfNotPresent
+
+command: ["node", "dist/grpc.main"]
+
+dependencies:
+  - service: users-grpc
+  - service: registry
+
+port: 50052
+
+# Explicit non-sensitive env (from apps/auth-service/.env.example)
+env:
+  - name: NODE_ENV
+    value: "production"
+  - name: APP_NAME
+    value: "auth-service"
+  - name: LOG_PRETTY
+    value: "false"
+  - name: LOG_LEVEL
+    value: "info"
+
+# Required keys in existingSecret (ESO or manual Secret). Source: apps/auth-service/.env.example
+secretKeys:
+  - AUTH_SERVICE_GRAPHQL_URL
+  - AUTH_SERVICE_GRPC_URL
+  - INTERNAL_REGISTRY_SERVER_HOST
+  - DB_CONNECTION_URL
+  - RT_SECRET
+  - AT_SECRET
+  - COOKIES_MAX_AGE
+
+existingSecret: auth-grpc-db-config
+
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+replicaCount: 1
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+
+service:
+  type: ClusterIP
+  targetPort: grpc-server
+  name: grpc-server

@@ -1,0 +1,62 @@
+# Step 4: Auth service (GraphQL). Waits for auth-grpc (port from cluster.knownServices).
+# Config keys from apps/auth-service/.env.example
+# Install: helm install auth-graphql charts/microservice -f values/cluster.yaml -f values/auth-service/auth-graphql.yaml -n <ns>
+
+fullnameOverride: auth-graphql
+
+image:
+  name: auth-service
+  tag: latest
+  pullPolicy: IfNotPresent
+
+command: ["node", "dist/graphql.main"]
+
+dependencies:
+  - service: auth-grpc
+
+port: 3002
+portEnvKey: APP_GRAPHQL_PORT
+
+# Explicit non-sensitive env (from apps/auth-service/.env.example)
+env:
+  - name: NODE_ENV
+    value: "production"
+  - name: APP_NAME
+    value: "auth-service"
+  - name: LOG_PRETTY
+    value: "false"
+  - name: LOG_LEVEL
+    value: "info"
+
+# Required keys in existingSecret (ESO or manual Secret). Source: apps/auth-service/.env.example
+secretKeys:
+  - AUTH_SERVICE_GRAPHQL_URL
+  - AUTH_SERVICE_GRPC_URL
+  - INTERNAL_REGISTRY_SERVER_HOST
+  - DB_CONNECTION_URL
+  - RT_SECRET
+  - AT_SECRET
+  - COOKIES_MAX_AGE
+
+existingSecret: auth-graphql-db-config
+
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+replicaCount: 1
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+
+service:
+  type: ClusterIP
+  targetPort: http
+  name: http

@@ -1,0 +1,91 @@
+# Default values for the universal microservice chart.
+# Override per service via -f values/<service>.yaml
+# Use -f values/cluster.yaml (or global -f) for imageRepository and cluster.knownServices.
+
+nameOverride: ""
+fullnameOverride: ""
+
+# Image: repository is taken from imageRepository (or global) when not set here.
+# Set only image.name (and optionally tag); repository is centralized.
+imageRepository: ""  # e.g. my-registry.io/my-repo — set via -f values/cluster.yaml or --set
+image:
+  repository: ""     # override per release; default: imageRepository
+  name: app-name     # e.g. registry-service, users-service
+  tag: latest
+  pullPolicy: Always
+  pullSecrets: []    # optional, e.g. [name: regcred]
+
+# Override container CMD for variants (e.g. ["node", "dist/grpc.main"])
+command: []  # e.g. ["node", "dist/grpc.main"] or leave [] for default
+
+# InitContainer: wait for these services. Port is resolved from cluster.knownServices when omitted.
+# Each entry: service (K8s Service DNS name) and optional port (fallback if not in knownServices).
+dependencies: []     # e.g. [ { service: registry }, { service: users-grpc } ]
+
+# Central map: service fullname (release name) -> port. Used to resolve dependency ports and URLs.
+# Set once via -f values/cluster.yaml so per-service values don't repeat ports.
+cluster:
+  knownServices: {}  # e.g. { "registry": 3000, "users-grpc": 50051, "auth-grpc": 50052, ... }
+
+# Single source of truth for this release: container port, Service port, and port env var.
+port: 3000
+# Env key for the port (app-specific: APP_PORT, APP_GRAPHQL_PORT, APP_REST_PORT)
+portEnvKey: APP_PORT
+
+# Explicit env key-values from values (non-sensitive). Sensitive vars must be in existingSecret.
+# Source: apps/<service>/.env.example. Example: [ { name: NODE_ENV, value: "production" }, { name: LOG_LEVEL, value: "info" } ]
+env: []
+
+# Required key names in existingSecret (from apps/<service>/.env.example). ESO or manual Secret must provide these.
+# Documented per service in values/<service>/*.yaml; used for validation/docs and ESO secret key mapping.
+secretKeys: []  # e.g. [ DB_CONNECTION_URL, AT_SECRET, RT_SECRET, INTERNAL_REGISTRY_SERVER_HOST ]
+
+# Env from Secrets/ConfigMaps — all sensitive .env-style variables must live in the Secret.
+existingSecret: ""   # e.g. auth-graphql-db-config — required in production
+existingConfigMap: "" # optional, for non-sensitive config
+
+# Resources
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+# Replicas (ignored when autoscaling.enabled is true)
+replicaCount: 1
+
+# Deployment strategy (RollingUpdate or Recreate)
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: "25%"
+    maxUnavailable: 0
+
+# Autoscaling (HPA)
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 70
+
+# Service (port defaults to .Values.port when not set)
+service:
+  type: ClusterIP
+  targetPort: http
+  name: http
+
+# Pod annotations / labels
+podAnnotations: {}
+podLabels: {}
+
+# Optional: override probes (defaults to tcpSocket on port)
+livenessProbe: {}
+readinessProbe: {}
+
+# Node selector / tolerations / affinity (optional)
+nodeSelector: {}
+tolerations: []
+affinity: {}

@@ -1,0 +1,13 @@
+apiVersion: v2
+name: microservice
+description: Universal Animemoria Helm chart for NestJS microservices
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords:
+  - nestjs
+  - microservice
+  - grpc
+  - graphql
+  - rest
+maintainers: []

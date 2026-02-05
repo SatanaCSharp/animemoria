@@ -1,0 +1,52 @@
+# Step 1: Registry service (REST). No dependencies.
+# Config keys from apps/registry-service/.env.example
+# Install: helm install registry charts/microservice -f values/cluster.yaml -f values/registry-service/registry.yaml -n <ns>
+
+fullnameOverride: registry
+
+image:
+  name: registry-service
+  tag: latest
+  pullPolicy: IfNotPresent
+
+command: ["node", "dist/rest.main"]
+
+dependencies: []
+
+port: 3000
+portEnvKey: APP_REST_PORT
+
+# Explicit non-sensitive env (from apps/registry-service/.env.example)
+env:
+  - name: NODE_ENV
+    value: "production"
+  - name: LOG_PRETTY
+    value: "false"
+  - name: LOG_LEVEL
+    value: "info"
+
+# No sensitive keys; existingSecret can be empty or omit if no secrets needed
+secretKeys: []
+
+existingSecret: registry-db-config
+
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+replicaCount: 1
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 1
+  targetCPUUtilizationPercentage: 80
+
+service:
+  type: ClusterIP
+  targetPort: http
+  name: http

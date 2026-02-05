@@ -57,8 +57,8 @@ fi
 if [ "$APP_TYPE" == "nestjs" ]; then
     EXCLUDED_PACKAGES="$NESTJS_EXCLUDED_PACKAGES"
     CACHE_ID="pnpm-nestjs"
-    DOCKERFILE="infra/deployment/Dockerfile.nestjs"
-    
+    DOCKERFILE="infra/deployment/docker/Dockerfile.nestjs"
+
     if [ -z "$ENTRY_POINT" ]; then
         echo -e "${RED}❌ Error: ENTRY_POINT required for NestJS apps${NC}"
         echo "Example: $0 nestjs auth-service graphql.main"
@@ -67,7 +67,7 @@ if [ "$APP_TYPE" == "nestjs" ]; then
 elif [ "$APP_TYPE" == "vite" ]; then
     EXCLUDED_PACKAGES="$VITE_EXCLUDED_PACKAGES"
     CACHE_ID="pnpm-vite"
-    DOCKERFILE="infra/deployment/Dockerfile.vite"
+    DOCKERFILE="infra/deployment/docker/Dockerfile.vite"
 else
     echo -e "${RED}❌ Error: Unknown app type: $APP_TYPE${NC}"
     echo "Supported types: nestjs, vite"
@@ -93,7 +93,7 @@ echo -e "${YELLOW}📦 Step 1/2: Building base image with dependencies...${NC}"
 echo ""
 
 docker build \
-    -f infra/deployment/Dockerfile.base \
+    -f infra/deployment/docker/Dockerfile.base \
     --build-arg APP_NAME="$APP_NAME" \
     --build-arg EXCLUDED_PACKAGES="$EXCLUDED_PACKAGES" \
     --build-arg CACHE_ID="$CACHE_ID" \

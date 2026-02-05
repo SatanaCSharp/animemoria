@@ -1,0 +1,58 @@
+# Step 2: Users service (gRPC). Waits for registry (port from cluster.knownServices).
+# Config keys from apps/users-service/.env.example
+# Install: helm install users-grpc charts/microservice -f values/cluster.yaml -f values/users-service/users-grpc.yaml -n <ns>
+
+fullnameOverride: users-grpc
+
+image:
+  name: users-service
+  tag: latest
+  pullPolicy: IfNotPresent
+
+command: ["node", "dist/grpc.main"]
+
+dependencies:
+  - service: registry
+
+port: 50051
+
+# Explicit non-sensitive env (from apps/users-service/.env.example)
+env:
+  - name: NODE_ENV
+    value: "production"
+  - name: APP_NAME
+    value: "users-service"
+  - name: LOG_PRETTY
+    value: "false"
+  - name: LOG_LEVEL
+    value: "info"
+
+# Required keys in existingSecret (ESO or manual Secret). Source: apps/users-service/.env.example
+secretKeys:
+  - USERS_SERVICE_GRAPHQL_URL
+  - USERS_SERVICE_GRPC_URL
+  - INTERNAL_REGISTRY_SERVER_HOST
+  - DB_CONNECTION_URL
+
+existingSecret: users-grpc-db-config
+
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+replicaCount: 1
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+
+service:
+  type: ClusterIP
+  targetPort: grpc-server
+  name: grpc-server
