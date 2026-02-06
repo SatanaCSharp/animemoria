@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AppLoggerModule } from '@packages/nest-shared/app-logger';
 import { ConfigModule } from '@packages/nest-shared/config';
+import { HealthHttpModule } from '@packages/nest-shared/health';
 import { RegistryRestModule } from 'registry/registry.rest.module';
 import { SharedModule } from 'shared/shared.module';
 
@@ -13,6 +14,7 @@ import { SharedModule } from 'shared/shared.module';
     // Application modules
     SharedModule,
     RegistryRestModule,
+    HealthHttpModule.forRootAsync(),
   ],
 })
 export class RestModule {}
