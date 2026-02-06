@@ -68,7 +68,7 @@ catalog:
   "class-transformer": "^0.5.1"
   "reflect-metadata": "^0.2.2"
   "rxjs": "^7.8.2"
-  "lodash": "4.17.21"
+  "lodash": "4.17.23"
 
   # Backend Type Definitions
   "@types/express": "^5.0.0"

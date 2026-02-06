@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import * as userGql from '@packages/graphql-definitions/user';
 import { ApolloGqlGraphQLModule } from '@packages/nest-shared/graphql';
 import {
-  HealthHttpModule,
+  HealthModule,
   TypeOrmHealthcheckIndicator,
 } from '@packages/nest-shared/health';
 import { ClientRegistrationModule } from '@packages/nest-shared/registry-service';
@@ -16,7 +16,8 @@ import { UsersGraphqlModule } from 'users/users.graphql.module';
     UsersGraphqlModule,
     ApolloGqlGraphQLModule.forRoot({ orphanedTypes: [userGql.User] }),
     ClientRegistrationModule.forRoot({ appType: AppType.GQL }),
-    HealthHttpModule.forRootAsync({
+    HealthModule.forRoot({
+      appType: AppType.GQL,
       healthcheckIndicators: [TypeOrmHealthcheckIndicator],
     }),
   ],

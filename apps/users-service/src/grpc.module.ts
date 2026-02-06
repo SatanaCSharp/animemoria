@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import {
-  HealthGrpcModule,
+  HealthModule,
   TypeOrmHealthcheckIndicator,
 } from '@packages/nest-shared/health';
 import { ClientRegistrationModule } from '@packages/nest-shared/registry-service';
@@ -12,7 +12,8 @@ import { UsersGrpcModule } from 'users/users.grpc.module';
   imports: [
     AppBaseModule,
     UsersGrpcModule,
-    HealthGrpcModule.forRootAsync({
+    HealthModule.forRoot({
+      appType: AppType.GRPC,
       healthcheckIndicators: [TypeOrmHealthcheckIndicator],
     }),
     ClientRegistrationModule.forRoot({ appType: AppType.GRPC }),

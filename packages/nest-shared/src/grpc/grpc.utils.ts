@@ -12,7 +12,7 @@ export const getProtoPath = (serviceName: string): string => {
 
 /**
  * Creates gRPC server options that include both the service proto and the health proto.
- * Use this when your gRPC module includes HealthGrpcModule for standard health checking.
+ * Health proto is included by default to support HealthModule with AppType.GRPC.
  *
  * @param serviceName - The service name (e.g., 'users-service')
  * @param url - The gRPC server URL (e.g., '0.0.0.0:5000')
@@ -21,7 +21,7 @@ export const getProtoPath = (serviceName: string): string => {
  * @example
  * const app = await NestFactory.createMicroservice<MicroserviceOptions>(
  *   GrpcModule,
- *   getServerGrpcOptionWithHealth('users-service', url),
+ *   getServerGrpcOption('users-service', url),
  * );
  */
 

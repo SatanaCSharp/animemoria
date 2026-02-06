@@ -1,32 +1,51 @@
-import type { Provider } from '@nestjs/common';
+import type { Provider, Type } from '@nestjs/common';
 import { DynamicModule, Module } from '@nestjs/common';
 import { TerminusModule } from '@nestjs/terminus';
+import { SystemError } from '@packages/shared-types/errors';
+import { assertFail } from '@packages/utils/asserts';
 import { isDefined, isEmpty } from '@packages/utils/predicates';
 import { HEALTH_INDICATORS } from 'health/constants';
+import { HealthGrpcController } from 'health/controllers/health-grpc.controller';
 import { HealthProbeService } from 'health/health-probe.service';
-import type { HealthIndicatorFunction } from 'health/types/health-options';
-import type { HealthcheckIndicatorType } from 'health/types/health-options';
 import type { IHealthcheckIndicator } from 'health/types/health-options';
-
-export interface HealthModuleAsyncOptions {
-  /** Indicator classes (factories). Each is injected and getIndicator() is used. */
-  healthcheckIndicators?: HealthcheckIndicatorType[];
-}
+import {
+  HealthIndicatorFunction,
+  HealthModuleOptions,
+} from 'health/types/health-options';
+import { AppType } from 'shared/enums/app-type';
 
 /**
- * Core health module: registers indicators and HealthProbeService.
- * Shared by HTTP (HealthHttpModule) and gRPC (HealthGrpcModule) transports.
+ * Unified health module that registers appropriate controller based on app type.
+ *
+ * - REST/GQL: Registers HTTP controller with /health, /health/live, /health/ready endpoints
+ * - GRPC: Registers gRPC controller implementing grpc.health.v1.Health protocol
+ *
+ * @example
+ * // For REST/GraphQL apps:
+ * HealthModule.forRoot({
+ *   appType: AppType.REST,
+ *   healthcheckIndicators: [TypeOrmHealthcheckIndicator],
+ * })
+ *
+ * @example
+ * // For gRPC apps (requires getServerGrpcOption which includes health.proto):
+ * HealthModule.forRoot({
+ *   appType: AppType.GRPC,
+ *   healthcheckIndicators: [TypeOrmHealthcheckIndicator],
+ * })
  */
 @Module({})
 export class HealthModule {
-  static forRootAsync(asyncOptions: HealthModuleAsyncOptions): DynamicModule {
+  static forRoot(options: HealthModuleOptions): DynamicModule {
     const providers: Provider[] = [HealthProbeService];
+    const controllers = this.getControllers(options.appType);
+
     const hasIndicators =
-      isDefined(asyncOptions.healthcheckIndicators) &&
-      !isEmpty(asyncOptions.healthcheckIndicators);
+      isDefined(options.healthcheckIndicators) &&
+      !isEmpty(options.healthcheckIndicators);
 
     if (hasIndicators) {
-      const indicatorClasses = asyncOptions.healthcheckIndicators!;
+      const indicatorClasses = options.healthcheckIndicators!;
 
       providers.push(...indicatorClasses);
       providers.push({
@@ -37,7 +56,6 @@ export class HealthModule {
         ): HealthIndicatorFunction[] => instances.map((i) => i.getIndicator()),
       });
     } else {
-      // Provide empty indicators array when no indicators configured
       providers.push({
         provide: HEALTH_INDICATORS,
         useValue: [],
@@ -48,8 +66,20 @@ export class HealthModule {
       module: HealthModule,
       global: false,
       imports: [TerminusModule],
+      controllers,
       providers,
       exports: [HealthProbeService, TerminusModule],
     };
+  }
+
+  private static getControllers(appType: AppType): Type[] {
+    switch (appType) {
+      case AppType.GRPC:
+        return [HealthGrpcController];
+      case AppType.REST:
+      case AppType.GQL:
+      default:
+        assertFail(new SystemError(`case ${appType} has not been registered`));
+    }
   }
 }

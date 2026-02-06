@@ -4,10 +4,10 @@ import type { Response } from 'express';
 import { HealthProbeService } from 'health/health-probe.service';
 
 /**
- * Health controller for HTTP transport. Exposes fixed routes.
+ * Health controller for HTTP transport (REST/GraphQL). Exposes fixed routes.
  */
 @Controller('health')
-export class HealthController {
+export class HealthHttpController {
   constructor(private readonly healthProbeService: HealthProbeService) {}
 
   @Get()

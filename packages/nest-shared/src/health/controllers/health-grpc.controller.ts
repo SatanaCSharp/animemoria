@@ -23,33 +23,21 @@ export class HealthGrpcController implements IHealthController {
    * Empty service name ("") checks overall server health (readiness).
    * Specific service names are not yet supported (returns SERVICE_UNKNOWN).
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async check(_request: HealthCheckRequest): Promise<HealthCheckResponse> {
-    // Empty service name = overall health (readiness check)
-    // if (request.service === '') {
+  async check(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _request: HealthCheckRequest,
+  ): Promise<HealthCheckResponse> {
     return this.getHealthStatus();
-    // }
-
-    // Per-service health checks not implemented yet
-    // return { status: HealthCheckResponse_ServingStatus.SERVICE_UNKNOWN };
   }
 
   /**
    * Streaming health check. Emits status on initial connect and on changes.
    * Uses a polling interval (5s) to detect health changes.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  watch(_request: HealthCheckRequest): Observable<HealthCheckResponse> {
-    // Per-service health checks not implemented
-    // if (request.service !== '') {
-    //   return new Observable((subscriber) => {
-    //     subscriber.next({
-    //       status: HealthCheckResponse_ServingStatus.SERVICE_UNKNOWN,
-    //     });
-    //   });
-    // }
-
-    // Poll every 5 seconds for health status changes
+  watch(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _request: HealthCheckRequest,
+  ): Observable<HealthCheckResponse> {
     const HEALTH_CHECK_INTERVAL_MS = 5000;
 
     return interval(HEALTH_CHECK_INTERVAL_MS).pipe(
