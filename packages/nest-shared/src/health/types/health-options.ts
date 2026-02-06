@@ -1,4 +1,5 @@
 import type { HealthIndicatorResult } from '@nestjs/terminus';
+import type { AppType } from 'shared/enums/app-type';
 
 /**
  * A function that performs a single health check and returns its result.
@@ -15,15 +16,21 @@ export interface IHealthcheckIndicator {
 }
 
 /** Type for indicator classes (factories) that can be passed to healthcheckIndicators. */
-
 export type HealthcheckIndicatorType = (new (
   ...args: any[]
 ) => IHealthcheckIndicator) & { name?: string };
 
-/**
- * Core options: indicators only. Used by HealthModule (shared by HTTP and gRPC transports).
- */
 export interface HealthModuleOptions {
-  /** Health indicator functions to run for readiness. */
-  healthcheckIndicators: HealthIndicatorFunction[];
+  /**
+   * Application type determines which health controller to register:
+   * - REST/GQL: HTTP controller with /health, /health/live, /health/ready endpoints
+   * - GRPC: gRPC controller implementing grpc.health.v1.Health protocol
+   */
+  appType: AppType;
+
+  /**
+   * Indicator classes (factories). Each is injected and getIndicator() is used.
+   * Omit or pass [] for no indicators (e.g. gateway – process running only).
+   */
+  healthcheckIndicators?: HealthcheckIndicatorType[];
 }

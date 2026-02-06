@@ -4,7 +4,7 @@ import type { IHealthcheckIndicator } from 'health/types/health-options';
 
 /**
  * Built-in health-check indicator that pings the default TypeORM database connection.
- * Use with HealthHttpModule.forRootAsync({ healthcheckIndicators: [TypeOrmHealthcheckIndicator] }).
+ * Use with HealthModule.forRoot({ appType, healthcheckIndicators: [TypeOrmHealthcheckIndicator] }).
  */
 @Injectable()
 export class TypeOrmHealthcheckIndicator implements IHealthcheckIndicator {

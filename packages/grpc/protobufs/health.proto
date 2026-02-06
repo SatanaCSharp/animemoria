@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package grpc.health.v1;
+
+/**
+ * Standard gRPC health checking protocol.
+ * @see https://github.com/grpc/grpc/blob/master/doc/health-checking.md
+ */
+service Health {
+  /**
+   * Synchronous health check. Returns the current health status.
+   * Use empty service name "" for overall server health.
+   */
+  rpc Check (HealthCheckRequest) returns (HealthCheckResponse) {}
+
+  /**
+   * Streaming health check. Server sends updates when status changes.
+   * Useful for load balancers that need real-time health updates.
+   */
+  rpc Watch (HealthCheckRequest) returns (stream HealthCheckResponse) {}
+}
+
+message HealthCheckRequest {
+  /**
+   * Service name to check. Empty string "" means overall server health.
+   * For per-service checks, use the fully-qualified service name (e.g., "users_service.UsersService").
+   */
+  string service = 1;
+}
+
+message HealthCheckResponse {
+  enum ServingStatus {
+    UNKNOWN = 0;
+    SERVING = 1;
+    NOT_SERVING = 2;
+    SERVICE_UNKNOWN = 3;  // Used for Watch: service does not exist or is not registered
+  }
+
+  ServingStatus status = 1;
+}

@@ -1,11 +1,7 @@
-export { HealthGrpcModule } from './grpc/health-grpc.module';
-export { HealthModule, type HealthModuleAsyncOptions } from './health.module';
+export { HealthGrpcController } from './controllers/health-grpc.controller';
+export { HealthHttpController } from './controllers/health-http.controller';
+export { HealthModule } from './health.module';
 export { HealthProbeService } from './health-probe.service';
-export { HealthController } from './http/health.controller';
-export {
-  HealthHttpModule,
-  type HealthHttpModuleAsyncOptions,
-} from './http/health-http.module';
 export { TypeOrmHealthcheckIndicator } from './indicators/typeorm.healthcheck-indicator';
 export {
   type HealthcheckIndicatorType,

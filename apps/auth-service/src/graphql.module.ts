@@ -3,7 +3,7 @@ import * as accountGql from '@packages/graphql-definitions/account';
 import { AuthModule } from '@packages/nest-shared/auth';
 import { ApolloGqlGraphQLModule } from '@packages/nest-shared/graphql';
 import {
-  HealthHttpModule,
+  HealthModule,
   TypeOrmHealthcheckIndicator,
 } from '@packages/nest-shared/health';
 import { ClientRegistrationModule } from '@packages/nest-shared/registry-service';
@@ -18,7 +18,8 @@ import { AppBaseModule } from 'app-base.module';
     AccountGraphqlModule,
     ApolloGqlGraphQLModule.forRoot({ orphanedTypes: [accountGql.Account] }),
     ClientRegistrationModule.forRoot({ appType: AppType.GQL }),
-    HealthHttpModule.forRootAsync({
+    HealthModule.forRoot({
+      appType: AppType.GQL,
       healthcheckIndicators: [TypeOrmHealthcheckIndicator],
     }),
   ],
