@@ -21,11 +21,12 @@ export interface HealthModuleAsyncOptions {
 export class HealthModule {
   static forRootAsync(asyncOptions: HealthModuleAsyncOptions): DynamicModule {
     const providers: Provider[] = [HealthProbeService];
-    if (
+    const hasIndicators =
       isDefined(asyncOptions.healthcheckIndicators) &&
-      !isEmpty(asyncOptions.healthcheckIndicators)
-    ) {
-      const indicatorClasses = asyncOptions.healthcheckIndicators;
+      !isEmpty(asyncOptions.healthcheckIndicators);
+
+    if (hasIndicators) {
+      const indicatorClasses = asyncOptions.healthcheckIndicators!;
 
       providers.push(...indicatorClasses);
       providers.push({
@@ -34,6 +35,12 @@ export class HealthModule {
         useFactory: (
           ...instances: IHealthcheckIndicator[]
         ): HealthIndicatorFunction[] => instances.map((i) => i.getIndicator()),
+      });
+    } else {
+      // Provide empty indicators array when no indicators configured
+      providers.push({
+        provide: HEALTH_INDICATORS,
+        useValue: [],
       });
     }
 

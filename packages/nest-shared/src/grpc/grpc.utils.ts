@@ -10,15 +10,33 @@ export const getProtoPath = (serviceName: string): string => {
   return join(process.cwd(), protobufsPath, `${snakeCase(serviceName)}.proto`);
 };
 
+/**
+ * Creates gRPC server options that include both the service proto and the health proto.
+ * Use this when your gRPC module includes HealthGrpcModule for standard health checking.
+ *
+ * @param serviceName - The service name (e.g., 'users-service')
+ * @param url - The gRPC server URL (e.g., '0.0.0.0:5000')
+ * @returns GrpcOptions configured with both service and health protos
+ *
+ * @example
+ * const app = await NestFactory.createMicroservice<MicroserviceOptions>(
+ *   GrpcModule,
+ *   getServerGrpcOptionWithHealth('users-service', url),
+ * );
+ */
+
 export const getServerGrpcOption = (
   serviceName: string,
   url: string,
 ): GrpcOptions => {
+  const healthPackageName = 'grpc.health.v1';
+  const healthServiceName = 'health';
+
   return {
     transport: Transport.GRPC,
     options: {
-      package: snakeCase(serviceName),
-      protoPath: getProtoPath(serviceName),
+      package: [snakeCase(serviceName), healthPackageName],
+      protoPath: [getProtoPath(serviceName), getProtoPath(healthServiceName)],
       url,
       onLoadPackageDefinition: (
         pkg: PackageDefinition,

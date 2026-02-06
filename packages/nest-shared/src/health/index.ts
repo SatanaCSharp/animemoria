@@ -1,4 +1,8 @@
-export { HealthGrpcModule } from './grpc/health-grpc.module';
+export { HealthGrpcController } from './grpc/health.controller';
+export {
+  HealthGrpcModule,
+  type HealthGrpcModuleAsyncOptions,
+} from './grpc/health-grpc.module';
 export { HealthModule, type HealthModuleAsyncOptions } from './health.module';
 export { HealthProbeService } from './health-probe.service';
 export { HealthController } from './http/health.controller';
