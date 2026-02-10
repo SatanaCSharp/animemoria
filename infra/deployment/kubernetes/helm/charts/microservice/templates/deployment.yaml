@@ -79,25 +79,34 @@ spec:
             {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          {{- if .Values.livenessProbe }}
+          {{- if eq (include "microservice.protocol" .) "http" }}
           livenessProbe:
-            {{- toYaml .Values.livenessProbe | nindent 12 }}
-          {{- else }}
-          livenessProbe:
-            tcpSocket:
+            httpGet:
+              path: /health/live
               port: {{ include "microservice.portName" . }}
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3
-          {{- end }}
-          {{- if .Values.readinessProbe }}
           readinessProbe:
-            {{- toYaml .Values.readinessProbe | nindent 12 }}
-          {{- else }}
-          readinessProbe:
-            tcpSocket:
+            httpGet:
+              path: /health/ready
               port: {{ include "microservice.portName" . }}
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 2
+          {{- else }}
+          livenessProbe:
+            grpc:
+              port: {{ include "microservice.containerPort" . }}
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            grpc:
+              port: {{ include "microservice.containerPort" . }}
             initialDelaySeconds: 5
             periodSeconds: 5
             timeoutSeconds: 3

@@ -94,10 +94,6 @@ service:
 podAnnotations: {}
 podLabels: {}
 
-# Optional: override probes (defaults to tcpSocket on port)
-livenessProbe: {}
-readinessProbe: {}
-
 # Node selector / tolerations / affinity (optional)
 nodeSelector: {}
 tolerations: []
