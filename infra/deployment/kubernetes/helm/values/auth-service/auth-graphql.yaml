@@ -1,0 +1,52 @@
+# Auth service (GraphQL). Convention: protocol=http -> port 3000/80.
+# Config keys from apps/auth-service/.env.example
+# Install: helm install auth-graphql charts/microservice -f values/cluster.yaml -f values/auth-service/auth-graphql.yaml -n <ns>
+
+fullnameOverride: auth-graphql
+
+# protocol: http (default)
+portEnvKey: APP_GRAPHQL_PORT
+
+image:
+  name: auth-service
+  tag: latest
+  pullPolicy: IfNotPresent
+
+command: ["node", "dist/graphql.main"]
+
+dependencies:
+  - service: auth-grpc
+
+env:
+  - name: APP_NAME
+    value: "auth-service"
+
+secretKeys:
+  - AUTH_SERVICE_GRAPHQL_URL
+  - AUTH_SERVICE_GRPC_URL
+  - INTERNAL_REGISTRY_SERVER_HOST
+  - DB_CONNECTION_URL
+  - RT_SECRET
+  - AT_SECRET
+  - COOKIES_MAX_AGE
+
+existingSecret: auth-graphql-service-config
+
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+replicaCount: 1
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+
+service:
+  type: ClusterIP

@@ -1,0 +1,46 @@
+# Registry service (REST). Convention: protocol=http -> port 3000/80.
+# Creates global-shared-config ConfigMap (create: true). Install this release first so other services can use it.
+# Install: helm install registry charts/microservice -f values/cluster.yaml -f values/registry-service/registry.yaml -n <ns>
+
+fullnameOverride: registry
+
+portEnvKey: APP_REST_PORT
+
+# Create global-shared-config once; other service values leave this false.
+sharedConfigMap:
+  create: true
+
+image:
+  name: registry-service
+  tag: latest
+  pullPolicy: IfNotPresent
+
+command: ["node", "dist/rest.main"]
+
+dependencies: []
+
+# No service-specific env; use global-shared-config for NODE_ENV, LOG_LEVEL, etc.
+env: []
+
+secretKeys: []
+
+existingSecret: registry-service-config
+
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+replicaCount: 1
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 1
+  targetCPUUtilizationPercentage: 80
+
+service:
+  type: ClusterIP

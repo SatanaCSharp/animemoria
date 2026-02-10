@@ -2,15 +2,15 @@
 #
 # PREREQUISITES:
 #   Build Dockerfile.base first to create the base image with dependencies:
-#   
-#   docker build -f infra/deployment/Dockerfile.base \
+#
+#   docker build -f infra/deployment/docker/Dockerfile.base \
 #     --build-arg APP_NAME=<service-name> \
 #     --build-arg EXCLUDED_PACKAGES="eslint-config-base eslint-config-service eslint-config-ui graphql/generated ui-shared" \
 #     --build-arg CACHE_ID=pnpm-nestjs \
 #     -t animemoria/base:<service-name>-deps .
 #
 # THEN BUILD THIS FILE:
-#   docker build -f infra/deployment/Dockerfile.nestjs \
+#   docker build -f infra/deployment/docker/Dockerfile.nestjs \
 #     --build-arg APP_NAME=<service-name> \
 #     --build-arg ENTRY_POINT=<main-file> \
 #     -t <service-name>:latest .
@@ -104,9 +104,9 @@ WORKDIR /app
 RUN apk add --no-cache dumb-init
 
 # Copy cleanup and user setup scripts
-COPY infra/deployment/scripts/cleanup-build-artifacts.sh /tmp/cleanup-build-artifacts.sh
-COPY infra/deployment/scripts/cleanup-node-modules.sh /tmp/cleanup-node-modules.sh
-COPY infra/deployment/scripts/setup-app-user.sh /tmp/setup-app-user.sh
+COPY infra/deployment/docker/scripts/cleanup-build-artifacts.sh /tmp/cleanup-build-artifacts.sh
+COPY infra/deployment/docker/scripts/cleanup-node-modules.sh /tmp/cleanup-node-modules.sh
+COPY infra/deployment/docker/scripts/setup-app-user.sh /tmp/setup-app-user.sh
 RUN chmod +x /tmp/*.sh
 
 # Copy packages from builder

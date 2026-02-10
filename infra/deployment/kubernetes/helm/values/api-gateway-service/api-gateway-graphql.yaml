@@ -1,0 +1,49 @@
+# API Gateway (GraphQL). Convention: protocol=http -> port 3000/80.
+# Config keys from apps/api-gateway-service/.env.example
+# Install: helm install api-gateway-graphql charts/microservice -f values/cluster.yaml -f values/api-gateway-service/api-gateway-graphql.yaml -n <ns>
+
+fullnameOverride: api-gateway-graphql
+
+portEnvKey: APP_GRAPHQL_PORT
+
+image:
+  name: api-gateway-service
+  tag: latest
+  pullPolicy: IfNotPresent
+
+command: ["node", "dist/graphql.main"]
+
+dependencies:
+  - service: users-graphql
+  - service: auth-graphql
+
+# Gateway-specific env only if needed; common vars from global-shared-config.
+env: []
+
+secretKeys:
+  - INTERNAL_REGISTRY_SERVER_HOST
+  - RT_SECRET
+  - AT_SECRET
+  - COOKIES_MAX_AGE
+  - CORS_ORIGINS
+
+existingSecret: api-gateway-graphql-service-config
+
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+replicaCount: 1
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+
+service:
+  type: ClusterIP

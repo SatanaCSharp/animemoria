@@ -1,18 +1,18 @@
 # Base Dockerfile for monorepo applications
-# 
+#
 # This is the SINGLE SOURCE OF TRUTH for shared build stages.
 # Both Dockerfile.nestjs and Dockerfile.vite inherit from this.
 #
 # BUILD INSTRUCTIONS:
 #   1. Build this base image first:
-#      docker build -f infra/deployment/Dockerfile.base \
+#      docker build -f infra/deployment/docker/Dockerfile.base \
 #        --build-arg EXCLUDED_PACKAGES="<packages>" \
 #        --build-arg APP_NAME=<app> \
 #        --build-arg CACHE_ID=<id> \
 #        -t animemoria/base:<app>-deps .
 #
 #   2. Then build child Dockerfiles:
-#      docker build -f infra/deployment/Dockerfile.nestjs ...
+#      docker build -f infra/deployment/docker/Dockerfile.nestjs ...
 #
 # Stages provided:
 # - base:            Node.js + pnpm setup

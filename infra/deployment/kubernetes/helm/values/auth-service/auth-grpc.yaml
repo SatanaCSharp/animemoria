@@ -1,0 +1,53 @@
+# Auth service (gRPC). Convention: protocol=grpc -> port 5000.
+# Config keys from apps/auth-service/.env.example
+# Install: helm install auth-grpc charts/microservice -f values/cluster.yaml -f values/auth-service/auth-grpc.yaml -n <ns>
+
+fullnameOverride: auth-grpc
+
+protocol: grpc
+
+image:
+  name: auth-service
+  tag: latest
+  pullPolicy: IfNotPresent
+
+command: ["node", "dist/grpc.main"]
+
+dependencies:
+  - service: users-grpc
+  - service: registry
+
+# Service-specific env only; NODE_ENV, LOG_LEVEL, etc. from global-shared-config.
+env:
+  - name: APP_NAME
+    value: "auth-service"
+
+secretKeys:
+  - AUTH_SERVICE_GRAPHQL_URL
+  - AUTH_SERVICE_GRPC_URL
+  - INTERNAL_REGISTRY_SERVER_HOST
+  - DB_CONNECTION_URL
+  - RT_SECRET
+  - AT_SECRET
+  - COOKIES_MAX_AGE
+
+existingSecret: auth-grpc-service-config
+
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+replicaCount: 1
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+
+service:
+  type: ClusterIP

@@ -1,0 +1,47 @@
+# API Gateway (REST). Convention: protocol=http -> port 3000/80.
+# Config keys from apps/api-gateway-service/.env.example
+# Install: helm install api-gateway-rest charts/microservice -f values/cluster.yaml -f values/api-gateway-service/api-gateway-rest.yaml -n <ns>
+
+fullnameOverride: api-gateway-rest
+
+portEnvKey: APP_REST_PORT
+
+image:
+  name: api-gateway-service
+  tag: latest
+  pullPolicy: IfNotPresent
+
+command: ["node", "dist/rest.main"]
+
+dependencies:
+  - service: api-gateway-graphql
+
+env: []
+
+secretKeys:
+  - INTERNAL_REGISTRY_SERVER_HOST
+  - RT_SECRET
+  - AT_SECRET
+  - COOKIES_MAX_AGE
+  - CORS_ORIGINS
+
+existingSecret: api-gateway-rest-service-config
+
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+replicaCount: 1
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+
+service:
+  type: ClusterIP

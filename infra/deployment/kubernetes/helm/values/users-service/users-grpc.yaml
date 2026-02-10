@@ -1,0 +1,48 @@
+# Users service (gRPC). Convention: protocol=grpc -> port 5000.
+# Config keys from apps/users-service/.env.example
+# Install: helm install users-grpc charts/microservice -f values/cluster.yaml -f values/users-service/users-grpc.yaml -n <ns>
+
+fullnameOverride: users-grpc
+
+protocol: grpc
+
+image:
+  name: users-service
+  tag: latest
+  pullPolicy: IfNotPresent
+
+command: ["node", "dist/grpc.main"]
+
+dependencies:
+  - service: registry
+
+env:
+  - name: APP_NAME
+    value: "users-service"
+
+secretKeys:
+  - USERS_SERVICE_GRAPHQL_URL
+  - USERS_SERVICE_GRPC_URL
+  - INTERNAL_REGISTRY_SERVER_HOST
+  - DB_CONNECTION_URL
+
+existingSecret: users-grpc-service-config
+
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+replicaCount: 1
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+
+service:
+  type: ClusterIP
