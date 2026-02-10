@@ -28,6 +28,7 @@ catalog:
   "@nestjs/microservices": "^11.1.12"
   "@nestjs/jwt": "^11.0.2"
   "@nestjs/passport": "^11.0.5"
+  "@nestjs/terminus": "^11.0.0"
   "nestjs-pino": "^4.5.0"
 
   # Apollo Server & Gateway
@@ -67,7 +68,7 @@ catalog:
   "class-transformer": "^0.5.1"
   "reflect-metadata": "^0.2.2"
   "rxjs": "^7.8.2"
-  "lodash": "4.17.21"
+  "lodash": "4.17.23"
 
   # Backend Type Definitions
   "@types/express": "^5.0.0"

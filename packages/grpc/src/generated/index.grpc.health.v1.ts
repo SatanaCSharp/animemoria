@@ -5,6 +5,4 @@
 
 /* eslint-disable */
 
-export * as auth_service from './index.auth_service';
-export * as grpc from './index.grpc';
-export * as users_service from './index.users_service';
+export * from './health';

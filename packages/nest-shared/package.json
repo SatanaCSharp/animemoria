@@ -38,6 +38,10 @@
       "types": "./dist/graphql/index.d.ts",
       "default": "./dist/graphql/index.js"
     },
+    "./health": {
+      "types": "./dist/health/index.d.ts",
+      "default": "./dist/health/index.js"
+    },
     "./grpc": {
       "types": "./dist/grpc/index.d.ts",
       "default": "./dist/grpc/index.js"
@@ -72,6 +76,7 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand"
   },
   "dependencies": {
+    "@packages/grpc": "workspace:*",
     "@packages/utils": "workspace:*",
     "@packages/shared-types": "workspace:*",
     "@nestjs/axios": "catalog:",
@@ -84,6 +89,7 @@
     "@apollo/server": "catalog:",
     "@nestjs/apollo": "catalog:",
     "@nestjs/graphql": "catalog:",
+    "@nestjs/terminus": "catalog:",
     "@as-integrations/express5": "catalog:",
     "@grpc/reflection": "catalog:",
     "@grpc/grpc-js": "catalog:",
