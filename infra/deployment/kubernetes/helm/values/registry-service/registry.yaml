@@ -3,6 +3,7 @@
 # Install: helm install registry charts/microservice -f values/cluster.yaml -f values/registry-service/registry.yaml -n <ns>
 
 fullnameOverride: registry
+component: registry
 
 portEnvKey: APP_REST_PORT
 
@@ -44,3 +45,20 @@ autoscaling:
 
 service:
   type: ClusterIP
+
+# NetworkPolicy: allow traffic from gRPC services only, egress DNS only.
+networkPolicy:
+  enabled: true
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow from any service in the namespace (all services can access registry)
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: microservice
+      ports:
+        - port: 80
+          protocol: TCP
+  egress: []

@@ -3,6 +3,7 @@
 # Install: helm install api-gateway-graphql charts/microservice -f values/cluster.yaml -f values/api-gateway-service/api-gateway-graphql.yaml -n <ns>
 
 fullnameOverride: api-gateway-graphql
+component: gateway
 
 portEnvKey: APP_GRAPHQL_PORT
 
@@ -47,3 +48,59 @@ autoscaling:
 
 service:
   type: ClusterIP
+
+# Ingress: GraphQL gateway entry point (/graphql).
+# className and annotations are set per platform via Kustomize overlays or --set.
+ingress:
+  enabled: true
+  className: ""
+  annotations: {}
+  hosts:
+    - host: ""
+      paths:
+        - path: /graphql
+          pathType: Prefix
+
+# NetworkPolicy: allow traffic from api-gateway-rest and ingress controller, egress to graphql subgraphs.
+networkPolicy:
+  enabled: true
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow from other gateway pods (api-gateway-rest)
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: gateway
+      ports:
+        - port: 80
+          protocol: TCP
+    # Allow from ingress controller (for direct /graphql route)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - port: 80
+          protocol: TCP
+  egress:
+    # Allow to all graphql subgraphs
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: graphql
+      ports:
+        - port: 80
+          protocol: TCP
+    # Allow to registry (service discovery)
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: registry
+      ports:
+        - port: 80
+          protocol: TCP

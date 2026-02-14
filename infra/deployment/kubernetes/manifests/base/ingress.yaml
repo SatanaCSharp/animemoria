@@ -1,0 +1,26 @@
+# Base Ingress for api-gateway. Routes all external traffic through the gateway.
+# Overlays (minikube, aws) patch className, annotations, and host.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: api-gateway
+spec:
+  ingressClassName: ""
+  rules:
+    - host: api.animemoria.local
+      http:
+        paths:
+          - path: /graphql
+            pathType: Prefix
+            backend:
+              service:
+                name: api-gateway-graphql
+                port:
+                  number: 80
+          - path: /api/v1
+            pathType: Prefix
+            backend:
+              service:
+                name: api-gateway-rest
+                port:
+                  number: 80

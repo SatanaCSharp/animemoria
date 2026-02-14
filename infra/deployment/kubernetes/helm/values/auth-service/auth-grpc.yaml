@@ -3,6 +3,7 @@
 # Install: helm install auth-grpc charts/microservice -f values/cluster.yaml -f values/auth-service/auth-grpc.yaml -n <ns>
 
 fullnameOverride: auth-grpc
+component: grpc
 
 protocol: grpc
 
@@ -51,3 +52,46 @@ autoscaling:
 
 service:
   type: ClusterIP
+
+# NetworkPolicy: allow traffic from auth-graphql, egress to external DB + registry + users-grpc.
+networkPolicy:
+  enabled: true
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: graphql
+      ports:
+        - port: 5000
+          protocol: TCP
+  egress:
+    # Allow to other gRPC services (inter-service communication)
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: grpc
+      ports:
+        - port: 5000
+          protocol: TCP
+    # Allow to registry (service discovery)
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: registry
+      ports:
+        - port: 80
+          protocol: TCP
+    # Allow to external database (all external IPs)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - port: 5432
+          protocol: TCP

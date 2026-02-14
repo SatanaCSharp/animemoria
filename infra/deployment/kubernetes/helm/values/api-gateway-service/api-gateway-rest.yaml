@@ -3,6 +3,7 @@
 # Install: helm install api-gateway-rest charts/microservice -f values/cluster.yaml -f values/api-gateway-service/api-gateway-rest.yaml -n <ns>
 
 fullnameOverride: api-gateway-rest
+component: gateway
 
 portEnvKey: APP_REST_PORT
 
@@ -45,3 +46,54 @@ autoscaling:
 
 service:
   type: ClusterIP
+
+# Ingress: REST gateway entry point (/api/v1).
+# className and annotations are set per platform via Kustomize overlays or --set.
+ingress:
+  enabled: true
+  className: ""
+  annotations: {}
+  hosts:
+    - host: ""
+      paths:
+        - path: /api/v1
+          pathType: Prefix
+
+# NetworkPolicy: allow traffic from ingress controller, egress to internal services.
+networkPolicy:
+  enabled: true
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow from ingress controller (nginx / ALB pods in ingress namespace)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - port: 80
+          protocol: TCP
+  egress:
+    # Allow to all graphql services (subgraphs + gateway-graphql)
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: graphql
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: gateway
+      ports:
+        - port: 80
+          protocol: TCP
+    # Allow to registry (service discovery)
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: registry
+      ports:
+        - port: 80
+          protocol: TCP

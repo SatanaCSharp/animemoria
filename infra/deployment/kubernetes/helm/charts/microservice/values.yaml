@@ -5,6 +5,10 @@
 nameOverride: ""
 fullnameOverride: ""
 
+# Component type: gateway, graphql, grpc, registry. Used as app.kubernetes.io/component label
+# and for component-based NetworkPolicy selectors (e.g. gateway -> graphql -> grpc -> registry).
+component: ""
+
 # Image: repository is taken from imageRepository (or global) when not set here.
 # Set only image.name (and optionally tag); repository is centralized.
 imageRepository: ""  # e.g. my-registry.io/my-repo — set via -f values/cluster.yaml or --set
@@ -40,7 +44,7 @@ env: []
 # Documented per service in values/<service>/*.yaml; used for validation/docs and ESO secret key mapping.
 secretKeys: []  # e.g. [ DB_CONNECTION_URL, AT_SECRET, RT_SECRET, INTERNAL_REGISTRY_SERVER_HOST ]
 
-# global-shared-config: non-sensitive env (NODE_ENV, LOG_*). Used by default in deployment envFrom.
+# global-shared-config: non-sensitive env (NODE_ENV, LOG_*). Mounted as volume (not etcd envFrom).
 # Set create: true on one release (e.g. registry) to create the ConfigMap; others leave false.
 sharedConfigMap:
   create: false
@@ -49,9 +53,24 @@ sharedConfigMap:
     LOG_LEVEL: "info"
     LOG_PRETTY: "false"
 
-# Env from Secrets/ConfigMaps — sensitive vars in Secret (default: <fullname>-secrets).
-existingSecret: ""   # default: {{ fullname }}-secrets
-existingConfigMap: "" # optional, for service-specific non-sensitive config
+# Config and secrets are mounted as volumes; init container merges them into a single .env in emptyDir.
+# App should load env from DOTENV_CONFIG_PATH (default /etc/app/config/.env).
+configVolume:
+  mountPath: /etc/app/config
+  envFilePath: .env
+
+# Secrets volume: source is either K8s Secret (from .env/ESO) or CSI (e.g. AWS Secrets Manager).
+# type: secret — use existingSecret (populated from .env or ESO; mounted as files).
+# type: csi — use Secrets Store CSI Driver; secretProviderClass must exist (e.g. AWS); no etcd.
+secretsVolume:
+  type: secret       # secret | csi
+  mountPath: /etc/app/secrets
+  secretName: ""     # when type=secret, default: {{ fullname }}-secrets
+  csi:
+    secretProviderClass: ""  # e.g. aws-auth-secrets; create SecretProviderClass in cluster
+
+existingSecret: ""   # default: {{ fullname }}-secrets (used when secretsVolume.type=secret)
+existingConfigMap: "" # optional, service-specific config (mounted as volume when set)
 
 # Resources
 resources:
@@ -89,6 +108,52 @@ pdb:
 # Service type only; port/targetPort/name derived from protocol (http -> 80->3000, grpc -> 5000->5000).
 service:
   type: ClusterIP
+
+# Ingress: expose the service externally. Enable only on api-gateway release.
+# Per-path serviceName/servicePort override allows routing to multiple backends from one Ingress.
+ingress:
+  enabled: false
+  className: ""        # "nginx" (minikube) or "alb" (AWS)
+  annotations: {}
+  hosts: []
+  # - host: api.animemoria.local
+  #   paths:
+  #     - path: /graphql
+  #       pathType: Prefix
+  #       serviceName: api-gateway-graphql   # override backend service
+  #       servicePort: 80
+  #     - path: /api/v1
+  #       pathType: Prefix
+  #       # uses release service by default
+  tls: []
+  # - hosts:
+  #     - api.animemoria.com
+  #   secretName: tls-secret
+
+# NetworkPolicy: restrict pod-to-pod and external traffic.
+# ingress/egress arrays use raw Kubernetes NetworkPolicy rule syntax.
+networkPolicy:
+  enabled: false
+  policyTypes:
+    - Ingress
+    - Egress
+  allowDNS: true       # auto-adds egress to kube-dns (UDP+TCP 53)
+  ingress: []
+  # - from:
+  #     - podSelector:
+  #         matchLabels:
+  #           app.kubernetes.io/instance: api-gateway-graphql
+  #   ports:
+  #     - port: 80
+  #       protocol: TCP
+  egress: []
+  # - to:
+  #     - podSelector:
+  #         matchLabels:
+  #           app.kubernetes.io/instance: auth-grpc
+  #   ports:
+  #     - port: 5000
+  #       protocol: TCP
 
 # Pod annotations / labels
 podAnnotations: {}

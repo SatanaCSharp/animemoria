@@ -1,0 +1,11 @@
+# Minikube: use nginx ingress controller (minikube addons enable ingress)
+- op: replace
+  path: /spec/ingressClassName
+  value: nginx
+- op: add
+  path: /metadata/annotations
+  value:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+- op: replace
+  path: /spec/rules/0/host
+  value: api.animemoria.local

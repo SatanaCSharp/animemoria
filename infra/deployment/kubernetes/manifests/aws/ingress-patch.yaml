@@ -1,0 +1,22 @@
+# AWS: use ALB ingress controller (aws-load-balancer-controller)
+- op: replace
+  path: /spec/ingressClassName
+  value: alb
+- op: add
+  path: /metadata/annotations
+  value:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+    alb.ingress.kubernetes.io/certificate-arn: "${ACM_CERT_ARN}"
+    alb.ingress.kubernetes.io/healthcheck-path: /health/ready
+    alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
+- op: replace
+  path: /spec/rules/0/host
+  value: api.animemoria.com
+- op: add
+  path: /spec/tls
+  value:
+    - hosts:
+        - api.animemoria.com

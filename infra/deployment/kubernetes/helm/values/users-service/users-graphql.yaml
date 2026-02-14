@@ -3,6 +3,7 @@
 # Install: helm install users-graphql charts/microservice -f values/cluster.yaml -f values/users-service/users-graphql.yaml -n <ns>
 
 fullnameOverride: users-graphql
+component: graphql
 
 portEnvKey: APP_GRAPHQL_PORT
 
@@ -46,3 +47,35 @@ autoscaling:
 
 service:
   type: ClusterIP
+
+# NetworkPolicy: allow traffic from api-gateway-graphql, egress to users-grpc.
+networkPolicy:
+  enabled: true
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: gateway
+      ports:
+        - port: 80
+          protocol: TCP
+  egress:
+    # Allow to all gRPC services
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: grpc
+      ports:
+        - port: 5000
+          protocol: TCP
+    # Allow to registry (service discovery)
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: registry
+      ports:
+        - port: 80
+          protocol: TCP

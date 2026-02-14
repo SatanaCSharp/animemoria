@@ -3,3 +3,4 @@ kind: Kustomization
 
 resources:
   - externalsecret-template.yaml
+  - ingress.yaml

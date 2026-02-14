@@ -1,3 +1,4 @@
+import { RequestMethod } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { assertDefined } from '@packages/utils/asserts';
 import cookieParser from 'cookie-parser';
@@ -24,6 +25,9 @@ async function bootstrap(): Promise<void> {
       'Authorization',
       'Apollo-Require-Preflight',
     ],
+  });
+  app.setGlobalPrefix('api/v1', {
+    exclude: [{ path: 'health', method: RequestMethod.GET }],
   });
 
   app.use(cookieParser());

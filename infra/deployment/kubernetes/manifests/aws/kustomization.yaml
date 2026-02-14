@@ -10,3 +10,7 @@ patches:
       kind: ExternalSecret
       name: config
     path: externalsecret-patch.yaml
+  - target:
+      kind: Ingress
+      name: api-gateway
+    path: ingress-patch.yaml
