@@ -1,143 +1,154 @@
-# Multi-stage Dockerfile for NestJS applications
+# Multi-stage Dockerfile for NestJS microservices
 #
-# PREREQUISITES:
-#   Build Dockerfile.base first to create the base image with dependencies:
+# Builds a self-contained image with no external base image dependency.
+# Uses `pnpm deploy` to create a standalone production bundle with all
+# workspace dependencies resolved — no need to copy packages/ at runtime.
 #
-#   docker build -f infra/deployment/docker/Dockerfile.base \
-#     --build-arg APP_NAME=<service-name> \
-#     --build-arg EXCLUDED_PACKAGES="eslint-config-base eslint-config-service eslint-config-ui graphql/generated ui-shared" \
-#     --build-arg CACHE_ID=pnpm-nestjs \
-#     -t animemoria/base:<service-name>-deps .
+# Image naming convention: <service-name>-<app-type>
 #
-# THEN BUILD THIS FILE:
+# BUILD:
 #   docker build -f infra/deployment/docker/Dockerfile.nestjs \
-#     --build-arg APP_NAME=<service-name> \
-#     --build-arg ENTRY_POINT=<main-file> \
-#     -t <service-name>:latest .
+#     --build-arg APP_NAME=auth-service \
+#     --build-arg APP_TYPE=graphql \
+#     --build-arg ENTRY_POINT=graphql.main \
+#     -t auth-service-graphql:latest .
 #
-# EXCLUDED PACKAGES (configured in Dockerfile.base build):
-# - packages/eslint-config-base      (dev linting only)
-# - packages/eslint-config-service   (dev linting only)
-# - packages/eslint-config-ui        (dev linting only)
-# - packages/graphql/generated       (frontend codegen only)
-# - packages/ui-shared               (React/UI components)
-# - packages/tsconfig                (build-time only, excluded from runtime)
+# ARGS:
+#   APP_NAME    - Service name (e.g., auth-service, users-service)
+#   APP_TYPE    - Application type (e.g., graphql, grpc, rest)
+#   ENTRY_POINT - Main file without extension (e.g., graphql.main, grpc.main)
 
-# Build args for service configuration
+# ============================================================================
+# Global build args
+# ============================================================================
+ARG NODE_VERSION=24.11.1
+ARG PNPM_VERSION=9.15.3
+ARG APP_NAME
+ARG APP_TYPE
+ARG ENTRY_POINT
+
+# Packages excluded from NestJS builds (frontend/dev-only)
+ARG EXCLUDED_PACKAGES="eslint-config-base eslint-config-service eslint-config-ui graphql/generated ui-shared"
+
+# ============================================================================
+# Stage 1: Base - Node.js with pnpm
+# ============================================================================
+FROM node:${NODE_VERSION}-alpine AS base
+
+ARG PNPM_VERSION
+
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+
+RUN apk add --no-cache libc6-compat && \
+    npm install -g pnpm@${PNPM_VERSION}
+
+WORKDIR /app
+
+# ============================================================================
+# Stage 2: Package stubs - all package.json files for workspace resolution
+# ============================================================================
+FROM base AS packages-json
+
+COPY packages/ ./packages/
+
+RUN find ./packages -mindepth 2 -type f ! -name 'package.json' -delete && \
+    find ./packages -mindepth 2 -type d -empty -delete
+
+# ============================================================================
+# Stage 3: Dependencies - install all workspace packages
+# ============================================================================
+FROM base AS deps
+
+ARG APP_NAME
+
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json .npmrc ./
+COPY turbo.json ./
+
+# All package.json stubs (unfiltered) so pnpm can resolve every workspace: reference
+COPY --from=packages-json /app/packages/ ./packages/
+
+COPY apps/${APP_NAME}/package.json ./apps/${APP_NAME}/
+
+RUN --mount=type=cache,id=pnpm-nestjs,target=/pnpm/store \
+    pnpm install --frozen-lockfile --prefer-offline
+
+# ============================================================================
+# Stage 4: Build - compile packages and app
+# ============================================================================
+FROM deps AS builder
+
 ARG APP_NAME
 ARG ENTRY_POINT
 ARG EXCLUDED_PACKAGES
 
-# ============================================================================
-# Import base image with pre-installed dependencies
-# ============================================================================
-
-# Import deps stage from base image (contains Node.js, pnpm, and all dependencies)
-FROM animemoria/base:${APP_NAME}-deps AS deps
-
-# ============================================================================
-# NestJS-specific stages
-# ============================================================================
-
-# Stage 2: Build stage
-FROM deps AS builder
-
-ARG APP_NAME
-ARG EXCLUDED_PACKAGES
-
-# Install build dependencies (protoc for gRPC)
 RUN apk add --no-cache protobuf-dev
 
-# Copy workspace configuration (deps stage only has package.json files)
 COPY pnpm-workspace.yaml turbo.json package.json ./
 
-# Copy ALL packages source code and remove excluded ones
+# Copy full source and remove packages not needed for NestJS builds
 COPY packages/ ./packages/
 RUN for pkg in ${EXCLUDED_PACKAGES}; do \
       rm -rf "./packages/${pkg}"; \
     done
 
-# Copy service source code
 COPY apps/${APP_NAME} ./apps/${APP_NAME}
 
-# Build packages first (workspace dependencies)
 RUN pnpm turbo run build --filter='./packages/*'
 
-# Build the service
 RUN pnpm turbo run build --filter=${APP_NAME}
 
 # Ensure db directory exists (for services without migrations)
 RUN mkdir -p ./apps/${APP_NAME}/db
 
-# Stage 3: Production dependencies
-FROM deps AS prod-deps
+# Detect entry point path (dist/<entry>.js or dist/src/<entry>.js)
+RUN if [ -f "./apps/${APP_NAME}/dist/${ENTRY_POINT}.js" ]; then \
+      echo "dist/${ENTRY_POINT}.js" > "./apps/${APP_NAME}/.entrypoint"; \
+    elif [ -f "./apps/${APP_NAME}/dist/src/${ENTRY_POINT}.js" ]; then \
+      echo "dist/src/${ENTRY_POINT}.js" > "./apps/${APP_NAME}/.entrypoint"; \
+    else \
+      echo "ERROR: Cannot find ${ENTRY_POINT}.js in dist/ or dist/src/" >&2 && \
+      ls -R "./apps/${APP_NAME}/dist" >&2 && exit 1; \
+    fi
+
+
+# ============================================================================
+# Stage 5: Production bundle - pnpm deploy with built workspace packages
+# ============================================================================
+FROM deps AS prod-bundle
 
 ARG APP_NAME
 
-# Remove dev dependencies (deps stage has all dependencies installed)
-RUN rm -rf node_modules apps/${APP_NAME}/node_modules
+# Overlay built workspace packages (with dist/) on top of deps stubs
+COPY --from=builder /app/packages/ ./packages/
 
-# Also exclude tsconfig at runtime (not needed)
-RUN rm -rf ./packages/tsconfig
+RUN --mount=type=cache,id=pnpm-deploy-nestjs,target=/pnpm/store \
+    pnpm deploy --filter=${APP_NAME} --prod /app/deploy
 
-# Install production dependencies only with optimizations
-# --prod: production only
-# --ignore-scripts: skip lifecycle scripts (faster, more secure)
-# --prefer-offline: use cache when possible
-RUN --mount=type=cache,id=pnpm-prod-nestjs,target=/pnpm/store \
-    pnpm install --prod --frozen-lockfile --ignore-scripts --prefer-offline
-
-# Stage 6: Production runtime
-FROM node:24.11.1-alpine AS runner
+# ============================================================================
+# Stage 6: Runtime - minimal production image
+# ============================================================================
+FROM node:${NODE_VERSION}-alpine AS runner
 
 ARG APP_NAME
-ARG ENTRY_POINT
+ARG APP_TYPE
 
-# Set as environment variables for runtime
-ENV APP_NAME=${APP_NAME}
-ENV ENTRY_POINT=${ENTRY_POINT}
+LABEL org.opencontainers.image.title="${APP_NAME}-${APP_TYPE}" \
+      org.opencontainers.image.description="AnimeMoria ${APP_NAME} ${APP_TYPE} service"
+
 ENV NODE_ENV=production
 
 WORKDIR /app
 
-# Install dumb-init for proper signal handling
-RUN apk add --no-cache dumb-init
+# Copy production node_modules from pnpm deploy (includes resolved workspace deps)
+COPY --from=prod-bundle /app/deploy/node_modules ./node_modules
 
-# Copy cleanup and user setup scripts
-COPY infra/deployment/docker/scripts/cleanup-build-artifacts.sh /tmp/cleanup-build-artifacts.sh
-COPY infra/deployment/docker/scripts/cleanup-node-modules.sh /tmp/cleanup-node-modules.sh
-COPY infra/deployment/docker/scripts/setup-app-user.sh /tmp/setup-app-user.sh
-RUN chmod +x /tmp/*.sh
+# Copy built application, database migrations, and detected entrypoint path
+COPY --from=builder /app/apps/${APP_NAME}/dist ./dist
+COPY --from=builder /app/apps/${APP_NAME}/db ./db
+COPY --from=builder /app/apps/${APP_NAME}/package.json ./package.json
+COPY --from=builder /app/apps/${APP_NAME}/.entrypoint ./.entrypoint
 
-# Copy packages from builder
-COPY --from=builder /app/packages/ ./packages/
+# exec replaces the shell so node becomes PID 1 (receives SIGTERM for graceful shutdown)
+CMD ["sh", "-c", "exec node $(cat .entrypoint)"]
 
-# Remove build-time only packages and cleanup artifacts
-RUN rm -rf ./packages/tsconfig && \
-    /tmp/cleanup-build-artifacts.sh ./packages
-
-# Copy built application and database migrations directory
-COPY --from=builder /app/apps/${APP_NAME}/dist ./apps/${APP_NAME}/dist
-COPY --from=builder /app/apps/${APP_NAME}/db ./apps/${APP_NAME}/db
-
-# Copy production dependencies
-COPY --from=prod-deps /app/node_modules ./node_modules
-COPY --from=prod-deps /app/apps/${APP_NAME}/node_modules ./apps/${APP_NAME}/node_modules
-
-# Optimize node_modules using cleanup script
-RUN /tmp/cleanup-node-modules.sh ./node_modules
-
-# Copy package.json for runtime metadata
-COPY apps/${APP_NAME}/package.json ./apps/${APP_NAME}/
-
-# Create non-root user and set permissions
-RUN /tmp/setup-app-user.sh nestjs 1001 1001 /app && \
-    rm /tmp/*.sh
-
-USER nestjs
-
-WORKDIR /app/apps/${APP_NAME}
-
-# Use shell form to allow variable expansion
-ENTRYPOINT ["dumb-init", "--"]
-CMD sh -c "if [ -f dist/src/${ENTRY_POINT}.js ]; then node dist/src/${ENTRY_POINT}.js; else node dist/${ENTRY_POINT}.js; fi"

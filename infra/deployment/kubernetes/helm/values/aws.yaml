@@ -1,0 +1,16 @@
+# AWS environment overrides.
+# Layer this file BEFORE the service-specific values:
+#   helm install auth-graphql charts/microservice \
+#     -f values/cluster.yaml -f values/aws.yaml -f values/auth-service/auth-graphql.yaml
+#
+# Switches secret volume from K8s Secret to AWS Secrets Store CSI Driver.
+# Each service must reference its SecretProviderClass name via secretsVolume.csi.secretProviderClass
+# (set per service below or override with --set).
+#
+# Prerequisites:
+#   - AWS Secrets Store CSI Driver installed
+#   - SecretProviderClass resources applied (manifests/aws/secretproviderclass.yaml)
+#   - IRSA configured for the service account
+
+secretsVolume:
+  type: csi

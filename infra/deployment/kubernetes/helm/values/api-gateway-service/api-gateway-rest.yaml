@@ -17,16 +17,22 @@ command: ["node", "dist/rest.main"]
 dependencies:
   - service: api-gateway-graphql
 
-env: []
+env:
+  - name: INTERNAL_REGISTRY_SERVER_HOST
+    value: "http://registry:80"
 
 secretKeys:
-  - INTERNAL_REGISTRY_SERVER_HOST
-  - RT_SECRET
   - AT_SECRET
+  - RT_SECRET
   - COOKIES_MAX_AGE
   - CORS_ORIGINS
 
 existingSecret: api-gateway-rest-service-config
+
+# AWS CSI: SecretProviderClass name (applied when secretsVolume.type=csi via values/aws.yaml)
+secretsVolume:
+  csi:
+    secretProviderClass: api-gateway-service-secrets
 
 resources:
   requests:

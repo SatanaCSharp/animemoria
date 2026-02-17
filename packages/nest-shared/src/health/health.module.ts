@@ -6,6 +6,7 @@ import { assertFail } from '@packages/utils/asserts';
 import { isDefined, isEmpty } from '@packages/utils/predicates';
 import { HEALTH_INDICATORS } from 'health/constants';
 import { HealthGrpcController } from 'health/controllers/health-grpc.controller';
+import { HealthHttpController } from 'health/controllers/health-http.controller';
 import { HealthProbeService } from 'health/health-probe.service';
 import type { IHealthcheckIndicator } from 'health/types/health-options';
 import {
@@ -78,8 +79,11 @@ export class HealthModule {
         return [HealthGrpcController];
       case AppType.REST:
       case AppType.GQL:
+        return [HealthHttpController];
       default:
-        assertFail(new SystemError(`case ${appType} has not been registered`));
+        assertFail(
+          new SystemError(`case ${String(appType)} has not been registered`),
+        );
     }
   }
 }

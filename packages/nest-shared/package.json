@@ -81,6 +81,7 @@
     "@packages/shared-types": "workspace:*",
     "@nestjs/axios": "catalog:",
     "@nestjs/common": "catalog:",
+    "class-validator": "catalog:",
     "@nestjs/config": "catalog:",
     "@nestjs/typeorm": "catalog:",
     "@nestjs/microservices": "catalog:",

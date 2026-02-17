@@ -40,8 +40,8 @@ portEnvKey: ""
 # Source: apps/<service>/.env.example. Example: [ { name: NODE_ENV, value: "production" }, { name: LOG_LEVEL, value: "info" } ]
 env: []
 
-# Required key names in existingSecret (from apps/<service>/.env.example). ESO or manual Secret must provide these.
-# Documented per service in values/<service>/*.yaml; used for validation/docs and ESO secret key mapping.
+# Required key names in the secret (from apps/<service>/.env.example).
+# Documented per service in values/<service>/*.yaml; used for validation/docs.
 secretKeys: []  # e.g. [ DB_CONNECTION_URL, AT_SECRET, RT_SECRET, INTERNAL_REGISTRY_SERVER_HOST ]
 
 # global-shared-config: non-sensitive env (NODE_ENV, LOG_*). Mounted as volume (not etcd envFrom).
@@ -59,15 +59,15 @@ configVolume:
   mountPath: /etc/app/config
   envFilePath: .env
 
-# Secrets volume: source is either K8s Secret (from .env/ESO) or CSI (e.g. AWS Secrets Manager).
-# type: secret — use existingSecret (populated from .env or ESO; mounted as files).
-# type: csi — use Secrets Store CSI Driver; secretProviderClass must exist (e.g. AWS); no etcd.
+# Secrets volume: source is either K8s Secret or CSI (AWS Secrets Store CSI Driver).
+# type: secret — K8s Secret (local: created from .env via create-secrets.sh; mounted as files).
+# type: csi — AWS Secrets Store CSI Driver; secretProviderClass must exist; no etcd storage.
 secretsVolume:
   type: secret       # secret | csi
   mountPath: /etc/app/secrets
   secretName: ""     # when type=secret, default: {{ fullname }}-secrets
   csi:
-    secretProviderClass: ""  # e.g. aws-auth-secrets; create SecretProviderClass in cluster
+    secretProviderClass: ""  # e.g. auth-service-secrets; see manifests/aws/secretproviderclass.yaml
 
 existingSecret: ""   # default: {{ fullname }}-secrets (used when secretsVolume.type=secret)
 existingConfigMap: "" # optional, service-specific config (mounted as volume when set)

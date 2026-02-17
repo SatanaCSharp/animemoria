@@ -20,14 +20,22 @@ dependencies:
 env:
   - name: APP_NAME
     value: "users-service"
+  - name: USERS_SERVICE_GRAPHQL_URL
+    value: "http://users-graphql:80"
+  - name: USERS_SERVICE_GRPC_URL
+    value: "users-grpc:5000"
+  - name: INTERNAL_REGISTRY_SERVER_HOST
+    value: "http://registry:80"
 
 secretKeys:
-  - USERS_SERVICE_GRAPHQL_URL
-  - USERS_SERVICE_GRPC_URL
-  - INTERNAL_REGISTRY_SERVER_HOST
   - DB_CONNECTION_URL
 
 existingSecret: users-graphql-service-config
+
+# AWS CSI: SecretProviderClass name (applied when secretsVolume.type=csi via values/aws.yaml)
+secretsVolume:
+  csi:
+    secretProviderClass: users-service-secrets
 
 resources:
   requests:

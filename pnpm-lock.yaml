@@ -1285,6 +1285,9 @@ importers:
       '@packages/utils':
         specifier: workspace:*
         version: link:../utils
+      class-validator:
+        specifier: 'catalog:'
+        version: 0.14.3
       lodash:
         specifier: 'catalog:'
         version: 4.17.23
@@ -13619,7 +13622,7 @@ snapshots:
       '@rushstack/terminal': 0.19.5(@types/node@22.19.3)
       '@rushstack/ts-command-line': 5.1.5(@types/node@22.19.3)
       diff: 8.0.2
-      lodash: 4.17.21
+      lodash: 4.17.23
       minimatch: 10.0.3
       resolve: 1.22.11
       semver: 7.5.4

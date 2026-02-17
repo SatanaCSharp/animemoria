@@ -25,7 +25,6 @@
 
 # Documentation
 **/*.md
-!README.md
 
 # Version control
 **/.git

@@ -3,13 +3,12 @@ kind: Kustomization
 
 resources:
   - ../base
-  - secret-store.yaml
+  - ./secrets/auth-service-secrets.yaml
+  - ./secrets/users-service-secrets.yaml
+  - ./secrets/api-gateway-service-secrets.yaml
+  - ./secrets/registry-service-secrets.yaml
 
 patches:
-  - target:
-      kind: ExternalSecret
-      name: config
-    path: externalsecret-patch.yaml
   - target:
       kind: Ingress
       name: api-gateway
