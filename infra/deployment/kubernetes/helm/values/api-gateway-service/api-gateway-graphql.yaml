@@ -8,13 +8,15 @@ component: gateway
 portEnvKey: APP_GRAPHQL_PORT
 
 image:
-  name: api-gateway-service
+  name: api-gateway-service-graphql
   tag: latest
   pullPolicy: IfNotPresent
 
 command: ["node", "dist/graphql.main"]
 
 dependencies:
+  - service: auth-grpc
+  - service: registry
   - service: users-graphql
   - service: auth-graphql
 

@@ -26,11 +26,16 @@ async function bootstrap(): Promise<void> {
       'Apollo-Require-Preflight',
     ],
   });
-  app.setGlobalPrefix('api/v1', {
-    exclude: [{ path: 'health', method: RequestMethod.GET }],
-  });
-
   app.use(cookieParser());
+
+  // Set global prefix AFTER middleware, exclude health endpoints
+  app.setGlobalPrefix('api/v1', {
+    exclude: [
+      { path: 'health', method: RequestMethod.GET },
+      { path: 'health/live', method: RequestMethod.GET },
+      { path: 'health/ready', method: RequestMethod.GET },
+    ],
+  });
 
   await app.listen(port);
 

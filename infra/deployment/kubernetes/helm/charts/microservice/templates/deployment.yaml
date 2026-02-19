@@ -10,7 +10,11 @@ spec:
   {{- end }}
   {{- with .Values.strategy }}
   strategy:
-    {{- toYaml . | nindent 4 }}
+    type: {{ .type }}
+    {{- if and .rollingUpdate (ne .type "Recreate") }}
+    rollingUpdate:
+      {{- toYaml .rollingUpdate | nindent 6 }}
+    {{- end }}
   {{- end }}
   selector:
     matchLabels:
@@ -73,7 +77,7 @@ spec:
             - name: app-secrets
               mountPath: /app-secrets
               readOnly: true
-        {{- if .Values.dependencies }}
+        {{- if or .Values.dependencies .Values.waitForRegistry }}
         - name: wait-for-dependencies
           image: busybox:1.36
           command:
@@ -84,17 +88,25 @@ spec:
               echo "Waiting for dependent services..."
               {{- range .Values.dependencies }}
               {{- $depPort := .port | default (index $.Values.cluster.knownServices .service) }}
-              until nslookup {{ .service }} >/dev/null 2>&1 && nc -z {{ .service }} {{ $depPort }} 2>/dev/null; do
+              until nc -z {{ .service }} {{ $depPort }} 2>/dev/null; do
                 echo "Waiting for {{ .service }}:{{ $depPort }}..."
                 sleep 2
               done
               echo "{{ .service }}:{{ $depPort }} is ready"
               {{- end }}
+              {{- range .Values.waitForRegistry }}
+              until wget -qO- "http://registry/registry/{{ .appType }}/service-descriptions/service-names/{{ .name }}" 2>/dev/null | grep -q '"serviceName"'; do
+                echo "Waiting for {{ .name }}:{{ .appType }} in registry..."
+                sleep 2
+              done
+              echo "{{ .name }}:{{ .appType }} is registered"
+              {{- end }}
               echo "All dependencies are ready"
         {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository | default .Values.imageRepository }}/{{ .Values.image.name }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          {{- $repo := .Values.image.repository | default .Values.imageRepository }}
+          image: "{{ if $repo }}{{ $repo }}/{{ end }}{{ .Values.image.name }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- if .Values.command }}
           command: {{- toYaml .Values.command | nindent 12 }}
@@ -105,7 +117,7 @@ spec:
               protocol: TCP
           env:
             - name: {{ .Values.portEnvKey | default (include "microservice.portEnvKey" .) }}
-              value: {{ include "microservice.containerPort" . }}
+              value: {{ include "microservice.containerPort" . | quote }}
             - name: DOTENV_CONFIG_PATH
               value: "{{ .Values.configVolume.mountPath }}/{{ .Values.configVolume.envFilePath }}"
             {{- with .Values.env }}
@@ -121,7 +133,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /health/live
-              port: {{ include "microservice.portName" . }}
+              port: {{ include "microservice.containerPort" . }}
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
@@ -129,21 +141,21 @@ spec:
           readinessProbe:
             httpGet:
               path: /health/ready
-              port: {{ include "microservice.portName" . }}
+              port: {{ include "microservice.containerPort" . }}
             initialDelaySeconds: 5
             periodSeconds: 5
             timeoutSeconds: 3
             failureThreshold: 2
           {{- else }}
           livenessProbe:
-            grpc:
+            tcpSocket:
               port: {{ include "microservice.containerPort" . }}
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3
           readinessProbe:
-            grpc:
+            tcpSocket:
               port: {{ include "microservice.containerPort" . }}
             initialDelaySeconds: 5
             periodSeconds: 5

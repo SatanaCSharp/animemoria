@@ -9,11 +9,11 @@ component: graphql
 portEnvKey: APP_GRAPHQL_PORT
 
 image:
-  name: auth-service
+  name: auth-service-graphql
   tag: latest
   pullPolicy: IfNotPresent
 
-command: ["node", "dist/graphql.main"]
+command: ["node", "dist/src/graphql.main"]
 
 dependencies:
   - service: auth-grpc

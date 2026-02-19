@@ -8,15 +8,21 @@ component: grpc
 protocol: grpc
 
 image:
-  name: auth-service
+  name: auth-service-grpc
   tag: latest
   pullPolicy: IfNotPresent
 
-command: ["node", "dist/grpc.main"]
+command: ["node", "dist/src/grpc.main"]
 
 dependencies:
   - service: users-grpc
   - service: registry
+
+# Wait for users-service to be registered in the registry before starting,
+# because GrpcClientModule queries the registry for users-service:grpc at startup.
+waitForRegistry:
+  - name: users-service
+    appType: grpc
 
 # Service-specific env only; NODE_ENV, LOG_LEVEL, etc. from global-shared-config.
 env:
@@ -51,6 +57,11 @@ resources:
     cpu: "500m"
 
 replicaCount: 1
+
+# Recreate ensures old pod terminates before new one starts,
+# preventing the serviceId race condition (old pod unregisters new pod's entry).
+strategy:
+  type: Recreate
 
 autoscaling:
   enabled: false

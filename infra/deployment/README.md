@@ -7,14 +7,16 @@ Infrastructure for deploying AniMemoria microservices via Docker and Kubernetes 
 ```
 infra/deployment/
 ├── docker/
-│   ├── Dockerfile.base          # Shared monorepo dependency layer
 │   ├── Dockerfile.nestjs        # Multi-stage NestJS build
 │   ├── Dockerfile.vite          # Vite + Nginx build (admin dashboard)
 │   ├── Dockerfile.nextjs        # Next.js standalone build
-│   ├── build.sh                 # Build orchestration script
 │   ├── nginx.conf               # Nginx config for Vite apps
 │   ├── .dockerignore
-│   └── scripts/                 # Build-time helpers (cleanup, user setup)
+│   └── scripts/                 # Build-time helpers
+│       ├── setup-app-user.sh        # Creates non-root user for NestJS containers
+│       ├── setup-nginx-user.sh      # Creates non-root nginx user for Vite containers
+│       ├── cleanup-node-modules.sh  # Strips source maps, docs, test files from node_modules
+│       └── cleanup-build-artifacts.sh # Removes *.map files and test artifacts post-build
 │
 └── kubernetes/
     ├── helm/
@@ -95,28 +97,34 @@ This separation ensures no port conflicts between environments. Container `env` 
 
 ## Docker Builds
 
-Build images using the orchestration script from the repository root:
+Build images using pnpm scripts from the repository root:
 
 ```bash
-# Usage: ./infra/deployment/docker/build.sh <type> <app-name> [entry-point]
+# Frontend
+pnpm docker:build:admin                  # Vite app via Nginx
 
 # NestJS services (each entrypoint = separate image)
-./infra/deployment/docker/build.sh nestjs auth-service graphql.main
-./infra/deployment/docker/build.sh nestjs auth-service grpc.main
-./infra/deployment/docker/build.sh nestjs users-service graphql.main
-./infra/deployment/docker/build.sh nestjs users-service grpc.main
-./infra/deployment/docker/build.sh nestjs api-gateway-service graphql.main
-./infra/deployment/docker/build.sh nestjs api-gateway-service rest.main
-./infra/deployment/docker/build.sh nestjs registry-service rest.main
+pnpm docker:build:auth:graphql           # auth-service graphql entrypoint
+pnpm docker:build:auth:grpc              # auth-service grpc entrypoint
+pnpm docker:build:users:graphql          # users-service graphql entrypoint
+pnpm docker:build:users:grpc             # users-service grpc entrypoint
+pnpm docker:build:api-gateway:graphql    # api-gateway graphql entrypoint
+pnpm docker:build:api-gateway:rest       # api-gateway rest entrypoint
+pnpm docker:build:registry               # registry-service rest entrypoint
 
-# Vite frontend
-./infra/deployment/docker/build.sh vite admin
+# Build everything
+pnpm docker:build:all
 ```
 
-Each build produces two images:
+### Dockerfile Overview
 
-- `animemoria/base:<app-name>-deps` — cached dependency layer
-- `<app-name>:latest` — final application image
+| Dockerfile          | Runtime      | Description                                                     |
+| ------------------- | ------------ | --------------------------------------------------------------- |
+| `Dockerfile.nestjs` | Node Alpine  | 6-stage build: base → stubs → deps → builder → deploy → runtime |
+| `Dockerfile.vite`   | Nginx Alpine | 5-stage build: base → filter → deps → builder → runtime         |
+| `Dockerfile.nextjs` | Node Alpine  | 4-stage build: base → deps → builder → runtime (standalone)     |
+
+All images run as non-root users (created by `scripts/setup-app-user.sh` or `scripts/setup-nginx-user.sh`) and have node_modules stripped of dev artifacts for smaller image size.
 
 ---
 
@@ -183,11 +191,11 @@ The script creates K8s Secrets for each Helm release:
 
 ### Step 5: Deploy services with Helm
 
-Set shortcuts for readability:
+Export the path variables first — both must be set in the same shell session before running `helm install`:
 
 ```bash
-CHART=infra/deployment/kubernetes/helm/charts/microservice
-VALUES=infra/deployment/kubernetes/helm/values
+export CHART=infra/deployment/kubernetes/helm/charts/microservice
+export VALUES=infra/deployment/kubernetes/helm/values
 ```
 
 Deploy in dependency order:
@@ -263,7 +271,7 @@ curl http://api.animemoria.local/api/v1
 
 ### Upgrading a service
 
-After rebuilding an image:
+After rebuilding an image (requires `$CHART` and `$VALUES` to be exported — see Step 5):
 
 ```bash
 helm upgrade auth-graphql $CHART \

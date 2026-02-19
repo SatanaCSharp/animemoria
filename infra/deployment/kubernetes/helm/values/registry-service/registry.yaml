@@ -12,7 +12,7 @@ sharedConfigMap:
   create: true
 
 image:
-  name: registry-service
+  name: registry-service-rest
   tag: latest
   pullPolicy: IfNotPresent
 

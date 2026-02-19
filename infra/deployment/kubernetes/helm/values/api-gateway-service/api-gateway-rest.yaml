@@ -8,14 +8,16 @@ component: gateway
 portEnvKey: APP_REST_PORT
 
 image:
-  name: api-gateway-service
+  name: api-gateway-service-rest
   tag: latest
   pullPolicy: IfNotPresent
 
 command: ["node", "dist/rest.main"]
 
+
 dependencies:
-  - service: api-gateway-graphql
+  - service: registry
+  - service: auth-grpc
 
 env:
   - name: INTERNAL_REGISTRY_SERVER_HOST

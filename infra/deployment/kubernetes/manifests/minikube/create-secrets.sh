@@ -52,7 +52,7 @@ for service in "${!SERVICE_SECRETS[@]}"; do
       --from-env-file="$env_path" \
       --namespace="$NAMESPACE" \
       --dry-run=client -o yaml | kubectl apply -f -
-    ((created++))
+    (( ++created ))
   done
 done
 

@@ -8,11 +8,11 @@ component: grpc
 protocol: grpc
 
 image:
-  name: users-service
+  name: users-service-grpc
   tag: latest
   pullPolicy: IfNotPresent
 
-command: ["node", "dist/grpc.main"]
+command: ["node", "dist/src/grpc.main"]
 
 dependencies:
   - service: registry
@@ -46,6 +46,11 @@ resources:
     cpu: "500m"
 
 replicaCount: 1
+
+# Recreate ensures old pod terminates before new one starts,
+# preventing the serviceId race condition (old pod unregisters new pod's entry).
+strategy:
+  type: Recreate
 
 autoscaling:
   enabled: false
