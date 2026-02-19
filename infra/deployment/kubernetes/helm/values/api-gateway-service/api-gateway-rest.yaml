@@ -64,6 +64,8 @@ ingress:
   hosts:
     - host: ""
       paths:
+        - path: /health
+          pathType: Prefix
         - path: /api/v1
           pathType: Prefix
 

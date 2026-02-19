@@ -24,10 +24,3 @@ spec:
                 name: api-gateway-rest
                 port:
                   number: 80
-          - path: /health
-            pathType: Prefix
-            backend:
-              service:
-                name: api-gateway-rest
-                port:
-                  number: 80

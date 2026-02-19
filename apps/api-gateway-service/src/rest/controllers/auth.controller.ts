@@ -1,4 +1,4 @@
-import { Controller, Post, Res, UseGuards } from '@nestjs/common';
+import { Post, Res, UseGuards } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   CurrentUser,
@@ -11,8 +11,9 @@ import { assertDefined } from '@packages/utils/asserts';
 import { isProd } from '@packages/utils/predicates';
 import { Response } from 'express';
 import { AuthClientService } from 'shared/client-services/auth.client-service';
+import { RestController } from 'shared/decorators/rest.controller';
 
-@Controller('auth')
+@RestController('auth')
 export class AuthController {
   constructor(
     private readonly authClientService: AuthClientService,

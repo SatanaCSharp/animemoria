@@ -1,4 +1,3 @@
-import { RequestMethod } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { assertDefined } from '@packages/utils/asserts';
 import cookieParser from 'cookie-parser';
@@ -28,14 +27,9 @@ async function bootstrap(): Promise<void> {
   });
   app.use(cookieParser());
 
-  // Set global prefix AFTER middleware, exclude health endpoints
-  app.setGlobalPrefix('api/v1', {
-    exclude: [
-      { path: 'health', method: RequestMethod.GET },
-      { path: 'health/live', method: RequestMethod.GET },
-      { path: 'health/ready', method: RequestMethod.GET },
-    ],
-  });
+  // Avoid setGlobalPrefix so NestJS does not register "/api/v1/*" (path-to-regexp v8
+  // warns on unnamed wildcards). API routes use the "api/v1" prefix in their controller path.
+  // Health stays at /health (no prefix) via HealthHttpController in nest-shared.
 
   await app.listen(port);
 

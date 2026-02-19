@@ -12,23 +12,23 @@ catalog:
   # ============================================
   
   # NestJS Core & Platform
-  "@nestjs/common": "^11.0.1"
-  "@nestjs/core": "^11.0.1"
-  "@nestjs/platform-express": "^11.0.1"
-  "@nestjs/config": "^4.0.2"
-  "@nestjs/cli": "^11.0.0"
-  "@nestjs/schematics": "^11.0.0"
-  "@nestjs/testing": "^11.0.1"
+  "@nestjs/common": "^11.1.14"
+  "@nestjs/core": "^11.1.14"
+  "@nestjs/platform-express": "^11.1.14"
+  "@nestjs/config": "^4.0.3"
+  "@nestjs/cli": "^11.0.16"
+  "@nestjs/schematics": "^11.0.9"
+  "@nestjs/testing": "^11.1.14"
   
   # NestJS Integrations
   "@nestjs/axios": "^4.0.1"
-  "@nestjs/graphql": "^13.2.3"
+  "@nestjs/graphql": "^13.2.4"
   "@nestjs/apollo": "^13.2.3"
   "@nestjs/typeorm": "^11.0.0"
-  "@nestjs/microservices": "^11.1.12"
+  "@nestjs/microservices": "^11.1.14"
   "@nestjs/jwt": "^11.0.2"
   "@nestjs/passport": "^11.0.5"
-  "@nestjs/terminus": "^11.0.0"
+  "@nestjs/terminus": "^11.1.1"
   "nestjs-pino": "^4.5.0"
 
   # Apollo Server & Gateway
@@ -71,7 +71,7 @@ catalog:
   "lodash": "4.17.23"
 
   # Backend Type Definitions
-  "@types/express": "^5.0.0"
+  "@types/express": "^5.0.6"
   "@types/bcrypt": "^6.0.0"
   "@types/lodash": "4.17.23"
   "@types/cookie-parser": "^1.4.10"
