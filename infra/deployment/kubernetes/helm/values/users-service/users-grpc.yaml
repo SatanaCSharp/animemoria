@@ -10,7 +10,7 @@ protocol: grpc
 image:
   name: users-service-grpc
   tag: latest
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 
 command: ["node", "dist/src/grpc.main"]
 

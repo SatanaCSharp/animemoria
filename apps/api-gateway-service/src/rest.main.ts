@@ -27,9 +27,9 @@ async function bootstrap(): Promise<void> {
   });
   app.use(cookieParser());
 
-  // Avoid setGlobalPrefix so NestJS does not register "/api/v1/*" (path-to-regexp v8
-  // warns on unnamed wildcards). API routes use the "api/v1" prefix in their controller path.
-  // Health stays at /health (no prefix) via HealthHttpController in nest-shared.
+  app.setGlobalPrefix('api/v1', {
+    exclude: ['/health', '/health/live', '/health/ready'],
+  });
 
   await app.listen(port);
 

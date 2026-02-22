@@ -11,7 +11,7 @@ portEnvKey: APP_GRAPHQL_PORT
 image:
   name: auth-service-graphql
   tag: latest
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 
 command: ["node", "dist/src/graphql.main"]
 

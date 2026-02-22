@@ -10,7 +10,7 @@ portEnvKey: APP_REST_PORT
 image:
   name: api-gateway-service-rest
   tag: latest
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 
 command: ["node", "dist/rest.main"]
 

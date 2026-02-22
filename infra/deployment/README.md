@@ -244,6 +244,28 @@ helm install api-gateway-rest $CHART \
   --set image.pullPolicy=Never
 ```
 
+**Note:**
+
+Using `docker-env` switching, means you directly build Docker images in Minikube, and they become cached inside Minikube.
+To load new image use the following:
+
+```bash
+#1 build docker image
+pnpm run docker:build:api:gateway:rest # or any other build command
+
+#2 uninstall deployment using helm
+helm uninstall api-gateway-rest
+
+#3 load image into minikube
+minikube image load api-gateway-rest:latest
+
+#4 install deployment
+helm install api-gateway-rest $CHART \
+  -f $VALUES/cluster.yaml \
+  -f $VALUES/api-gateway-service/api-gateway-rest.yaml \
+  --set image.pullPolicy=Never
+```
+
 ### Step 6: Configure DNS
 
 Add the minikube IP to your hosts file:
