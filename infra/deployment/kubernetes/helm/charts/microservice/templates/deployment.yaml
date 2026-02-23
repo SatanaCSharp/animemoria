@@ -1,0 +1,198 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "microservice.fullname" . }}
+  labels:
+    {{- include "microservice.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  {{- with .Values.strategy }}
+  strategy:
+    type: {{ .type }}
+    {{- if and .rollingUpdate (ne .type "Recreate") }}
+    rollingUpdate:
+      {{- toYaml .rollingUpdate | nindent 6 }}
+    {{- end }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "microservice.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "microservice.selectorLabels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        - name: merge-config-and-secrets
+          image: busybox:1.36
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              OUT="{{ .Values.configVolume.mountPath }}/{{ .Values.configVolume.envFilePath }}"
+              mkdir -p "$(dirname "$OUT")"
+              touch "$OUT"
+              chmod 600 "$OUT"
+              if [ -d /shared-config ]; then
+                for f in /shared-config/*; do
+                  [ -f "$f" ] && echo "$(basename "$f")=$(cat "$f")" >> "$OUT"
+                done
+              fi
+              if [ -d /service-config ]; then
+                for f in /service-config/*; do
+                  [ -f "$f" ] && echo "$(basename "$f")=$(cat "$f")" >> "$OUT"
+                done
+              fi
+              if [ -d /app-secrets ]; then
+                for f in /app-secrets/*; do
+                  [ -f "$f" ] && echo "$(basename "$f")=$(cat "$f")" >> "$OUT"
+                done
+              fi
+              echo "Merged config and secrets into $OUT"
+          volumeMounts:
+            - name: shared-config
+              mountPath: /shared-config
+              readOnly: true
+            - name: env-file
+              mountPath: "{{ .Values.configVolume.mountPath }}"
+            {{- if .Values.existingConfigMap }}
+            - name: service-config
+              mountPath: /service-config
+              readOnly: true
+            {{- end }}
+            - name: app-secrets
+              mountPath: /app-secrets
+              readOnly: true
+        {{- if or .Values.dependencies .Values.waitForRegistry }}
+        - name: wait-for-dependencies
+          image: busybox:1.36
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              echo "Waiting for dependent services..."
+              {{- range .Values.dependencies }}
+              {{- $depPort := .port | default (index $.Values.cluster.knownServices .service) }}
+              until nc -z {{ .service }} {{ $depPort }} 2>/dev/null; do
+                echo "Waiting for {{ .service }}:{{ $depPort }}..."
+                sleep 2
+              done
+              echo "{{ .service }}:{{ $depPort }} is ready"
+              {{- end }}
+              {{- range .Values.waitForRegistry }}
+              until wget -qO- "http://registry/registry/{{ .appType }}/service-descriptions/service-names/{{ .name }}" 2>/dev/null | grep -q '"serviceName"'; do
+                echo "Waiting for {{ .name }}:{{ .appType }} in registry..."
+                sleep 2
+              done
+              echo "{{ .name }}:{{ .appType }} is registered"
+              {{- end }}
+              echo "All dependencies are ready"
+        {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          {{- $repo := .Values.image.repository | default .Values.imageRepository }}
+          image: "{{ if $repo }}{{ $repo }}/{{ end }}{{ .Values.image.name }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.command }}
+          command: {{- toYaml .Values.command | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: {{ include "microservice.portName" . }}
+              containerPort: {{ include "microservice.containerPort" . }}
+              protocol: TCP
+          env:
+            - name: {{ .Values.portEnvKey | default (include "microservice.portEnvKey" .) }}
+              value: {{ include "microservice.containerPort" . | quote }}
+            - name: DOTENV_CONFIG_PATH
+              value: "{{ .Values.configVolume.mountPath }}/{{ .Values.configVolume.envFilePath }}"
+            {{- with .Values.env }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          volumeMounts:
+            - name: env-file
+              mountPath: "{{ .Values.configVolume.mountPath }}"
+              readOnly: true
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          {{- if eq (include "microservice.protocol" .) "http" }}
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: {{ include "microservice.containerPort" . }}
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: {{ include "microservice.containerPort" . }}
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 2
+          {{- else }}
+          livenessProbe:
+            tcpSocket:
+              port: {{ include "microservice.containerPort" . }}
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            tcpSocket:
+              port: {{ include "microservice.containerPort" . }}
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 2
+          {{- end }}
+      volumes:
+        - name: shared-config
+          configMap:
+            name: global-shared-config
+        - name: env-file
+          emptyDir: {}
+        {{- if .Values.existingConfigMap }}
+        - name: service-config
+          configMap:
+            name: {{ .Values.existingConfigMap }}
+        {{- end }}
+        - name: app-secrets
+          {{- if eq .Values.secretsVolume.type "csi" }}
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: {{ .Values.secretsVolume.csi.secretProviderClass | quote }}
+          {{- else }}
+          secret:
+            secretName: {{ .Values.secretsVolume.secretName | default .Values.existingSecret | default (printf "%s-secrets" (include "microservice.fullname" .)) }}
+          {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

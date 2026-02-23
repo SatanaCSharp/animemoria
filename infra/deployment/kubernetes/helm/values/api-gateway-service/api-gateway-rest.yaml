@@ -1,0 +1,109 @@
+# API Gateway (REST). Convention: protocol=http -> port 3000/80.
+# Config keys from apps/api-gateway-service/.env.example
+# Install: helm install api-gateway-rest charts/microservice -f values/cluster.yaml -f values/api-gateway-service/api-gateway-rest.yaml -n <ns>
+
+fullnameOverride: api-gateway-rest
+component: gateway
+
+portEnvKey: APP_REST_PORT
+
+image:
+  name: api-gateway-service-rest
+  tag: latest
+  pullPolicy: Always
+
+command: ["node", "dist/rest.main"]
+
+
+dependencies:
+  - service: registry
+  - service: auth-grpc
+
+env:
+  - name: INTERNAL_REGISTRY_SERVER_HOST
+    value: "http://registry:80"
+
+secretKeys:
+  - AT_SECRET
+  - RT_SECRET
+  - COOKIES_MAX_AGE
+  - CORS_ORIGINS
+
+existingSecret: api-gateway-rest-service-config
+
+# AWS CSI: SecretProviderClass name (applied when secretsVolume.type=csi via values/aws.yaml)
+secretsVolume:
+  csi:
+    secretProviderClass: api-gateway-service-secrets
+
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+replicaCount: 1
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+
+service:
+  type: ClusterIP
+
+# Ingress: REST gateway entry point (/api/v1).
+# className and annotations are set per platform via Kustomize overlays or --set.
+ingress:
+  enabled: true
+  className: ""
+  annotations: {}
+  hosts:
+    - host: ""
+      paths:
+        - path: /health
+          pathType: Prefix
+        - path: /api/v1
+          pathType: Prefix
+
+# NetworkPolicy: allow traffic from ingress controller, egress to internal services.
+networkPolicy:
+  enabled: true
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow from ingress controller (nginx / ALB pods in ingress namespace)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - port: 80
+          protocol: TCP
+  egress:
+    # Allow to all graphql services (subgraphs + gateway-graphql)
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: graphql
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: gateway
+      ports:
+        - port: 80
+          protocol: TCP
+    # Allow to registry (service discovery)
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: registry
+      ports:
+        - port: 80
+          protocol: TCP

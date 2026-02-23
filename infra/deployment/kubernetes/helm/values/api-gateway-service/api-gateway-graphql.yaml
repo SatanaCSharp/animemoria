@@ -1,0 +1,114 @@
+# API Gateway (GraphQL). Convention: protocol=http -> port 3000/80.
+# Config keys from apps/api-gateway-service/.env.example
+# Install: helm install api-gateway-graphql charts/microservice -f values/cluster.yaml -f values/api-gateway-service/api-gateway-graphql.yaml -n <ns>
+
+fullnameOverride: api-gateway-graphql
+component: gateway
+
+portEnvKey: APP_GRAPHQL_PORT
+
+image:
+  name: api-gateway-service-graphql
+  tag: latest
+  pullPolicy: Always
+
+command: ["node", "dist/graphql.main"]
+
+dependencies:
+  - service: auth-grpc
+  - service: registry
+  - service: users-graphql
+  - service: auth-graphql
+
+# Gateway-specific env only if needed; common vars from global-shared-config.
+env:
+  - name: INTERNAL_REGISTRY_SERVER_HOST
+    value: "http://registry:80"
+
+secretKeys:
+  - AT_SECRET
+  - RT_SECRET
+  - COOKIES_MAX_AGE
+  - CORS_ORIGINS
+
+existingSecret: api-gateway-graphql-service-config
+
+# AWS CSI: SecretProviderClass name (applied when secretsVolume.type=csi via values/aws.yaml)
+secretsVolume:
+  csi:
+    secretProviderClass: api-gateway-service-secrets
+
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+replicaCount: 1
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+
+service:
+  type: ClusterIP
+
+# Ingress: GraphQL gateway entry point (/graphql).
+# className and annotations are set per platform via Kustomize overlays or --set.
+ingress:
+  enabled: true
+  className: ""
+  annotations: {}
+  hosts:
+    - host: ""
+      paths:
+        - path: /graphql
+          pathType: Prefix
+
+# NetworkPolicy: allow traffic from api-gateway-rest and ingress controller, egress to graphql subgraphs.
+networkPolicy:
+  enabled: true
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow from other gateway pods (api-gateway-rest)
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: gateway
+      ports:
+        - port: 80
+          protocol: TCP
+    # Allow from ingress controller (for direct /graphql route)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - port: 80
+          protocol: TCP
+  egress:
+    # Allow to all graphql subgraphs
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: graphql
+      ports:
+        - port: 80
+          protocol: TCP
+    # Allow to registry (service discovery)
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: registry
+      ports:
+        - port: 80
+          protocol: TCP

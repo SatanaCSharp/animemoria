@@ -12,7 +12,7 @@ import 'i18n';
 const router = getRouter();
 
 const httpLink = new HttpLink({
-  uri: 'http://localhost:4301/graphql',
+  uri: '/graphql',
 });
 
 const authLink = new SetContextLink(({ headers }) => {

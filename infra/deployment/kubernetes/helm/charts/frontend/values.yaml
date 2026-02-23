@@ -1,0 +1,46 @@
+# Frontend chart values
+# Install: helm install admin charts/frontend -f values/cluster.yaml -f values/admin/admin.yaml
+
+nameOverride: ""
+fullnameOverride: ""
+
+# Image configuration
+imageRepository: ""
+image:
+  name: admin
+  tag: latest
+  pullPolicy: Always
+  pullSecrets: []
+
+# API Gateway URL (injected via ConfigMap, exposed as window.__ENV__.API_GATEWAY_URL)
+apiGatewayUrl: "http://api-gateway-graphql"
+
+# Backend URL for nginx proxy of /graphql (in-cluster service; used only server-side)
+apiGatewayBackendUrl: "http://api-gateway-graphql"
+
+# Ingress
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  host: ""
+  # tls:
+  #   secretName: tls-secret
+
+# Resources (nginx serving static files)
+resources:
+  requests:
+    memory: "32Mi"
+    cpu: "10m"
+  limits:
+    memory: "64Mi"
+    cpu: "50m"
+
+# Pod annotations / labels
+podAnnotations: {}
+podLabels: {}
+
+# Node selector / tolerations / affinity
+nodeSelector: {}
+tolerations: []
+affinity: {}

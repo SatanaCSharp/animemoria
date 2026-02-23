@@ -5,13 +5,13 @@ import { assertDefined } from '@packages/utils/asserts';
 import { GrpcModule } from 'grpc.module';
 
 async function bootstrap(): Promise<void> {
-  const url = process.env.AUTH_SERVICE_GRPC_URL;
+  const port = process.env.APP_GRPC_PORT;
 
-  assertDefined(url, 'AUTH_SERVICE_GRPC_URL is required');
+  assertDefined(port, 'APP_GRPC_PORT is required');
 
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
     GrpcModule,
-    getServerGrpcOption('auth-service', url),
+    getServerGrpcOption('auth-service', `0.0.0.0:${port}`),
   );
 
   await app.listen();

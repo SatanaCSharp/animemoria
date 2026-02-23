@@ -1,0 +1,17 @@
+# Cluster-global values: image repository and known service ports.
+# Use with every install: helm install <release> charts/microservice -f values/cluster.yaml -f values/<service>.yaml -n <ns>
+# Set imageRepository via CI (--set imageRepository=<registry>) or seal it in a secret; do not commit real registry URLs.
+
+imageRepository: ""  # e.g. ghcr.io/org/animemoria or my-registry.io/my-repo
+
+# Port map: release name -> Service port (convention: http=80, grpc=5000). Used by dependency wait.
+cluster:
+  knownServices:
+    registry: 80
+    users-grpc: 5000
+    users-graphql: 80
+    auth-grpc: 5000
+    auth-graphql: 80
+    api-gateway-graphql: 80
+    api-gateway-rest: 80
+    admin: 80

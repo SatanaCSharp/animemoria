@@ -25,8 +25,11 @@ async function bootstrap(): Promise<void> {
       'Apollo-Require-Preflight',
     ],
   });
-
   app.use(cookieParser());
+
+  app.setGlobalPrefix('api/v1', {
+    exclude: ['/health', '/health/live', '/health/ready'],
+  });
 
   await app.listen(port);
 

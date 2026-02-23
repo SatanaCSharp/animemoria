@@ -9,7 +9,7 @@ export class ConfigModule {
       module: ConfigModule,
       imports: [
         NestConfigModule.forRoot({
-          envFilePath: '.env',
+          envFilePath: process.env.DOTENV_CONFIG_PATH ?? '.env',
           isGlobal: true,
           expandVariables: true,
         }),

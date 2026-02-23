@@ -1,0 +1,165 @@
+# Default values for the universal microservice chart.
+# Override per service via -f values/<service>.yaml
+# Use -f values/cluster.yaml (or global -f) for imageRepository and cluster.knownServices.
+
+nameOverride: ""
+fullnameOverride: ""
+
+# Component type: gateway, graphql, grpc, registry. Used as app.kubernetes.io/component label
+# and for component-based NetworkPolicy selectors (e.g. gateway -> graphql -> grpc -> registry).
+component: ""
+
+# Image: repository is taken from imageRepository (or global) when not set here.
+# Set only image.name (and optionally tag); repository is centralized.
+imageRepository: ""  # e.g. my-registry.io/my-repo — set via -f values/cluster.yaml or --set
+image:
+  repository: ""     # override per release; default: imageRepository
+  name: app-name     # e.g. registry-service, users-service
+  tag: latest
+  pullPolicy: Always
+  pullSecrets: []    # optional, e.g. [name: regcred]
+
+# Override container CMD for variants (e.g. ["node", "dist/grpc.main"])
+command: []  # e.g. ["node", "dist/grpc.main"] or leave [] for default
+
+# InitContainer: wait for these services. Port is resolved from cluster.knownServices when omitted.
+# Each entry: service (K8s Service DNS name) and optional port (fallback if not in knownServices).
+dependencies: []     # e.g. [ { service: registry }, { service: users-grpc } ]
+
+# Central map: service fullname (release name) -> port. Used to resolve dependency ports and URLs.
+# Set once via -f values/cluster.yaml so per-service values don't repeat ports.
+cluster:
+  knownServices: {}  # e.g. { "registry": 3000, "users-grpc": 50051, "auth-grpc": 50052, ... }
+
+# Convention over configuration: protocol drives port (http -> 3000/80, grpc -> 5000/5000).
+protocol: http  # or grpc
+# Optional: override port env key (default: APP_PORT for http, APP_GRPC_PORT for grpc). Set e.g. APP_GRAPHQL_PORT, APP_REST_PORT.
+portEnvKey: ""
+
+# Explicit env key-values from values (non-sensitive). Sensitive vars must be in existingSecret.
+# Source: apps/<service>/.env.example. Example: [ { name: NODE_ENV, value: "production" }, { name: LOG_LEVEL, value: "info" } ]
+env: []
+
+# Required key names in the secret (from apps/<service>/.env.example).
+# Documented per service in values/<service>/*.yaml; used for validation/docs.
+secretKeys: []  # e.g. [ DB_CONNECTION_URL, AT_SECRET, RT_SECRET, INTERNAL_REGISTRY_SERVER_HOST ]
+
+# global-shared-config: non-sensitive env (NODE_ENV, LOG_*). Mounted as volume (not etcd envFrom).
+# Set create: true on one release (e.g. registry) to create the ConfigMap; others leave false.
+sharedConfigMap:
+  create: false
+  data:
+    NODE_ENV: "production"
+    LOG_LEVEL: "info"
+    LOG_PRETTY: "false"
+
+# Config and secrets are mounted as volumes; init container merges them into a single .env in emptyDir.
+# App should load env from DOTENV_CONFIG_PATH (default /etc/app/config/.env).
+configVolume:
+  mountPath: /etc/app/config
+  envFilePath: .env
+
+# Secrets volume: source is either K8s Secret or CSI (AWS Secrets Store CSI Driver).
+# type: secret — K8s Secret (local: created from .env via create-secrets.sh; mounted as files).
+# type: csi — AWS Secrets Store CSI Driver; secretProviderClass must exist; no etcd storage.
+secretsVolume:
+  type: secret       # secret | csi
+  mountPath: /etc/app/secrets
+  secretName: ""     # when type=secret, default: {{ fullname }}-secrets
+  csi:
+    secretProviderClass: ""  # e.g. auth-service-secrets; see manifests/aws/secretproviderclass.yaml
+
+existingSecret: ""   # default: {{ fullname }}-secrets (used when secretsVolume.type=secret)
+existingConfigMap: "" # optional, service-specific config (mounted as volume when set)
+
+# Resources
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+# Replicas (ignored when autoscaling.enabled is true)
+replicaCount: 1
+
+# Deployment strategy (RollingUpdate or Recreate)
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: "25%"
+    maxUnavailable: 0
+
+# Autoscaling (HPA)
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 70
+
+# Pod Disruption Budget (use either minAvailable or maxUnavailable, not both)
+pdb:
+  enabled: false  # Default to false, enable per-service for HA
+  minAvailable: 1 # Ensure at least 1 pod is always up
+  # maxUnavailable: 1 # Alternative option (uncomment and remove/zero minAvailable to use)
+
+# Service type only; port/targetPort/name derived from protocol (http -> 80->3000, grpc -> 5000->5000).
+service:
+  type: ClusterIP
+
+# Ingress: expose the service externally. Enable only on api-gateway release.
+# Per-path serviceName/servicePort override allows routing to multiple backends from one Ingress.
+ingress:
+  enabled: false
+  className: ""        # "nginx" (minikube) or "alb" (AWS)
+  annotations: {}
+  hosts: []
+  # - host: api.animemoria.local
+  #   paths:
+  #     - path: /graphql
+  #       pathType: Prefix
+  #       serviceName: api-gateway-graphql   # override backend service
+  #       servicePort: 80
+  #     - path: /api/v1
+  #       pathType: Prefix
+  #       # uses release service by default
+  tls: []
+  # - hosts:
+  #     - api.animemoria.com
+  #   secretName: tls-secret
+
+# NetworkPolicy: restrict pod-to-pod and external traffic.
+# ingress/egress arrays use raw Kubernetes NetworkPolicy rule syntax.
+networkPolicy:
+  enabled: false
+  policyTypes:
+    - Ingress
+    - Egress
+  allowDNS: true       # auto-adds egress to kube-dns (UDP+TCP 53)
+  ingress: []
+  # - from:
+  #     - podSelector:
+  #         matchLabels:
+  #           app.kubernetes.io/instance: api-gateway-graphql
+  #   ports:
+  #     - port: 80
+  #       protocol: TCP
+  egress: []
+  # - to:
+  #     - podSelector:
+  #         matchLabels:
+  #           app.kubernetes.io/instance: auth-grpc
+  #   ports:
+  #     - port: 5000
+  #       protocol: TCP
+
+# Pod annotations / labels
+podAnnotations: {}
+podLabels: {}
+
+# Node selector / tolerations / affinity (optional)
+nodeSelector: {}
+tolerations: []
+affinity: {}

@@ -1,0 +1,15 @@
+# Admin Dashboard
+# Install: helm install admin charts/frontend -f values/cluster.yaml -f values/admin/admin.yaml
+
+fullnameOverride: admin
+
+image:
+  name: admin
+  tag: latest
+
+# GraphQL API endpoint (injected as window.__ENV__.API_GATEWAY_URL)
+apiGatewayUrl: "http://api.animemoria.local"
+
+ingress:
+  enabled: true
+  host: ""  # Set via --set or overlay (e.g., admin.animemoria.local)
