@@ -14,3 +14,4 @@ cluster:
     auth-graphql: 80
     api-gateway-graphql: 80
     api-gateway-rest: 80
+    admin: 80

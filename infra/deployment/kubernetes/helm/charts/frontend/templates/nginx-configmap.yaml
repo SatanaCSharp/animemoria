@@ -1,0 +1,44 @@
+# Nginx config: static assets + proxy /graphql to API Gateway (internal service)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "frontend.fullname" . }}-nginx
+  labels:
+    {{- include "frontend.labels" . | nindent 4 }}
+data:
+  default.conf: |
+    server {
+        listen 80;
+        listen [::]:80;
+        server_name _;
+        root /usr/share/nginx/html;
+        index index.html;
+
+        # Proxy GraphQL to API Gateway (in-cluster service)
+        location /graphql {
+            proxy_pass {{ .Values.apiGatewayBackendUrl }};
+            proxy_http_version 1.1;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        # SPA routing - fallback to index.html
+        location / {
+            try_files $uri $uri/ /index.html;
+        }
+
+        # Cache static assets aggressively
+        location /assets {
+            expires 1y;
+            add_header Cache-Control "public, immutable";
+        }
+
+        # Enable gzip compression
+        gzip on;
+        gzip_vary on;
+        gzip_min_length 1024;
+        gzip_types text/plain text/css text/xml text/javascript application/x-javascript application/xml+rss application/javascript application/json image/svg+xml;
+        gzip_comp_level 6;
+    }

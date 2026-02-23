@@ -20,13 +20,19 @@ infra/deployment/
 │
 └── kubernetes/
     ├── helm/
-    │   ├── charts/microservice/ # Universal Helm chart for all services
-    │   │   ├── Chart.yaml
-    │   │   ├── values.yaml      # Default values with full documentation
-    │   │   └── templates/       # Deployment, Service, Ingress, HPA, PDB, NetworkPolicy
+    │   ├── charts/
+    │   │   ├── microservice/    # Universal Helm chart for NestJS services
+    │   │   │   ├── Chart.yaml
+    │   │   │   ├── values.yaml
+    │   │   │   └── templates/   # Deployment, Service, Ingress, HPA, PDB, NetworkPolicy
+    │   │   └── frontend/        # Helm chart for frontend apps (Vite/React + Nginx)
+    │   │       ├── Chart.yaml
+    │   │       ├── values.yaml
+    │   │       └── templates/   # Deployment, Service, Ingress, HPA, PDB, NetworkPolicy
     │   └── values/
     │       ├── cluster.yaml              # Global: imageRepository, knownServices port map
     │       ├── aws.yaml                  # AWS override: enables CSI secrets volume
+    │       ├── admin/                    # admin.yaml (frontend)
     │       ├── auth-service/             # auth-graphql.yaml, auth-grpc.yaml
     │       ├── users-service/            # users-graphql.yaml, users-grpc.yaml
     │       ├── api-gateway-service/      # api-gateway-graphql.yaml, api-gateway-rest.yaml
@@ -54,6 +60,12 @@ Each NestJS service is deployed as multiple Helm releases (one per entrypoint):
 | `api-gateway-graphql` | api-gateway-service | HTTP     | 3000           | 80           |
 | `api-gateway-rest`    | api-gateway-service | HTTP     | 3000           | 80           |
 
+Frontend applications use a separate Helm chart (`charts/frontend`):
+
+| Helm Release | Application | Runtime | Container Port | Service Port |
+| ------------ | ----------- | ------- | -------------- | ------------ |
+| `admin`      | admin       | Nginx   | 80             | 80           |
+
 ### Deployment Order
 
 Services must be deployed in dependency order:
@@ -66,9 +78,10 @@ Services must be deployed in dependency order:
 5. auth-graphql         (depends on: auth-grpc)
 6. api-gateway-graphql  (depends on: users-graphql, auth-graphql)
 7. api-gateway-rest     (depends on: api-gateway-graphql)
+8. admin                (no backend dependencies, can deploy anytime)
 ```
 
-Init containers block until dependencies are reachable (DNS + TCP check).
+Init containers block until dependencies are reachable (DNS + TCP check). Frontend apps (like admin) serve static files and have no runtime backend dependencies.
 
 ### Configuration Layers
 
@@ -242,6 +255,14 @@ helm install api-gateway-rest $CHART \
   -f $VALUES/cluster.yaml \
   -f $VALUES/api-gateway-service/api-gateway-rest.yaml \
   --set image.pullPolicy=Never
+
+# 8. Admin Dashboard (uses frontend chart)
+export FRONTEND_CHART=infra/deployment/kubernetes/helm/charts/frontend
+helm install admin $FRONTEND_CHART \
+  -f $VALUES/admin/admin.yaml \
+  --set image.pullPolicy=Never \
+  --set ingress.className=nginx \
+  --set ingress.host=admin.animemoria.local
 ```
 
 **Note:**
@@ -266,12 +287,39 @@ helm install api-gateway-rest $CHART \
   --set image.pullPolicy=Never
 ```
 
-### Step 6: Configure DNS
+### Step 6: Configure DNS and access in browser
 
-Add the minikube IP to your hosts file:
+Ingress routes by **hostname** (Host header). Use the hostname in the URL, not the IP.
+
+**If the minikube node IP is not reachable from your machine** (e.g. Docker driver on Mac):
 
 ```bash
-echo "$(minikube ip) api.animemoria.local" | sudo tee -a /etc/hosts
+# Resolve hostnames to localhost
+echo "127.0.0.1 api.animemoria.local admin.animemoria.local" | sudo tee -a /etc/hosts
+```
+
+Expose ingress on localhost (run in a separate terminal, keep it open). Choose one:
+
+- **No port in URL** — bind to port 80 (requires one-time sudo):
+
+  ```bash
+  sudo kubectl port-forward -n ingress-nginx svc/ingress-nginx-controller 80:80
+  ```
+
+  Then open **http://admin.animemoria.local/** and **http://api.animemoria.local/graphql**.
+
+- **No sudo** — use a non-privileged port:
+  ```bash
+  kubectl port-forward -n ingress-nginx svc/ingress-nginx-controller 8080:80
+  ```
+  Then open **http://admin.animemoria.local:8080/** and **http://api.animemoria.local:8080/graphql**.
+
+**If the minikube node IP is reachable:**
+
+```bash
+echo "$(minikube ip) api.animemoria.local admin.animemoria.local" | sudo tee -a /etc/hosts
+# Use the ingress NodePort in the URL, e.g. http://admin.animemoria.local:30650/
+# Get port: kubectl get svc -n ingress-nginx ingress-nginx-controller -o jsonpath='{.spec.ports[0].nodePort}'
 ```
 
 ### Step 7: Verify
@@ -286,9 +334,12 @@ kubectl get svc
 # Check ingress
 kubectl get ingress
 
-# Test the API
+# Test the API (omit :8080 if you used sudo port-forward on 80; use :<nodePort> if using NodePort)
 curl http://api.animemoria.local/graphql
 curl http://api.animemoria.local/api/v1
+
+# Test admin dashboard
+curl http://admin.animemoria.local/
 ```
 
 ### Upgrading a service
@@ -319,7 +370,7 @@ kubectl rollout restart deployment auth-graphql auth-grpc
 ### Tearing down
 
 ```bash
-helm uninstall api-gateway-rest api-gateway-graphql auth-graphql users-graphql auth-grpc users-grpc registry
+helm uninstall admin api-gateway-rest api-gateway-graphql auth-graphql users-graphql auth-grpc users-grpc registry
 kubectl delete -k infra/deployment/kubernetes/manifests/minikube/
 minikube stop
 ```
@@ -370,7 +421,11 @@ The `aws.yaml` overlay switches `secretsVolume.type` to `csi`, so secrets are mo
 
 ## Helm Chart Reference
 
-### Key Values
+### Microservice Chart (charts/microservice)
+
+For NestJS backend services with config/secret management.
+
+#### Key Values
 
 | Value                                   | Default    | Description                                                                    |
 | --------------------------------------- | ---------- | ------------------------------------------------------------------------------ |
@@ -395,21 +450,21 @@ The `aws.yaml` overlay switches `secretsVolume.type` to `csi`, so secrets are mo
 | `networkPolicy.enabled`                 | `false`    | Enable NetworkPolicy                                                           |
 | `ingress.enabled`                       | `false`    | Enable Ingress (api-gateway releases only)                                     |
 
-### Port Conventions
+#### Port Conventions
 
 | Protocol | Container Port | Service Port | Port Env Var                               |
 | -------- | -------------- | ------------ | ------------------------------------------ |
 | `http`   | 3000           | 80           | `APP_PORT` (or override with `portEnvKey`) |
 | `grpc`   | 5000           | 5000         | `APP_GRPC_PORT`                            |
 
-### Health Checks
+#### Health Checks
 
 | Protocol | Liveness                 | Readiness                |
 | -------- | ------------------------ | ------------------------ |
 | HTTP     | `GET /health/live`       | `GET /health/ready`      |
 | gRPC     | Native gRPC health check | Native gRPC health check |
 
-### Helm Install Pattern
+#### Helm Install Pattern
 
 ```bash
 helm install <release-name> charts/microservice \
@@ -418,4 +473,33 @@ helm install <release-name> charts/microservice \
   -f values/<service>/<release>.yaml \
   [--set imageRepository=<registry>]              # if not in cluster.yaml
   [--set image.pullPolicy=Never]                  # minikube only
+```
+
+---
+
+### Frontend Chart (charts/frontend)
+
+For static HTML/JS applications served via Nginx.
+
+#### Key Values
+
+| Value              | Default                              | Description                                     |
+| ------------------ | ------------------------------------ | ----------------------------------------------- |
+| `imageRepository`  | `""`                                 | Container registry URL                          |
+| `image.name`       | `admin`                              | Docker image name                               |
+| `image.tag`        | `latest`                             | Image tag                                       |
+| `image.pullPolicy` | `Always`                             | Use `Never` for minikube                        |
+| `apiGatewayUrl`    | `http://api-gateway-graphql/graphql` | GraphQL endpoint (injected as `window.__ENV__`) |
+| `ingress.enabled`  | `false`                              | Enable Ingress                                  |
+| `ingress.host`     | `""`                                 | Ingress hostname                                |
+
+#### Helm Install Pattern
+
+```bash
+helm install admin charts/frontend \
+  -f values/admin/admin.yaml \
+  [--set imageRepository=<registry>]     # if using remote registry
+  [--set image.pullPolicy=Never]         # minikube only
+  [--set ingress.className=nginx]        # minikube
+  [--set ingress.host=admin.local]       # set ingress host
 ```
