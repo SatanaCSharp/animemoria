@@ -1,6 +1,6 @@
 # Multi-stage Dockerfile for Vite/React applications
 #
-# Builds a self-contained image with no external base image dependency.
+# Follows https://pnpm.io/docker: BuildKit cache mount, full install, build with filter.
 #
 # BUILD:
 #   docker build -f infra/deployment/docker/Dockerfile.vite \
@@ -13,15 +13,12 @@
 # ============================================================================
 # Global build args
 # ============================================================================
-ARG NODE_VERSION=24.11.1
+ARG NODE_VERSION=24.14.0
 ARG PNPM_VERSION=9.15.3
 ARG APP_NAME
 
-# Packages excluded from Vite builds (backend/dev-only)
-ARG EXCLUDED_PACKAGES="nest-shared scripts graphql/definitions grpc eslint-config-base eslint-config-service eslint-config-ui"
-
 # ============================================================================
-# Stage 1: Base - Node.js with pnpm
+# Stage 1: Base - Node.js with pnpm (corepack)
 # ============================================================================
 FROM node:${NODE_VERSION}-alpine AS base
 
@@ -30,28 +27,13 @@ ARG PNPM_VERSION
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 
-RUN apk add --no-cache libc6-compat && \
-    npm install -g pnpm@${PNPM_VERSION}
+RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate && \
+    apk add --no-cache libc6-compat
 
 WORKDIR /app
 
 # ============================================================================
-# Stage 2: Package filter - keep only relevant package.json files
-# ============================================================================
-FROM base AS packages-filter
-
-ARG EXCLUDED_PACKAGES
-
-COPY packages/ ./packages/
-
-RUN for pkg in ${EXCLUDED_PACKAGES}; do \
-      rm -rf "./packages/${pkg}"; \
-    done && \
-    find ./packages -mindepth 2 -type f ! -name 'package.json' -delete && \
-    find ./packages -mindepth 2 -type d -empty -delete
-
-# ============================================================================
-# Stage 3: Dependencies - install with pnpm
+# Stage 2: Dependencies - install with pnpm (BuildKit cache mount)
 # ============================================================================
 FROM base AS deps
 
@@ -59,37 +41,26 @@ ARG APP_NAME
 
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json .npmrc ./
 COPY turbo.json ./
-
-COPY --from=packages-filter /app/packages/ ./packages/
-
+COPY packages/ ./packages/
 COPY apps/${APP_NAME}/package.json ./apps/${APP_NAME}/
 
-RUN --mount=type=cache,id=pnpm-vite,target=/pnpm/store \
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile --prefer-offline
 
 # ============================================================================
-# Stage 4: Build - compile workspace packages and Vite app
+# Stage 3: Build - compile app and its workspace dependencies only
 # ============================================================================
 FROM deps AS builder
 
 ARG APP_NAME
-ARG EXCLUDED_PACKAGES
-
-COPY pnpm-workspace.yaml turbo.json package.json ./
-
-COPY packages/ ./packages/
-RUN for pkg in ${EXCLUDED_PACKAGES}; do \
-      rm -rf "./packages/${pkg}"; \
-    done
 
 COPY apps/${APP_NAME} ./apps/${APP_NAME}
 
-RUN pnpm turbo run build --filter='./packages/*'
-
-RUN pnpm turbo run build --filter=${APP_NAME}
+# Build only this app and its deps (turbo filter); avoids building backend packages
+RUN pnpm turbo run build --filter=${APP_NAME}...
 
 # ============================================================================
-# Stage 5: Runtime - nginx serving static assets
+# Stage 4: Runtime - nginx serving static assets
 # ============================================================================
 FROM nginx:alpine AS runner
 

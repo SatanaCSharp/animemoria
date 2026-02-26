@@ -1,8 +1,7 @@
 # Multi-stage Dockerfile for NestJS microservices
 #
-# Builds a self-contained image with no external base image dependency.
-# Uses `pnpm deploy` to create a standalone production bundle with all
-# workspace dependencies resolved — no need to copy packages/ at runtime.
+# Follows https://pnpm.io/docker: BuildKit cache mount, full install, build with filter,
+# then pnpm deploy for a minimal production bundle.
 #
 # Image naming convention: <service-name>-<app-type>
 #
@@ -21,17 +20,14 @@
 # ============================================================================
 # Global build args
 # ============================================================================
-ARG NODE_VERSION=24.11.1
+ARG NODE_VERSION=24.14.0
 ARG PNPM_VERSION=9.15.3
 ARG APP_NAME
 ARG APP_TYPE
 ARG ENTRY_POINT
 
-# Packages excluded from NestJS builds (frontend/dev-only)
-ARG EXCLUDED_PACKAGES="eslint-config-base eslint-config-service eslint-config-ui graphql/generated ui-shared"
-
 # ============================================================================
-# Stage 1: Base - Node.js with pnpm
+# Stage 1: Base - Node.js with pnpm (corepack)
 # ============================================================================
 FROM node:${NODE_VERSION}-alpine AS base
 
@@ -40,13 +36,13 @@ ARG PNPM_VERSION
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 
-RUN apk add --no-cache libc6-compat && \
-    npm install -g pnpm@${PNPM_VERSION}
+RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate && \
+    apk add --no-cache libc6-compat
 
 WORKDIR /app
 
 # ============================================================================
-# Stage 2: Package stubs - all package.json files for workspace resolution
+# Stage 2: Package stubs - all package.json for workspace resolution
 # ============================================================================
 FROM base AS packages-json
 
@@ -64,44 +60,30 @@ ARG APP_NAME
 
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json .npmrc ./
 COPY turbo.json ./
-
-# All package.json stubs (unfiltered) so pnpm can resolve every workspace: reference
 COPY --from=packages-json /app/packages/ ./packages/
-
 COPY apps/${APP_NAME}/package.json ./apps/${APP_NAME}/
 
-RUN --mount=type=cache,id=pnpm-nestjs,target=/pnpm/store \
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile --prefer-offline
 
 # ============================================================================
-# Stage 4: Build - compile packages and app
+# Stage 4: Build - compile this service and its workspace dependencies only
 # ============================================================================
 FROM deps AS builder
 
 ARG APP_NAME
 ARG ENTRY_POINT
-ARG EXCLUDED_PACKAGES
 
 RUN apk add --no-cache protobuf-dev
 
-COPY pnpm-workspace.yaml turbo.json package.json ./
-
-# Copy full source and remove packages not needed for NestJS builds
 COPY packages/ ./packages/
-RUN for pkg in ${EXCLUDED_PACKAGES}; do \
-      rm -rf "./packages/${pkg}"; \
-    done
-
 COPY apps/${APP_NAME} ./apps/${APP_NAME}
 
-RUN pnpm turbo run build --filter='./packages/*'
+# Build only this app and its deps (e.g. nest-shared, grpc, graphql/definitions)
+RUN pnpm turbo run build --filter=${APP_NAME}...
 
-RUN pnpm turbo run build --filter=${APP_NAME}
-
-# Ensure db directory exists (for services without migrations)
 RUN mkdir -p ./apps/${APP_NAME}/db
 
-# Detect entry point path (dist/<entry>.js or dist/src/<entry>.js)
 RUN if [ -f "./apps/${APP_NAME}/dist/${ENTRY_POINT}.js" ]; then \
       echo "dist/${ENTRY_POINT}.js" > "./apps/${APP_NAME}/.entrypoint"; \
     elif [ -f "./apps/${APP_NAME}/dist/src/${ENTRY_POINT}.js" ]; then \
@@ -111,18 +93,16 @@ RUN if [ -f "./apps/${APP_NAME}/dist/${ENTRY_POINT}.js" ]; then \
       ls -R "./apps/${APP_NAME}/dist" >&2 && exit 1; \
     fi
 
-
 # ============================================================================
-# Stage 5: Production bundle - pnpm deploy with built workspace packages
+# Stage 5: Production bundle - pnpm deploy (minimal deps for this app)
 # ============================================================================
 FROM deps AS prod-bundle
 
 ARG APP_NAME
 
-# Overlay built workspace packages (with dist/) on top of deps stubs
 COPY --from=builder /app/packages/ ./packages/
 
-RUN --mount=type=cache,id=pnpm-deploy-nestjs,target=/pnpm/store \
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm deploy --filter=${APP_NAME} --prod /app/deploy
 
 # ============================================================================
@@ -140,15 +120,10 @@ ENV NODE_ENV=production
 
 WORKDIR /app
 
-# Copy production node_modules from pnpm deploy (includes resolved workspace deps)
 COPY --from=prod-bundle /app/deploy/node_modules ./node_modules
-
-# Copy built application, database migrations, and detected entrypoint path
 COPY --from=builder /app/apps/${APP_NAME}/dist ./dist
 COPY --from=builder /app/apps/${APP_NAME}/db ./db
 COPY --from=builder /app/apps/${APP_NAME}/package.json ./package.json
 COPY --from=builder /app/apps/${APP_NAME}/.entrypoint ./.entrypoint
 
-# exec replaces the shell so node becomes PID 1 (receives SIGTERM for graceful shutdown)
 CMD ["sh", "-c", "exec node $(cat .entrypoint)"]
-

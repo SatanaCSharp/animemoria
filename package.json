@@ -31,7 +31,8 @@
     "docker:build:api:gateway:graphql": "docker build -f infra/deployment/docker/Dockerfile.nestjs --build-arg APP_NAME=api-gateway-service --build-arg APP_TYPE=graphql --build-arg ENTRY_POINT=graphql.main -t api-gateway-service-graphql:latest .",
     "docker:build:api:gateway:rest": "docker build -f infra/deployment/docker/Dockerfile.nestjs --build-arg APP_NAME=api-gateway-service --build-arg APP_TYPE=rest --build-arg ENTRY_POINT=rest.main -t api-gateway-service-rest:latest .",
     "docker:build:services": "pnpm run docker:build:registry && pnpm run docker:build:users:grpc && pnpm run docker:build:auth:grpc && pnpm run docker:build:api:gateway:graphql",
-    "docker:build:all": "pnpm run docker:build:admin && pnpm run docker:build:services"
+    "docker:build:clients": "pnpm run docker:build:admin && pnpm run docker:build:web",
+    "docker:build:all": "pnpm run docker:build:clients && pnpm run docker:build:services"
   },
   "workspaces": [
     "apps/*",
