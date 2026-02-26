@@ -1,8 +1,8 @@
 # API Gateway (REST). Convention: protocol=http -> port 3000/80.
 # Config keys from apps/api-gateway-service/.env.example
-# Install: helm install api-gateway-rest charts/microservice -f values/cluster.yaml -f values/api-gateway-service/api-gateway-rest.yaml -n <ns>
+# Install: helm install api-gateway-rest charts/microservice -f values/cluster.yaml -f values/api-gateway-service/api-gateway-service-rest.yaml -n <ns>
 
-fullnameOverride: api-gateway-rest
+fullnameOverride: api-gateway-service-rest
 component: gateway
 
 portEnvKey: APP_REST_PORT
@@ -16,12 +16,12 @@ command: ["node", "dist/rest.main"]
 
 
 dependencies:
-  - service: registry
-  - service: auth-grpc
+  - service: registry-service-rest
+  - service: auth-service-grpc
 
 env:
   - name: INTERNAL_REGISTRY_SERVER_HOST
-    value: "http://registry:80"
+    value: "http://registry-service-rest:80"
 
 secretKeys:
   - AT_SECRET
@@ -107,3 +107,4 @@ networkPolicy:
       ports:
         - port: 80
           protocol: TCP
+

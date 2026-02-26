@@ -1,36 +1,36 @@
-# Users service (GraphQL). Convention: protocol=http -> port 3000/80.
+# Users service (gRPC). Convention: protocol=grpc -> port 5000.
 # Config keys from apps/users-service/.env.example
-# Install: helm install users-graphql charts/microservice -f values/cluster.yaml -f values/users-service/users-graphql.yaml -n <ns>
+# Install: helm install users-grpc charts/microservice -f values/cluster.yaml -f values/users-service/users-service-grpc.yaml -n <ns>
 
-fullnameOverride: users-graphql
-component: graphql
+fullnameOverride: users-service-grpc
+component: grpc
 
-portEnvKey: APP_GRAPHQL_PORT
+protocol: grpc
 
 image:
-  name: users-service-graphql
+  name: users-service-grpc
   tag: latest
   pullPolicy: Always
 
-command: ["node", "dist/src/graphql.main"]
+command: ["node", "dist/src/grpc.main"]
 
 dependencies:
-  - service: users-grpc
+  - service: registry-service-rest
 
 env:
   - name: APP_NAME
     value: "users-service"
   - name: USERS_SERVICE_GRAPHQL_URL
-    value: "http://users-graphql:80"
+    value: "http://users-service-graphql:80"
   - name: USERS_SERVICE_GRPC_URL
-    value: "users-grpc:5000"
+    value: "users-service-grpc:5000"
   - name: INTERNAL_REGISTRY_SERVER_HOST
-    value: "http://registry:80"
+    value: "http://registry-service-rest:80"
 
 secretKeys:
   - DB_CONNECTION_URL
 
-existingSecret: users-graphql-service-config
+existingSecret: users-grpc-service-config
 
 # AWS CSI: SecretProviderClass name (applied when secretsVolume.type=csi via values/aws.yaml)
 secretsVolume:
@@ -47,6 +47,11 @@ resources:
 
 replicaCount: 1
 
+# Recreate ensures old pod terminates before new one starts,
+# preventing the serviceId race condition (old pod unregisters new pod's entry).
+strategy:
+  type: Recreate
+
 autoscaling:
   enabled: false
   minReplicas: 1
@@ -56,7 +61,7 @@ autoscaling:
 service:
   type: ClusterIP
 
-# NetworkPolicy: allow traffic from api-gateway-graphql, egress to users-grpc.
+# NetworkPolicy: allow traffic from users-graphql, egress to external DB + registry.
 networkPolicy:
   enabled: true
   policyTypes:
@@ -66,12 +71,12 @@ networkPolicy:
     - from:
         - podSelector:
             matchLabels:
-              app.kubernetes.io/component: gateway
+              app.kubernetes.io/component: graphql
       ports:
-        - port: 80
+        - port: 5000
           protocol: TCP
   egress:
-    # Allow to all gRPC services
+    # Allow to other gRPC services (inter-service communication)
     - to:
         - podSelector:
             matchLabels:
@@ -87,3 +92,15 @@ networkPolicy:
       ports:
         - port: 80
           protocol: TCP
+    # Allow to external database (all external IPs)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - port: 5432
+          protocol: TCP
+

@@ -33,10 +33,10 @@ infra/deployment/
     │       ├── cluster.yaml              # Global: imageRepository, knownServices port map
     │       ├── aws.yaml                  # AWS override: enables CSI secrets volume
     │       ├── admin/                    # admin.yaml (frontend)
-    │       ├── auth-service/             # auth-graphql.yaml, auth-grpc.yaml
-    │       ├── users-service/            # users-graphql.yaml, users-grpc.yaml
-    │       ├── api-gateway-service/      # api-gateway-graphql.yaml, api-gateway-rest.yaml
-    │       └── registry-service/         # registry.yaml
+    │       ├── auth-service/             # auth-service-graphql.yaml, auth-service-grpc.yaml
+    │       ├── users-service/            # users-service-graphql.yaml, users-service-grpc.yaml
+    │       ├── api-gateway-service/      # api-gateway-service-graphql.yaml, api-gateway-service-rest.yaml
+    │       └── registry-service/         # registry-service-rest.yaml
     │
     └── manifests/               # Kustomize overlays
         ├── base/                # Base Ingress for api-gateway
@@ -50,15 +50,15 @@ infra/deployment/
 
 Each NestJS service is deployed as multiple Helm releases (one per entrypoint):
 
-| Helm Release          | Service             | Protocol | Container Port | Service Port |
-| --------------------- | ------------------- | -------- | -------------- | ------------ |
-| `registry`            | registry-service    | HTTP     | 3000           | 80           |
-| `auth-graphql`        | auth-service        | HTTP     | 3000           | 80           |
-| `auth-grpc`           | auth-service        | gRPC     | 5000           | 5000         |
-| `users-graphql`       | users-service       | HTTP     | 3000           | 80           |
-| `users-grpc`          | users-service       | gRPC     | 5000           | 5000         |
-| `api-gateway-graphql` | api-gateway-service | HTTP     | 3000           | 80           |
-| `api-gateway-rest`    | api-gateway-service | HTTP     | 3000           | 80           |
+| Helm Release                  | Service             | Protocol | Container Port | Service Port |
+| ----------------------------- | ------------------- | -------- | -------------- | ------------ |
+| `registry-service-rest`       | registry-service    | HTTP     | 3000           | 80           |
+| `auth-service-graphql`        | auth-service        | HTTP     | 3000           | 80           |
+| `auth-service-grpc`           | auth-service        | gRPC     | 5000           | 5000         |
+| `users-service-graphql`       | users-service       | HTTP     | 3000           | 80           |
+| `users-service-grpc`          | users-service       | gRPC     | 5000           | 5000         |
+| `api-gateway-service-graphql` | api-gateway-service | HTTP     | 3000           | 80           |
+| `api-gateway-service-rest`    | api-gateway-service | HTTP     | 3000           | 80           |
 
 Frontend applications use a separate Helm chart (`charts/frontend`):
 
@@ -71,14 +71,14 @@ Frontend applications use a separate Helm chart (`charts/frontend`):
 Services must be deployed in dependency order:
 
 ```
-1. registry             (no dependencies)
-2. users-grpc           (depends on: registry)
-3. auth-grpc            (depends on: users-grpc, registry)
-4. users-graphql        (depends on: users-grpc)
-5. auth-graphql         (depends on: auth-grpc)
-6. api-gateway-graphql  (depends on: users-graphql, auth-graphql)
-7. api-gateway-rest     (depends on: api-gateway-graphql)
-8. admin                (no backend dependencies, can deploy anytime)
+1. registry-service-rest       (no dependencies)
+2. users-service-grpc          (depends on: registry-service-rest)
+3. auth-service-grpc           (depends on: users-service-grpc, registry-service-rest)
+4. users-service-graphql       (depends on: users-service-grpc)
+5. auth-service-graphql        (depends on: auth-service-grpc)
+6. api-gateway-service-graphql (depends on: users-service-graphql, auth-service-graphql)
+7. api-gateway-service-rest    (depends on: api-gateway-service-graphql)
+8. admin                       (no backend dependencies, can deploy anytime)
 ```
 
 Init containers block until dependencies are reachable (DNS + TCP check). Frontend apps (like admin) serve static files and have no runtime backend dependencies.
@@ -215,45 +215,45 @@ Deploy in dependency order:
 
 ```bash
 # 1. Registry (creates global-shared-config ConfigMap)
-helm install registry $CHART \
+helm install registry-service-rest $CHART \
   -f $VALUES/cluster.yaml \
-  -f $VALUES/registry-service/registry.yaml \
+  -f $VALUES/registry-service/registry-service-rest.yaml \
   --set image.pullPolicy=Never
 
 # 2. Users gRPC
-helm install users-grpc $CHART \
+helm install users-service-grpc $CHART \
   -f $VALUES/cluster.yaml \
-  -f $VALUES/users-service/users-grpc.yaml \
+  -f $VALUES/users-service/users-service-grpc.yaml \
   --set image.pullPolicy=Never
 
 # 3. Auth gRPC
-helm install auth-grpc $CHART \
+helm install auth-service-grpc $CHART \
   -f $VALUES/cluster.yaml \
-  -f $VALUES/auth-service/auth-grpc.yaml \
+  -f $VALUES/auth-service/auth-service-grpc.yaml \
   --set image.pullPolicy=Never
 
 # 4. Users GraphQL
-helm install users-graphql $CHART \
+helm install users-service-graphql $CHART \
   -f $VALUES/cluster.yaml \
-  -f $VALUES/users-service/users-graphql.yaml \
+  -f $VALUES/users-service/users-service-graphql.yaml \
   --set image.pullPolicy=Never
 
 # 5. Auth GraphQL
-helm install auth-graphql $CHART \
+helm install auth-service-graphql $CHART \
   -f $VALUES/cluster.yaml \
-  -f $VALUES/auth-service/auth-graphql.yaml \
+  -f $VALUES/auth-service/auth-service-graphql.yaml \
   --set image.pullPolicy=Never
 
 # 6. API Gateway GraphQL
-helm install api-gateway-graphql $CHART \
+helm install api-gateway-service-graphql $CHART \
   -f $VALUES/cluster.yaml \
-  -f $VALUES/api-gateway-service/api-gateway-graphql.yaml \
+  -f $VALUES/api-gateway-service/api-gateway-service-graphql.yaml \
   --set image.pullPolicy=Never
 
 # 7. API Gateway REST
-helm install api-gateway-rest $CHART \
+helm install api-gateway-service-rest $CHART \
   -f $VALUES/cluster.yaml \
-  -f $VALUES/api-gateway-service/api-gateway-rest.yaml \
+  -f $VALUES/api-gateway-service/api-gateway-service-rest.yaml \
   --set image.pullPolicy=Never
 
 # 8. Admin Dashboard (uses frontend chart)
@@ -275,15 +275,15 @@ To load new image use the following:
 pnpm run docker:build:api:gateway:rest # or any other build command
 
 #2 uninstall deployment using helm
-helm uninstall api-gateway-rest
+helm uninstall api-gateway-service-rest
 
 #3 load image into minikube
 minikube image load api-gateway-rest:latest
 
 #4 install deployment
-helm install api-gateway-rest $CHART \
+helm install api-gateway-service-rest $CHART \
   -f $VALUES/cluster.yaml \
-  -f $VALUES/api-gateway-service/api-gateway-rest.yaml \
+  -f $VALUES/api-gateway-service/api-gateway-service-rest.yaml \
   --set image.pullPolicy=Never
 ```
 
@@ -347,9 +347,9 @@ curl http://admin.animemoria.local/
 After rebuilding an image (requires `$CHART` and `$VALUES` to be exported — see Step 5):
 
 ```bash
-helm upgrade auth-graphql $CHART \
+helm upgrade auth-service-graphql $CHART \
   -f $VALUES/cluster.yaml \
-  -f $VALUES/auth-service/auth-graphql.yaml \
+  -f $VALUES/auth-service/auth-service-graphql.yaml \
   --set image.pullPolicy=Never
 ```
 
@@ -370,7 +370,7 @@ kubectl rollout restart deployment auth-graphql auth-grpc
 ### Tearing down
 
 ```bash
-helm uninstall admin api-gateway-rest api-gateway-graphql auth-graphql users-graphql auth-grpc users-grpc registry
+helm uninstall admin api-gateway-service-rest api-gateway-service-graphql auth-service-graphql users-service-graphql auth-service-grpc users-service-grpc registry-service-rest
 kubectl delete -k infra/deployment/kubernetes/manifests/minikube/
 minikube stop
 ```
@@ -408,11 +408,11 @@ VALUES=infra/deployment/kubernetes/helm/values
 helm install registry $CHART \
   -f $VALUES/cluster.yaml \
   -f $VALUES/aws.yaml \
-  -f $VALUES/registry-service/registry.yaml \
+  -f $VALUES/registry-service/registry-service-rest.yaml \
   --set imageRepository=<your-ecr-registry>
 
 # ... repeat for all services in dependency order
-# Always include: -f $VALUES/cluster.yaml -f $VALUES/aws.yaml -f $VALUES/<service>/<release>.yaml
+# Always include: -f $VALUES/cluster.yaml -f $VALUES/aws.yaml -f $VALUES/<service-name>/<service-name>-<app-type>.yaml
 ```
 
 The `aws.yaml` overlay switches `secretsVolume.type` to `csi`, so secrets are mounted directly from AWS Secrets Manager via the CSI driver — no K8s Secrets stored in etcd.
@@ -470,7 +470,7 @@ For NestJS backend services with config/secret management.
 helm install <release-name> charts/microservice \
   -f values/cluster.yaml \
   [-f values/aws.yaml]                           # AWS only
-  -f values/<service>/<release>.yaml \
+  -f values/<service-name>/<service-name>-<app-type>.yaml \
   [--set imageRepository=<registry>]              # if not in cluster.yaml
   [--set image.pullPolicy=Never]                  # minikube only
 ```

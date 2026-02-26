@@ -95,7 +95,7 @@ spec:
               echo "{{ .service }}:{{ $depPort }} is ready"
               {{- end }}
               {{- range .Values.waitForRegistry }}
-              until wget -qO- "http://registry/registry/{{ .appType }}/service-descriptions/service-names/{{ .name }}" 2>/dev/null | grep -q '"serviceName"'; do
+              until wget -qO- "http://registry-service-rest/registry/{{ .appType }}/service-descriptions/service-names/{{ .name }}" 2>/dev/null | grep -q '"serviceName"'; do
                 echo "Waiting for {{ .name }}:{{ .appType }} in registry..."
                 sleep 2
               done

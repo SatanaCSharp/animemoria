@@ -21,6 +21,7 @@
     "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
     "prepare": "husky",
     "commitlint": "commitlint --edit",
+    "docker:build:web": "docker build -f infra/deployment/docker/Dockerfile.nextjs --build-arg APP_NAME=web -t web:latest .",
     "docker:build:admin": "docker build -f infra/deployment/docker/Dockerfile.vite --build-arg APP_NAME=admin -t admin:latest .",
     "docker:build:registry:rest": "docker build -f infra/deployment/docker/Dockerfile.nestjs --build-arg APP_NAME=registry-service --build-arg APP_TYPE=rest --build-arg ENTRY_POINT=rest.main -t registry-service-rest:latest .",
     "docker:build:users:grpc": "docker build -f infra/deployment/docker/Dockerfile.nestjs --build-arg APP_NAME=users-service --build-arg APP_TYPE=grpc --build-arg ENTRY_POINT=grpc.main -t users-service-grpc:latest .",
