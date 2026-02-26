@@ -204,7 +204,7 @@ The script creates K8s Secrets for each Helm release:
 
 ### Step 5: Deploy services with Helm
 
-Export the path variables first — both must be set in the same shell session before running `helm install`:
+Export the path variables first — both must be set in the same shell session before running `helm upgrade --install`:
 
 ```bash
 export CHART=infra/deployment/kubernetes/helm/charts/microservice
@@ -215,50 +215,50 @@ Deploy in dependency order:
 
 ```bash
 # 1. Registry (creates global-shared-config ConfigMap)
-helm install registry-service-rest $CHART \
+helm upgrade --install registry-service-rest $CHART \
   -f $VALUES/cluster.yaml \
   -f $VALUES/registry-service/registry-service-rest.yaml \
   --set image.pullPolicy=Never
 
 # 2. Users gRPC
-helm install users-service-grpc $CHART \
+helm upgrade --install users-service-grpc $CHART \
   -f $VALUES/cluster.yaml \
   -f $VALUES/users-service/users-service-grpc.yaml \
   --set image.pullPolicy=Never
 
 # 3. Auth gRPC
-helm install auth-service-grpc $CHART \
+helm upgrade --install auth-service-grpc $CHART \
   -f $VALUES/cluster.yaml \
   -f $VALUES/auth-service/auth-service-grpc.yaml \
   --set image.pullPolicy=Never
 
 # 4. Users GraphQL
-helm install users-service-graphql $CHART \
+helm upgrade --install users-service-graphql $CHART \
   -f $VALUES/cluster.yaml \
   -f $VALUES/users-service/users-service-graphql.yaml \
   --set image.pullPolicy=Never
 
 # 5. Auth GraphQL
-helm install auth-service-graphql $CHART \
+helm upgrade --install auth-service-graphql $CHART \
   -f $VALUES/cluster.yaml \
   -f $VALUES/auth-service/auth-service-graphql.yaml \
   --set image.pullPolicy=Never
 
 # 6. API Gateway GraphQL
-helm install api-gateway-service-graphql $CHART \
+helm upgrade --install api-gateway-service-graphql $CHART \
   -f $VALUES/cluster.yaml \
   -f $VALUES/api-gateway-service/api-gateway-service-graphql.yaml \
   --set image.pullPolicy=Never
 
 # 7. API Gateway REST
-helm install api-gateway-service-rest $CHART \
+helm upgrade --install api-gateway-service-rest $CHART \
   -f $VALUES/cluster.yaml \
   -f $VALUES/api-gateway-service/api-gateway-service-rest.yaml \
   --set image.pullPolicy=Never
 
 # 8. Admin Dashboard (uses frontend chart)
 export FRONTEND_CHART=infra/deployment/kubernetes/helm/charts/frontend
-helm install admin $FRONTEND_CHART \
+helm upgrade --install admin $FRONTEND_CHART \
   -f $VALUES/admin/admin.yaml \
   --set image.pullPolicy=Never \
   --set ingress.className=nginx \
@@ -281,7 +281,7 @@ helm uninstall api-gateway-service-rest
 minikube image load api-gateway-rest:latest
 
 #4 install deployment
-helm install api-gateway-service-rest $CHART \
+helm upgrade --install api-gateway-service-rest $CHART \
   -f $VALUES/cluster.yaml \
   -f $VALUES/api-gateway-service/api-gateway-service-rest.yaml \
   --set image.pullPolicy=Never
@@ -405,7 +405,7 @@ kubectl apply -k infra/deployment/kubernetes/manifests/aws/
 CHART=infra/deployment/kubernetes/helm/charts/microservice
 VALUES=infra/deployment/kubernetes/helm/values
 
-helm install registry $CHART \
+helm upgrade --install registry $CHART \
   -f $VALUES/cluster.yaml \
   -f $VALUES/aws.yaml \
   -f $VALUES/registry-service/registry-service-rest.yaml \
@@ -449,6 +449,8 @@ For NestJS backend services with config/secret management.
 | `pdb.enabled`                           | `false`    | Enable Pod Disruption Budget                                                   |
 | `networkPolicy.enabled`                 | `false`    | Enable NetworkPolicy                                                           |
 | `ingress.enabled`                       | `false`    | Enable Ingress (api-gateway releases only)                                     |
+| `migration.enabled`                     | `false`    | Run DB migration Job before install/upgrade (disable for gateway, registry)    |
+| `migration.command`                     | see below  | Command to run (default: `["pnpm", "migration:run:prod"]`)                     |
 
 #### Port Conventions
 
@@ -464,10 +466,10 @@ For NestJS backend services with config/secret management.
 | HTTP     | `GET /health/live`       | `GET /health/ready`      |
 | gRPC     | Native gRPC health check | Native gRPC health check |
 
-#### Helm Install Pattern
+#### Helm Install / Upgrade Pattern
 
 ```bash
-helm install <release-name> charts/microservice \
+helm upgrade --install <release-name> charts/microservice \
   -f values/cluster.yaml \
   [-f values/aws.yaml]                           # AWS only
   -f values/<service-name>/<service-name>-<app-type>.yaml \
@@ -493,10 +495,10 @@ For static HTML/JS applications served via Nginx.
 | `ingress.enabled`  | `false`                              | Enable Ingress                                  |
 | `ingress.host`     | `""`                                 | Ingress hostname                                |
 
-#### Helm Install Pattern
+#### Helm Install / Upgrade Pattern
 
 ```bash
-helm install admin charts/frontend \
+helm upgrade --install admin charts/frontend \
   -f values/admin/admin.yaml \
   [--set imageRepository=<registry>]     # if using remote registry
   [--set image.pullPolicy=Never]         # minikube only

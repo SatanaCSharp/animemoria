@@ -32,6 +32,10 @@ secretKeys:
 
 existingSecret: users-graphql-service-config
 
+# Run DB migrations before install/upgrade.
+migration:
+  enabled: true
+
 # AWS CSI: SecretProviderClass name (applied when secretsVolume.type=csi via values/aws.yaml)
 secretsVolume:
   csi:
