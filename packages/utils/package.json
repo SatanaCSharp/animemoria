@@ -27,15 +27,22 @@
     "build": "tsc && tsc-alias",
     "start:dev": "tsc && (concurrently \"tsc -w\" \"tsc-alias -w\")",
     "lint": "eslint 'src/**/*.ts' --max-warnings=0",
-    "lint:fix": "eslint 'src/**/*.ts' --max-warnings=0 --fix"
+    "lint:fix": "eslint 'src/**/*.ts' --max-warnings=0 --fix",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage"
   },
   "dependencies": {
     "@packages/shared-types": "workspace:*"
   },
   "devDependencies": {
     "@packages/eslint-config-base": "workspace:*",
+    "@packages/jest-config-preset": "workspace:*",
     "@packages/tsconfig": "workspace:*",
+    "@types/jest": "catalog:",
     "@types/node": "catalog:",
+    "jest": "catalog:",
+    "ts-jest": "catalog:",
     "tsc-alias": "catalog:",
     "typescript": "catalog:"
   }
