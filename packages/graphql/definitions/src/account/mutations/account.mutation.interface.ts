@@ -1,5 +1,5 @@
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
-import { GraphQLContext } from '@packages/nest-shared/graphql';
+import type { GraphQLContext } from '@packages/nest-shared/graphql';
 import { NotImplementedError } from '@packages/shared-types/errors';
 import { assertFail } from '@packages/utils/asserts';
 import { AccountResponse } from 'account/dto/account.response';

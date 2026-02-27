@@ -629,6 +629,9 @@ importers:
       '@packages/eslint-config-service':
         specifier: workspace:*
         version: link:../../packages/eslint-config-service
+      '@packages/jest-config-preset':
+        specifier: workspace:*
+        version: link:../../packages/jest-config-preset
       '@packages/scripts':
         specifier: workspace:*
         version: link:../../packages/scripts
@@ -729,6 +732,9 @@ importers:
       '@packages/eslint-config-service':
         specifier: workspace:*
         version: link:../../packages/eslint-config-service
+      '@packages/jest-config-preset':
+        specifier: workspace:*
+        version: link:../../packages/jest-config-preset
       '@packages/tsconfig':
         specifier: workspace:*
         version: link:../../packages/tsconfig
@@ -932,6 +938,9 @@ importers:
       '@packages/eslint-config-service':
         specifier: workspace:*
         version: link:../../packages/eslint-config-service
+      '@packages/jest-config-preset':
+        specifier: workspace:*
+        version: link:../../packages/jest-config-preset
       '@packages/scripts':
         specifier: workspace:*
         version: link:../../packages/scripts
