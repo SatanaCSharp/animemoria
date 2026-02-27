@@ -13,10 +13,10 @@ image:
   pullSecrets: []
 
 # API Gateway URL (injected via ConfigMap, exposed as window.__ENV__.API_GATEWAY_URL)
-apiGatewayUrl: "http://api-gateway-graphql"
+apiGatewayUrl: "http://api-gateway-service-graphql"
 
 # Backend URL for nginx proxy of /graphql (in-cluster service; used only server-side)
-apiGatewayBackendUrl: "http://api-gateway-graphql"
+apiGatewayBackendUrl: "http://api-gateway-service-graphql"
 
 # Ingress
 ingress:

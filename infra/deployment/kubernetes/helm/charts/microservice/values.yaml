@@ -159,6 +159,13 @@ networkPolicy:
 podAnnotations: {}
 podLabels: {}
 
+# Migration Job: runs DB migrations before install/upgrade when enabled.
+# Disable for services without a DB (e.g. api-gateway-service, registry-service).
+migration:
+  enabled: false
+  # Command to run (default: pnpm migration:run:prod)
+  command: ["pnpm", "migration:run:prod"]
+
 # Node selector / tolerations / affinity (optional)
 nodeSelector: {}
 tolerations: []

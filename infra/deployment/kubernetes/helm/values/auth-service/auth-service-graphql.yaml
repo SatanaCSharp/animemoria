@@ -1,41 +1,49 @@
-# Users service (GraphQL). Convention: protocol=http -> port 3000/80.
-# Config keys from apps/users-service/.env.example
-# Install: helm install users-graphql charts/microservice -f values/cluster.yaml -f values/users-service/users-graphql.yaml -n <ns>
+# Auth service (GraphQL). Convention: protocol=http -> port 3000/80.
+# Config keys from apps/auth-service/.env.example
+# Install: helm install auth-graphql charts/microservice -f values/cluster.yaml -f values/auth-service/auth-service-graphql.yaml -n <ns>
 
-fullnameOverride: users-graphql
+fullnameOverride: auth-service-graphql
 component: graphql
 
+# protocol: http (default)
 portEnvKey: APP_GRAPHQL_PORT
 
 image:
-  name: users-service-graphql
+  name: auth-service-graphql
   tag: latest
   pullPolicy: Always
 
 command: ["node", "dist/src/graphql.main"]
 
 dependencies:
-  - service: users-grpc
+  - service: auth-service-grpc
 
 env:
   - name: APP_NAME
-    value: "users-service"
-  - name: USERS_SERVICE_GRAPHQL_URL
-    value: "http://users-graphql:80"
-  - name: USERS_SERVICE_GRPC_URL
-    value: "users-grpc:5000"
+    value: "auth-service"
+  - name: AUTH_SERVICE_GRAPHQL_URL
+    value: "http://auth-service-graphql:80"
+  - name: AUTH_SERVICE_GRPC_URL
+    value: "auth-service-grpc:5000"
   - name: INTERNAL_REGISTRY_SERVER_HOST
-    value: "http://registry:80"
+    value: "http://registry-service-rest:80"
 
 secretKeys:
   - DB_CONNECTION_URL
+  - AT_SECRET
+  - RT_SECRET
+  - COOKIES_MAX_AGE
 
-existingSecret: users-graphql-service-config
+existingSecret: auth-graphql-service-config
+
+# Run DB migrations before install/upgrade.
+migration:
+  enabled: true
 
 # AWS CSI: SecretProviderClass name (applied when secretsVolume.type=csi via values/aws.yaml)
 secretsVolume:
   csi:
-    secretProviderClass: users-service-secrets
+    secretProviderClass: auth-service-secrets
 
 resources:
   requests:
@@ -56,7 +64,7 @@ autoscaling:
 service:
   type: ClusterIP
 
-# NetworkPolicy: allow traffic from api-gateway-graphql, egress to users-grpc.
+# NetworkPolicy: allow traffic from api-gateway-graphql, egress to auth-grpc.
 networkPolicy:
   enabled: true
   policyTypes:
@@ -87,3 +95,4 @@ networkPolicy:
       ports:
         - port: 80
           protocol: TCP
+

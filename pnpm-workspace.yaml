@@ -6,6 +6,11 @@ packages:
   # graphql related packages
   - 'packages/graphql/*'
 
+# For pnpm deploy in Docker: sync workspace deps after build, inject workspace packages
+syncInjectedDepsAfterScripts:
+  - build
+injectWorkspacePackages: true
+
 catalog:
   # ============================================
   # BACKEND (BE) DEPENDENCIES

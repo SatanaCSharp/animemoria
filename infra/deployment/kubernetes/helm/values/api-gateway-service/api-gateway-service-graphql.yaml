@@ -1,8 +1,8 @@
 # API Gateway (GraphQL). Convention: protocol=http -> port 3000/80.
 # Config keys from apps/api-gateway-service/.env.example
-# Install: helm install api-gateway-graphql charts/microservice -f values/cluster.yaml -f values/api-gateway-service/api-gateway-graphql.yaml -n <ns>
+# Install: helm install api-gateway-graphql charts/microservice -f values/cluster.yaml -f values/api-gateway-service/api-gateway-service-graphql.yaml -n <ns>
 
-fullnameOverride: api-gateway-graphql
+fullnameOverride: api-gateway-service-graphql
 component: gateway
 
 portEnvKey: APP_GRAPHQL_PORT
@@ -15,15 +15,15 @@ image:
 command: ["node", "dist/graphql.main"]
 
 dependencies:
-  - service: auth-grpc
-  - service: registry
-  - service: users-graphql
-  - service: auth-graphql
+  - service: auth-service-grpc
+  - service: registry-service-rest
+  - service: users-service-graphql
+  - service: auth-service-graphql
 
 # Gateway-specific env only if needed; common vars from global-shared-config.
 env:
   - name: INTERNAL_REGISTRY_SERVER_HOST
-    value: "http://registry:80"
+    value: "http://registry-service-rest:80"
 
 secretKeys:
   - AT_SECRET
@@ -112,3 +112,4 @@ networkPolicy:
       ports:
         - port: 80
           protocol: TCP
+

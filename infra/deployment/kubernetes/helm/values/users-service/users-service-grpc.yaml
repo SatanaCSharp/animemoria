@@ -1,0 +1,110 @@
+# Users service (gRPC). Convention: protocol=grpc -> port 5000.
+# Config keys from apps/users-service/.env.example
+# Install: helm install users-grpc charts/microservice -f values/cluster.yaml -f values/users-service/users-service-grpc.yaml -n <ns>
+
+fullnameOverride: users-service-grpc
+component: grpc
+
+protocol: grpc
+
+image:
+  name: users-service-grpc
+  tag: latest
+  pullPolicy: Always
+
+command: ["node", "dist/src/grpc.main"]
+
+dependencies:
+  - service: registry-service-rest
+
+env:
+  - name: APP_NAME
+    value: "users-service"
+  - name: USERS_SERVICE_GRAPHQL_URL
+    value: "http://users-service-graphql:80"
+  - name: USERS_SERVICE_GRPC_URL
+    value: "users-service-grpc:5000"
+  - name: INTERNAL_REGISTRY_SERVER_HOST
+    value: "http://registry-service-rest:80"
+
+secretKeys:
+  - DB_CONNECTION_URL
+
+existingSecret: users-grpc-service-config
+
+# Run DB migrations before install/upgrade.
+migration:
+  enabled: true
+
+# AWS CSI: SecretProviderClass name (applied when secretsVolume.type=csi via values/aws.yaml)
+secretsVolume:
+  csi:
+    secretProviderClass: users-service-secrets
+
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+replicaCount: 1
+
+# Recreate ensures old pod terminates before new one starts,
+# preventing the serviceId race condition (old pod unregisters new pod's entry).
+strategy:
+  type: Recreate
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+
+service:
+  type: ClusterIP
+
+# NetworkPolicy: allow traffic from users-graphql, egress to external DB + registry.
+networkPolicy:
+  enabled: true
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: graphql
+      ports:
+        - port: 5000
+          protocol: TCP
+  egress:
+    # Allow to other gRPC services (inter-service communication)
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: grpc
+      ports:
+        - port: 5000
+          protocol: TCP
+    # Allow to registry (service discovery)
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: registry
+      ports:
+        - port: 80
+          protocol: TCP
+    # Allow to external database (all external IPs)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - port: 5432
+          protocol: TCP
+

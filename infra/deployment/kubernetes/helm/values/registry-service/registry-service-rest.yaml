@@ -1,8 +1,8 @@
 # Registry service (REST). Convention: protocol=http -> port 3000/80.
 # Creates global-shared-config ConfigMap (create: true). Install this release first so other services can use it.
-# Install: helm install registry charts/microservice -f values/cluster.yaml -f values/registry-service/registry.yaml -n <ns>
+# Install: helm install registry charts/microservice -f values/cluster.yaml -f values/registry-service/registry-service-rest.yaml -n <ns>
 
-fullnameOverride: registry
+fullnameOverride: registry-service-rest
 component: registry
 
 portEnvKey: APP_REST_PORT
@@ -67,3 +67,4 @@ networkPolicy:
         - port: 80
           protocol: TCP
   egress: []
+
