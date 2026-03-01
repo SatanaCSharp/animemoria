@@ -513,7 +513,7 @@ importers:
         version: 7.1.4
       ts-jest:
         specifier: 'catalog:'
-        version: 29.4.6(@babel/core@7.28.5)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.28.5))(jest-util@30.2.0)(jest@30.2.0(@types/node@22.19.3)(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.28.5)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.28.5))(jest-util@30.2.0)(jest@30.2.0(@types/node@22.19.3))(typescript@5.9.3)
       ts-loader:
         specifier: 'catalog:'
         version: 9.5.4(typescript@5.9.3)(webpack@5.104.1)
@@ -629,6 +629,9 @@ importers:
       '@packages/eslint-config-service':
         specifier: workspace:*
         version: link:../../packages/eslint-config-service
+      '@packages/jest-config-preset':
+        specifier: workspace:*
+        version: link:../../packages/jest-config-preset
       '@packages/scripts':
         specifier: workspace:*
         version: link:../../packages/scripts
@@ -670,7 +673,7 @@ importers:
         version: 7.1.4
       ts-jest:
         specifier: 'catalog:'
-        version: 29.4.6(@babel/core@7.28.5)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.28.5))(jest-util@30.2.0)(jest@30.2.0(@types/node@22.19.3)(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.28.5)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.28.5))(jest-util@30.2.0)(jest@30.2.0(@types/node@22.19.3))(typescript@5.9.3)
       ts-loader:
         specifier: 'catalog:'
         version: 9.5.4(typescript@5.9.3)(webpack@5.104.1)
@@ -729,6 +732,9 @@ importers:
       '@packages/eslint-config-service':
         specifier: workspace:*
         version: link:../../packages/eslint-config-service
+      '@packages/jest-config-preset':
+        specifier: workspace:*
+        version: link:../../packages/jest-config-preset
       '@packages/tsconfig':
         specifier: workspace:*
         version: link:../../packages/tsconfig
@@ -758,7 +764,7 @@ importers:
         version: 7.1.4
       ts-jest:
         specifier: 'catalog:'
-        version: 29.4.6(@babel/core@7.28.5)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.28.5))(jest-util@30.2.0)(jest@30.2.0(@types/node@22.19.3)(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.28.5)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.28.5))(jest-util@30.2.0)(jest@30.2.0(@types/node@22.19.3))(typescript@5.9.3)
       ts-loader:
         specifier: 'catalog:'
         version: 9.5.4(typescript@5.9.3)(webpack@5.104.1)
@@ -932,6 +938,9 @@ importers:
       '@packages/eslint-config-service':
         specifier: workspace:*
         version: link:../../packages/eslint-config-service
+      '@packages/jest-config-preset':
+        specifier: workspace:*
+        version: link:../../packages/jest-config-preset
       '@packages/scripts':
         specifier: workspace:*
         version: link:../../packages/scripts
@@ -964,7 +973,7 @@ importers:
         version: 7.1.4
       ts-jest:
         specifier: 'catalog:'
-        version: 29.4.6(@babel/core@7.28.5)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.28.5))(jest-util@30.2.0)(jest@30.2.0(@types/node@22.19.3)(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.28.5)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.28.5))(jest-util@30.2.0)(jest@30.2.0(@types/node@22.19.3))(typescript@5.9.3)
       ts-loader:
         specifier: 'catalog:'
         version: 9.5.4(typescript@5.9.3)(webpack@5.104.1)
@@ -1148,7 +1157,7 @@ importers:
         version: 7.1.4
       ts-jest:
         specifier: 'catalog:'
-        version: 29.4.6(@babel/core@7.28.5)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.28.5))(jest-util@30.2.0)(jest@30.2.0(@types/node@22.19.3)(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.28.5)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.28.5))(jest-util@30.2.0)(jest@30.2.0(@types/node@22.19.3))(typescript@5.9.3)
       ts-loader:
         specifier: 'catalog:'
         version: 9.5.4(typescript@5.9.3)(webpack@5.104.1)
@@ -1222,6 +1231,8 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
+
+  packages/jest-config-preset: {}
 
   packages/nest-shared:
     dependencies:
@@ -1366,7 +1377,7 @@ importers:
         version: 7.1.4
       ts-jest:
         specifier: 'catalog:'
-        version: 29.4.6(@babel/core@7.28.5)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.28.5))(jest-util@30.2.0)(jest@30.2.0(@types/node@22.19.3)(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.28.5)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.28.5))(jest-util@30.2.0)(jest@30.2.0(@types/node@22.19.3))(typescript@5.9.3)
       ts-loader:
         specifier: 'catalog:'
         version: 9.5.4(typescript@5.9.3)(webpack@5.104.1)
@@ -1463,12 +1474,24 @@ importers:
       '@packages/eslint-config-base':
         specifier: workspace:*
         version: link:../eslint-config-base
+      '@packages/jest-config-preset':
+        specifier: workspace:*
+        version: link:../jest-config-preset
       '@packages/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig
+      '@types/jest':
+        specifier: 'catalog:'
+        version: 30.0.0
       '@types/node':
         specifier: 'catalog:'
         version: 22.19.3
+      jest:
+        specifier: 'catalog:'
+        version: 30.2.0(@types/node@22.19.3)(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))
+      ts-jest:
+        specifier: 'catalog:'
+        version: 29.4.6(@babel/core@7.28.5)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.28.5))(jest-util@30.2.0)(jest@30.2.0(@types/node@22.19.3))(typescript@5.9.3)
       tsc-alias:
         specifier: 'catalog:'
         version: 1.8.16
@@ -20518,7 +20541,7 @@ snapshots:
 
   ts-interface-checker@0.1.13: {}
 
-  ts-jest@29.4.6(@babel/core@7.28.5)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.28.5))(jest-util@30.2.0)(jest@30.2.0(@types/node@22.19.3)(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3)))(typescript@5.9.3):
+  ts-jest@29.4.6(@babel/core@7.28.5)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.28.5))(jest-util@30.2.0)(jest@30.2.0(@types/node@22.19.3))(typescript@5.9.3):
     dependencies:
       bs-logger: 0.2.6
       fast-json-stable-stringify: 2.1.0

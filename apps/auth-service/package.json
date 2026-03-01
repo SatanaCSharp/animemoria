@@ -61,6 +61,7 @@
     "@packages/eslint-config-service": "workspace:*",
     "@packages/scripts": "workspace:*",
     "@packages/tsconfig": "workspace:*",
+    "@packages/jest-config-preset": "workspace:*",
     "@types/bcrypt": "catalog:",
     "@types/cookie-parser": "catalog:",
     "@types/express": "catalog:",
@@ -78,22 +79,5 @@
     "tsc-alias": "catalog:",
     "tsconfig-paths": "catalog:",
     "typescript": "catalog:"
-  },
-  "jest": {
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "ts"
-    ],
-    "rootDir": "src",
-    "testRegex": ".*\\.spec\\.ts$",
-    "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
-    },
-    "collectCoverageFrom": [
-      "**/*.(t|j)s"
-    ],
-    "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
   }
 }

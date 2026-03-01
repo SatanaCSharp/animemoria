@@ -9,10 +9,8 @@ import { snakeCase } from 'lodash';
 import { SERVICE_INITIALIZATION_OPTIONS } from 'registry-service/injections.token';
 import { lastValueFrom } from 'rxjs';
 import { AppType } from 'shared';
-import {
-  ServiceDescription,
-  ServiceInitializationOptions,
-} from 'shared/types/service-description';
+import type { ServiceInitializationOptions } from 'shared/types/service-description';
+import { ServiceDescription } from 'shared/types/service-description';
 
 @Injectable()
 export class ModuleInitializerClientService {
