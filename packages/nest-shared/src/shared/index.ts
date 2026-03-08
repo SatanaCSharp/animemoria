@@ -2,12 +2,12 @@
 export { AppType } from './enums/app-type';
 
 //types
-export {
+export type {
   ServiceDescription,
   ServiceId,
   ServiceInitializationOptions,
 } from './types/service-description';
 
 //commands
-export { CommandProcessor } from './commands/command.processor';
-export { QueryProcessor } from './queries/query.processor';
+export type { CommandProcessor } from './commands/command.processor';
+export type { QueryProcessor } from './queries/query.processor';

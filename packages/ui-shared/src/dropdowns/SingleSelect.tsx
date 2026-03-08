@@ -29,6 +29,7 @@ interface SingleSelectProps {
   onChange: <TSelectedValue extends string>(
     selectedValue: TSelectedValue,
   ) => void;
+  'data-testid'?: string;
 }
 
 export const SingleSelect = ({
@@ -36,6 +37,7 @@ export const SingleSelect = ({
   ItemWrapper,
   renderTrigger,
   renderItem,
+  'data-testid': dataTestId,
   ...props
 }: SingleSelectProps): ReactElement => {
   const selectedElement = useMemo(() => {
@@ -68,31 +70,33 @@ export const SingleSelect = ({
   }, [renderTrigger, TriggerWrapper, selectedElement]);
 
   return (
-    <Dropdown>
-      <DropdownTrigger>
-        <div className="flex flex-row items-center">
-          {triggerContent} <DownArrow size={16} className="ml-2" />
-        </div>
-      </DropdownTrigger>
-      <DropdownMenu
-        color="default"
-        selectedKeys={new Set([props.selectedValue])}
-        selectionMode="single"
-        variant="flat"
-        onSelectionChange={onChange}
-      >
-        {props.items.map((item) => {
-          const itemContent = renderItem ? (
-            renderItem(item)
-          ) : ItemWrapper ? (
-            <ItemWrapper>{item.element}</ItemWrapper>
-          ) : (
-            item.element
-          );
+    <div data-testid={dataTestId}>
+      <Dropdown>
+        <DropdownTrigger>
+          <div className="flex flex-row items-center">
+            {triggerContent} <DownArrow size={16} className="ml-2" />
+          </div>
+        </DropdownTrigger>
+        <DropdownMenu
+          color="default"
+          selectedKeys={new Set([props.selectedValue])}
+          selectionMode="single"
+          variant="flat"
+          onSelectionChange={onChange}
+        >
+          {props.items.map((item) => {
+            const itemContent = renderItem ? (
+              renderItem(item)
+            ) : ItemWrapper ? (
+              <ItemWrapper>{item.element}</ItemWrapper>
+            ) : (
+              item.element
+            );
 
-          return <DropdownItem key={item.key}>{itemContent}</DropdownItem>;
-        })}
-      </DropdownMenu>
-    </Dropdown>
+            return <DropdownItem key={item.key}>{itemContent}</DropdownItem>;
+          })}
+        </DropdownMenu>
+      </Dropdown>
+    </div>
   );
 };

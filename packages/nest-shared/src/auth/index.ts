@@ -1,4 +1,5 @@
-export { AuthModule, AuthModuleOptions } from './auth.module';
+export type { AuthModuleOptions } from './auth.module';
+export { AuthModule } from './auth.module';
 export { CurrentUser } from './decorators/current-user.decorator';
 export { GqlAuthGuard } from './guards/gql-auth.guard';
 export { JwtGuard } from './guards/jwt.guard';

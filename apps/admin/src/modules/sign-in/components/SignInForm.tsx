@@ -5,6 +5,7 @@ import { ReactElement } from 'react';
 import { Control, Controller, FieldErrors } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
+import { testIds } from '__tests__/mocks/test-ids/modules/sign-in';
 import { SignInFormData } from 'modules/sign-in/schemas/sign-in.schema';
 
 type Props = {
@@ -17,12 +18,17 @@ type Props = {
 export const SignInForm = (props: Props): ReactElement => {
   const { t } = useTranslation();
   return (
-    <form onSubmit={props.onSubmit} className="space-y-6">
+    <form
+      data-testid={testIds.FORM}
+      onSubmit={props.onSubmit}
+      className="space-y-6"
+    >
       <Controller
         name="email"
         control={props.control}
         render={({ field }) => (
           <EmailInput
+            data-testid={testIds.EMAIL_INPUT}
             label={t('sign-in:email.label')}
             value={field.value}
             onValueChange={field.onChange}
@@ -44,6 +50,7 @@ export const SignInForm = (props: Props): ReactElement => {
         control={props.control}
         render={({ field }) => (
           <PasswordInput
+            data-testid={testIds.PASSWORD_INPUT}
             label={t('sign-in:password.label')}
             value={field.value}
             onValueChange={field.onChange}
@@ -62,6 +69,7 @@ export const SignInForm = (props: Props): ReactElement => {
       />
 
       <Button
+        data-testid={testIds.SUBMIT_BUTTON}
         isLoading={props.isSubmitting}
         type="submit"
         variant="bordered"

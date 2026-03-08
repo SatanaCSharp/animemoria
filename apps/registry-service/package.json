@@ -32,6 +32,7 @@
     "@nestjs/testing": "catalog:",
     "@packages/eslint-config-service": "workspace:*",
     "@packages/tsconfig": "workspace:*",
+    "@packages/jest-config-preset": "workspace:*",
     "@types/express": "catalog:",
     "@types/jest": "catalog:",
     "@types/node": "catalog:",
@@ -46,22 +47,5 @@
     "tsc-alias": "catalog:",
     "tsconfig-paths": "catalog:",
     "typescript": "catalog:"
-  },
-  "jest": {
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "ts"
-    ],
-    "rootDir": "src",
-    "testRegex": ".*\\.spec\\.ts$",
-    "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
-    },
-    "collectCoverageFrom": [
-      "**/*.(t|j)s"
-    ],
-    "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
   }
 }

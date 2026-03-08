@@ -2,7 +2,7 @@ import { ConfigService } from '@nestjs/config';
 import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
 import * as accountGql from '@packages/graphql-definitions/account';
 import { setRefreshTokenCookie } from '@packages/nest-shared/auth';
-import { GraphQLContext } from '@packages/nest-shared/graphql';
+import type { GraphQLContext } from '@packages/nest-shared/graphql';
 import { NotImplementedError } from '@packages/shared-types/errors';
 import { assertFail } from '@packages/utils/asserts';
 import { isProd } from '@packages/utils/predicates';

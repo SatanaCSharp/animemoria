@@ -1,0 +1,30 @@
+---
+description: Conventions for writing unit tests for NestJS service apps (auth-service, users-service, etc.)
+globs: apps/*-service/src/**/*.spec.ts
+alwaysApply: false
+---
+
+# Service Test Conventions
+
+- **Test style**
+  - Use Jest and `@nestjs/testing` with `Test.createTestingModule` to construct the SUT via DI.
+  - Keep tests as **unit tests**: no real DB, network, or gRPC calls.
+  - Prefer **Arrange–Act–Assert** structure and descriptive `describe`/`it` names that explain behavior.
+
+- **File layout & naming**
+  - Co-locate specs next to the implementation (e.g. `foo.command.ts` → `foo.command.spec.ts`).
+  - Put reusable test helpers under `src/test/**` (e.g. `src/test/shared/...`, `src/test/<feature>/mocks/...`).
+
+- **Mocks & test data**
+  - Define shared mocks as `jest.Mocked<ActualType>` (e.g. `AccountRepositoryMock = jest.Mocked<AccountRepository>`).
+  - Provide factory helpers like `createXxxMock()` and `getXxxEntityMock()` that:
+    - Return fully-typed objects with sensible defaults.
+    - Accept `overrides?: Partial<...>` to customize per test.
+  - Use Nest providers helpers for DI, e.g. `createXxxRepositoryProvider(mock)` returning `{ provide, useValue }`.
+  - For external libs (e.g. `bcrypt`), use `jest.mock(...)` once at top of the spec and configure behavior in each test.
+
+- **What to assert**
+  - Assert **interactions** with dependencies (e.g. repo methods, client calls) using `toHaveBeenCalledWith`.
+  - Assert the **public contract** of the unit (returned DTO/TokenPair, thrown `ApplicationError`, etc.), not internal implementation details.
+  - Prefer one clear expectation per behavior-focused test (happy path + separate negative/edge-case tests).
+

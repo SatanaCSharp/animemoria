@@ -1,0 +1,8 @@
+{
+  "name": "@packages/jest-config-preset",
+  "version": "0.0.1",
+  "private": true,
+  "type": "commonjs",
+  "main": "jest-config-preset.cjs",
+  "license": "MIT"
+}

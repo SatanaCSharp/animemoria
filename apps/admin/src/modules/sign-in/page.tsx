@@ -49,7 +49,7 @@ export const SignInPage = (): ReactElement => {
       new ApplicationError('No accessToken returned.'),
     );
     setToken(response.data.signIn.accessToken);
-    await navigate({ to: ROUTES.HOME });
+    await navigate({ to: ROUTES.DASHBOARD });
   };
 
   return (

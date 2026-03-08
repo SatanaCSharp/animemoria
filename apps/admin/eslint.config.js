@@ -4,8 +4,13 @@ import uiConfig from '@packages/eslint-config-ui';
 export default [
   ...uiConfig,
   {
-    // Ignore generated files from linting
-    ignores: ['src/__generated__/**'],
+    // Ignore generated files, coverage output, and config files outside tsconfig
+    ignores: [
+      'src/__generated__/**',
+      'coverage/**',
+      'jest.config.cjs',
+      'jest.setup.cjs',
+    ],
   },
   {
     files: ['src/guards/**'],
