@@ -8,6 +8,9 @@
     "preview": "vite preview",
     "lint": "eslint",
     "check": "eslint --fix",
+    "test": "jest --passWithNoTests",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage --passWithNoTests",
     "codegen": "graphql-codegen --config node_modules/@packages/graphql-generated/codegen.config.ts",
     "codegen:watch": "graphql-codegen --config node_modules/@packages/graphql-generated/codegen.config.ts --watch"
   },
@@ -32,6 +35,10 @@
     "yup": "catalog:"
   },
   "devDependencies": {
+    "@packages/jest-config-preset": "workspace:*",
+    "@testing-library/dom": "catalog:",
+    "@testing-library/jest-dom": "catalog:",
+    "@testing-library/react": "catalog:",
     "@graphql-codegen/cli": "catalog:",
     "@graphql-codegen/near-operation-file-preset": "catalog:",
     "@graphql-codegen/typed-document-node": "catalog:",
@@ -45,6 +52,10 @@
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@vitejs/plugin-react": "catalog:",
+    "jest": "catalog:",
+    "jest-environment-jsdom": "catalog:",
+    "ts-jest": "catalog:",
+    "@types/jest": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
     "vite-tsconfig-paths": "catalog:"

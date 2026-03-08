@@ -1,6 +1,6 @@
 /** @type {import('jest').Config} */
 module.exports = {
-  moduleFileExtensions: ['js', 'json', 'ts'],
+  moduleFileExtensions: ['js', 'json', 'ts', 'tsx'],
   rootDir: 'src',
   testRegex: '.*\\.spec\\.ts$',
   transform: {

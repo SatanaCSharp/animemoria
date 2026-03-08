@@ -2,6 +2,8 @@ import { SingleSelect } from '@packages/ui-shared/dropdowns';
 import { JSX, useState, ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { testIds } from '__tests__/mocks/test-ids/shared/language-switcher';
+
 type Languages = 'en' | 'uk';
 
 const languageItems: { key: Languages; element: ReactElement }[] = [
@@ -35,8 +37,9 @@ export const LanguageSwitcher = (): JSX.Element => {
   };
 
   return (
-    <div className="flex gap-2">
+    <div data-testid={testIds.ROOT} className="flex gap-2">
       <SingleSelect
+        data-testid={testIds.SELECT}
         selectedValue={selectedLang}
         items={languageItems}
         onChange={changeLanguage}
