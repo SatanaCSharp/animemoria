@@ -4,5 +4,8 @@
   "private": true,
   "type": "commonjs",
   "main": "jest-config-preset.cjs",
-  "license": "MIT"
+  "license": "MIT",
+  "engines": {
+    "node": ">=24.14.0"
+  }
 }

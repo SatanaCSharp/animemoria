@@ -2,6 +2,9 @@
   "name": "@packages/ui-shared",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=24.14.0"
+  },
   "exports": {
     "./buttons": {
       "types": "./dist/buttons/index.d.ts",
