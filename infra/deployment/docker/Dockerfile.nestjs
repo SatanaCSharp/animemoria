@@ -21,7 +21,7 @@
 # Global build args
 # ============================================================================
 ARG NODE_VERSION=24.14.0
-ARG PNPM_VERSION=9.15.3
+ARG PNPM_VERSION=10.32.0
 ARG APP_NAME
 ARG APP_TYPE
 ARG ENTRY_POINT

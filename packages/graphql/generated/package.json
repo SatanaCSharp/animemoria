@@ -5,6 +5,9 @@
   "license": "MIT",
   "author": "",
   "type": "module",
+  "engines": {
+    "node": ">=24.14.0"
+  },
   "exports": {
     "./schema": "./schema.gql",
     "./codegen.config": "./codegen.config.ts"

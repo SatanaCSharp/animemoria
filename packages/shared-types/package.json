@@ -5,6 +5,9 @@
   "license": "MIT",
   "author": "",
   "type": "commonjs",
+  "engines": {
+    "node": ">=24.14.0"
+  },
   "exports": {
     "./errors": {
       "types": "./dist/errors/index.d.ts",
