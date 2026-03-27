@@ -1,0 +1,35 @@
+name: Build and push Docker image to ECR
+description: Build a Docker image and push it to Amazon ECR using GitHub OIDC.
+
+inputs:
+  aws-region:
+    description: AWS region where the ECR registry is located.
+    required: true
+    default: 'eu-north-1'
+  ecr-repo:
+    description: ECR repo name where to push image.
+    required: true
+    default: 'animemoria-backend'
+
+runs:
+  using: composite
+  steps:
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-actions-ecr-role
+        aws-region: ${{ inputs.aws-region }}
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Build, Tag, and Push
+      shell: bash
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.registry }}
+        ECR_REPOSITORY: ${{ inputs.ecr-repo }}
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
