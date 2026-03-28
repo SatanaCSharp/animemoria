@@ -61,7 +61,7 @@ playwright-report
 
 # Documentation
 README.md
-**/README.md
+_docs/TABLE_OF_CONTENTS.md
 *.md
 LICENSE
 CHANGELOG.md
