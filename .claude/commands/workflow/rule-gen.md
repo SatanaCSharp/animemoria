@@ -4,7 +4,7 @@ allowed-tools: Read, Write, Bash(find:*), Bash(mkdir:*)
 argument-hint: '<describe the rule you want to create>'
 ---
 
-# /rule-gen:run
+# /workflow:rule-gen
 
 **Goal:** produce a rule that scores ≥ 9.0 average across 10 evaluation criteria.
 **Loop limit:** 3 improvement attempts maximum.

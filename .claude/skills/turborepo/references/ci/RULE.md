@@ -74,6 +74,6 @@ fetch-depth: 0 # Full history
 
 ## See Also
 
-- [github-actions.md](./github-actions.md) - GitHub Actions setup
-- [vercel.md](./vercel.md) - Vercel deployment
-- [patterns.md](./patterns.md) - CI optimization patterns
+- [github-actions.md](github-actions.md) - GitHub Actions setup
+- [vercel.md](vercel.md) - Vercel deployment
+- [patterns.md](patterns.md) - CI optimization patterns
