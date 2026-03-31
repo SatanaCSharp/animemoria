@@ -1,4 +1,34 @@
-name: pull-request.yml
+name: Pull Request
+
 on:
+  pull_request:
+    branches:
+      - master
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+
+env:
+  NODE_VERSION: '24.x'
+  PNPM_VERSION: '9.15.3'
 
 jobs:
+  detect-changes:
+    name: Detect changed workspaces
+    runs-on: ubuntu-latest
+    outputs:
+      has_changes: ${{ steps.changes.outputs.has_changes }}
+      matrix: ${{ steps.changes.outputs.matrix }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run change detection
+        id: changes
+        uses: ./.github/actions/change-detection
+        with:
+          base-branch: ${{ github.base_ref }}
