@@ -23,6 +23,8 @@ runs:
       id: set-matrix
       shell: bash
       run: |
+        set -e
+        set -o pipefail
         CHANGES=$(npx turbo ls --filter="...[origin/${{ inputs.base-branch }}]" --targets='lint' --json | jq -c '.packages | map(.name)')
         if [ "$CHANGES" == "[]" ] || [ -z "$CHANGES" ]; then
           echo "has_changes=false" >> $GITHUB_OUTPUT
