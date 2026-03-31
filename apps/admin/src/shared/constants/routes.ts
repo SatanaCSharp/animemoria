@@ -1,5 +1,5 @@
 export const ROUTES = {
   DASHBOARD: '/',
-  SIGN_IN: '/sing-in',
+  SIGN_IN: '/sign-in',
   USERS: '/users',
 } as const;
