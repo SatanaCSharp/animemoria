@@ -32,3 +32,49 @@ jobs:
         uses: ./.github/actions/change-detection
         with:
           base-branch: ${{ github.base_ref }}
+
+  quality-checks:
+    name: 'Quality: ${{ matrix.workspace }}'
+    needs: detect-changes
+    if: needs.detect-changes.outputs.has_changes == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        workspace: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-environment
+        with:
+          pnpm-version: ${{ env.PNPM_VERSION }}
+          node-version: ${{ env.NODE_VERSION }}
+          node: 'true'
+          app-dependencies: 'true'
+
+      - name: Lint
+        run: pnpm turbo run lint --filter="${{ matrix.workspace }}"
+
+      - name: Prettier check
+        run: |
+          WORKSPACE_DIR=$(pnpm --filter="${{ matrix.workspace }}" exec pwd --if-present 2>/dev/null || true)
+          if [ -z "$WORKSPACE_DIR" ]; then
+            echo "Could not resolve path for ${{ matrix.workspace }}, skipping prettier"
+            exit 0
+          fi
+          REL_PATH="${WORKSPACE_DIR#$GITHUB_WORKSPACE/}"
+          CHANGED=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD" \
+            -- "${REL_PATH}/**/*.ts" "${REL_PATH}/**/*.tsx" \
+               "${REL_PATH}/**/*.js" "${REL_PATH}/**/*.jsx" \
+               "${REL_PATH}/**/*.json" "${REL_PATH}/**/*.css" \
+               "${REL_PATH}/**/*.md" | xargs)
+          if [ -n "$CHANGED" ]; then
+            echo "Checking prettier for: $CHANGED"
+            npx prettier --check $CHANGED
+          else
+            echo "No prettier-eligible files changed in ${{ matrix.workspace }}"
+          fi
