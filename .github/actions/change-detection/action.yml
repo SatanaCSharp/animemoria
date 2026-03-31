@@ -1,6 +1,21 @@
 name: Change detection
 author: yuriihorchuk
 description: This reusable action for tracking changes of packages and apps
+
+inputs:
+  base-branch:
+    description: Base branch to compare against (e.g. master).
+    required: false
+    default: 'master'
+
+outputs:
+  has_changes:
+    description: "'true' if any workspace changed, 'false' otherwise"
+    value: ${{ steps.set-matrix.outputs.has_changes }}
+  matrix:
+    description: 'JSON array of changed workspace names'
+    value: ${{ steps.set-matrix.outputs.matrix }}
+
 runs:
   using: 'composite'
   steps:
@@ -8,10 +23,10 @@ runs:
       id: set-matrix
       shell: bash
       run: |
-        CHANGES=$(npx turbo ls --filter='...[origin/main]' --targets='build' --json | jq -c '.packages | map(select(.path | startswith("apps/"))) | map(.name)')
-        if [ "$CHANGES" == "[]" ]; then
+        CHANGES=$(npx turbo ls --filter="...[origin/${{ inputs.base-branch }}]" --targets='lint' --json | jq -c '.packages | map(.name)')
+        if [ "$CHANGES" == "[]" ] || [ -z "$CHANGES" ]; then
           echo "has_changes=false" >> $GITHUB_OUTPUT
         else
           echo "has_changes=true" >> $GITHUB_OUTPUT
-           echo "matrix=$CHANGES" >> $GITHUB_OUTPUT
+          echo "matrix=$CHANGES" >> $GITHUB_OUTPUT
         fi
