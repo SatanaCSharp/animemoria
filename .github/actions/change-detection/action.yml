@@ -28,6 +28,7 @@ runs:
         CHANGES=$(npx turbo ls --filter="...[origin/${{ inputs.base-branch }}]" --targets='lint' --json | jq -c '.packages | map(.name)')
         if [ "$CHANGES" == "[]" ] || [ -z "$CHANGES" ]; then
           echo "has_changes=false" >> $GITHUB_OUTPUT
+          echo "matrix=[]" >> $GITHUB_OUTPUT
         else
           echo "has_changes=true" >> $GITHUB_OUTPUT
           echo "matrix=$CHANGES" >> $GITHUB_OUTPUT

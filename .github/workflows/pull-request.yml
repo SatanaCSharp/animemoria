@@ -14,6 +14,13 @@ env:
   NODE_VERSION: '24.x'
   PNPM_VERSION: '9.15.3'
 
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   detect-changes:
     name: Detect changed workspaces
@@ -57,17 +64,22 @@ jobs:
           app-dependencies: 'true'
 
       - name: Lint
-        run: pnpm turbo run lint --filter="${{ matrix.workspace }}"
+        env:
+          WORKSPACE: ${{ matrix.workspace }}
+        run: pnpm turbo run lint --filter="$WORKSPACE"
 
       - name: Prettier check
+        env:
+          WORKSPACE: ${{ matrix.workspace }}
+          BASE_REF: ${{ github.base_ref }}
         run: |
-          WORKSPACE_DIR=$(pnpm --filter="${{ matrix.workspace }}" exec pwd --if-present 2>/dev/null || true)
+          WORKSPACE_DIR=$(pnpm -F "$WORKSPACE" exec pwd 2>/dev/null || true)
           if [ -z "$WORKSPACE_DIR" ]; then
-            echo "Could not resolve path for ${{ matrix.workspace }}, skipping prettier"
+            echo "Could not resolve path for $WORKSPACE, skipping prettier"
             exit 0
           fi
           REL_PATH="${WORKSPACE_DIR#$GITHUB_WORKSPACE/}"
-          CHANGED=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD" \
+          CHANGED=$(git diff --name-only "origin/${BASE_REF}...HEAD" \
             -- "${REL_PATH}/**/*.ts" "${REL_PATH}/**/*.tsx" \
                "${REL_PATH}/**/*.js" "${REL_PATH}/**/*.jsx" \
                "${REL_PATH}/**/*.json" "${REL_PATH}/**/*.css" \
@@ -76,13 +88,13 @@ jobs:
             echo "Checking prettier for: $CHANGED"
             npx prettier --check $CHANGED
           else
-            echo "No prettier-eligible files changed in ${{ matrix.workspace }}"
+            echo "No prettier-eligible files changed in $WORKSPACE"
           fi
 
   tests:
     name: 'Tests: ${{ matrix.workspace }}'
     needs: [detect-changes, quality-checks]
-    if: needs.detect-changes.outputs.has_changes == 'true'
+    if: needs.detect-changes.outputs.has_changes == 'true' && needs.quality-checks.result == 'success'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -103,4 +115,6 @@ jobs:
           app-dependencies: 'true'
 
       - name: Run tests
-        run: pnpm turbo run test --filter="${{ matrix.workspace }}"
+        env:
+          WORKSPACE: ${{ matrix.workspace }}
+        run: pnpm turbo run test --filter="$WORKSPACE"
