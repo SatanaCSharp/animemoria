@@ -78,3 +78,29 @@ jobs:
           else
             echo "No prettier-eligible files changed in ${{ matrix.workspace }}"
           fi
+
+  tests:
+    name: 'Tests: ${{ matrix.workspace }}'
+    needs: [detect-changes, quality-checks]
+    if: needs.detect-changes.outputs.has_changes == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        workspace: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-environment
+        with:
+          pnpm-version: ${{ env.PNPM_VERSION }}
+          node-version: ${{ env.NODE_VERSION }}
+          node: 'true'
+          app-dependencies: 'true'
+
+      - name: Run tests
+        run: pnpm turbo run test --filter="${{ matrix.workspace }}"
