@@ -1,0 +1,33 @@
+name: Tests
+author: yuriihorchuk
+description: Runs tests for a single workspace via Turborepo.
+
+inputs:
+  workspace:
+    description: Workspace name to test (e.g. users-service, @packages/nest-shared).
+    required: true
+  node-version:
+    description: Node.js version to use.
+    required: false
+    default: '24.x'
+  pnpm-version:
+    description: pnpm version to use.
+    required: false
+    default: '9.15.3'
+
+runs:
+  using: composite
+  steps:
+    - name: Setup environment
+      uses: ./.github/actions/setup-environment
+      with:
+        pnpm-version: ${{ inputs.pnpm-version }}
+        node-version: ${{ inputs.node-version }}
+        node: 'true'
+        app-dependencies: 'true'
+
+    - name: Run tests
+      shell: bash
+      env:
+        WORKSPACE: ${{ inputs.workspace }}
+      run: pnpm turbo run test --filter="$WORKSPACE"

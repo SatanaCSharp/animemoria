@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  NODE_VERSION: '24.x'
+  PNPM_VERSION: '9.15.3'
+  AWS_REGION: eu-central-1
+
+jobs:
+  identify-changes:
+    name: Identify changed apps and packages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: change detection
+        id: set-matrix
+        shell: bash
+        run: |
+         CHANGES=$(npx turbo ls --filter='...[origin/main]' --targets='build' --json | jq -c '.packages | map(select(.path | startswith("apps/"))) | map(.name)')
+         if [ "$CHANGES" == "[]" ]; then
+           echo "has_changes=false" >> $GITHUB_OUTPUT
+         else
+           echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "matrix=$CHANGES" >> $GITHUB_OUTPUT
+         fi

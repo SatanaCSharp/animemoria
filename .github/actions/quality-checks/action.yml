@@ -1,0 +1,62 @@
+name: Quality checks
+author: yuriihorchuk
+description: Runs lint and Prettier check for a single workspace against PR-changed files.
+
+inputs:
+  workspace:
+    description: Workspace name to lint and check (e.g. users-service, @packages/nest-shared).
+    required: true
+  base-ref:
+    description: Base branch to diff against for Prettier (e.g. master).
+    required: true
+  node-version:
+    description: Node.js version to use.
+    required: false
+    default: '24.x'
+  pnpm-version:
+    description: pnpm version to use.
+    required: false
+    default: '9.15.3'
+
+runs:
+  using: composite
+  steps:
+    - name: Setup environment
+      uses: ./.github/actions/setup-environment
+      with:
+        pnpm-version: ${{ inputs.pnpm-version }}
+        node-version: ${{ inputs.node-version }}
+        node: 'true'
+        app-dependencies: 'true'
+
+    - name: Lint
+      shell: bash
+      env:
+        WORKSPACE: ${{ inputs.workspace }}
+      run: pnpm turbo run lint --filter="$WORKSPACE"
+
+    - name: Prettier check
+      shell: bash
+      env:
+        WORKSPACE: ${{ inputs.workspace }}
+        BASE_REF: ${{ inputs.base-ref }}
+      run: |
+        set -e
+        set -o pipefail
+        WORKSPACE_DIR=$(pnpm -F "$WORKSPACE" exec pwd 2>/dev/null || true)
+        if [ -z "$WORKSPACE_DIR" ]; then
+          echo "Could not resolve path for $WORKSPACE, skipping prettier"
+          exit 0
+        fi
+        REL_PATH="${WORKSPACE_DIR#$GITHUB_WORKSPACE/}"
+        CHANGED=$(git diff --name-only "origin/${BASE_REF}...HEAD" \
+          -- "${REL_PATH}/**/*.ts" "${REL_PATH}/**/*.tsx" \
+             "${REL_PATH}/**/*.js" "${REL_PATH}/**/*.jsx" \
+             "${REL_PATH}/**/*.json" "${REL_PATH}/**/*.css" \
+             "${REL_PATH}/**/*.md" | xargs)
+        if [ -n "$CHANGED" ]; then
+          echo "Checking prettier for: $CHANGED"
+          npx prettier --check $CHANGED
+        else
+          echo "No prettier-eligible files changed in $WORKSPACE"
+        fi

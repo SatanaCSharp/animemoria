@@ -1,0 +1,86 @@
+name: Pull Request
+
+on:
+  pull_request:
+    branches:
+      - master
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+
+env:
+  NODE_VERSION: '24.x'
+  PNPM_VERSION: '9.15.3'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  detect-changes:
+    name: Detect changed workspaces
+    runs-on: ubuntu-latest
+    outputs:
+      has_changes: ${{ steps.changes.outputs.has_changes }}
+      matrix: ${{ steps.changes.outputs.matrix }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run change detection
+        id: changes
+        uses: ./.github/actions/change-detection
+        with:
+          base-branch: ${{ github.base_ref }}
+
+  quality-checks:
+    name: 'Quality: ${{ matrix.workspace }}'
+    needs: detect-changes
+    if: needs.detect-changes.outputs.has_changes == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        workspace: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run quality checks
+        uses: ./.github/actions/quality-checks
+        with:
+          workspace: ${{ matrix.workspace }}
+          base-ref: ${{ github.base_ref }}
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+
+  tests:
+    name: 'Tests: ${{ matrix.workspace }}'
+    needs: [detect-changes, quality-checks]
+    if: needs.detect-changes.outputs.has_changes == 'true' && needs.quality-checks.result == 'success'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        workspace: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run tests
+        uses: ./.github/actions/tests
+        with:
+          workspace: ${{ matrix.workspace }}
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
