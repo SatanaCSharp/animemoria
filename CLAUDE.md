@@ -188,6 +188,19 @@ Each service has its own TypeORM config. `DB_CONNECTION_URL` must be set before 
 4. Add Docker build script in root `package.json`.
 5. Add Helm values file under `infra/deployment/kubernetes/values/<service-name>/`.
 
+### Commit Message Format
+
+Use commitlint-style scopes with the ticket number from the current branch (e.g. branch `feat/AM-45-gh-actions` → ticket `AM-45`):
+
+```
+feat(AM-45): add github actions
+fix(AM-45): fix github actions workflow
+refactor(AM-45): extract composite actions
+```
+
+Format: `<type>(AM-<number>): <message>`
+Types: `feat`, `core`, `fix`, `refactor`, `chore`, `docs`, `test`, `ci`
+
 ### Gotchas
 
 - **Service startup order:** Gateway depends on registry + subgraphs being up. Start registry first.
