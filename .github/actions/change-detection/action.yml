@@ -25,6 +25,18 @@ runs:
       run: |
         set -e
         set -o pipefail
+
+        # Check if any files inside apps/ or packages/ changed.
+        # If only infra/docs/ci/root-config files were touched, skip lint and tests entirely.
+        WORKSPACE_FILES=$(git diff --name-only "origin/${{ inputs.base-branch }}...HEAD" -- apps/ packages/ 2>/dev/null || true)
+
+        if [ -z "$WORKSPACE_FILES" ]; then
+          echo "No changes in apps/ or packages/ — skipping quality checks and tests."
+          echo "has_changes=false" >> $GITHUB_OUTPUT
+          echo "matrix=[]" >> $GITHUB_OUTPUT
+          exit 0
+        fi
+
         CHANGES=$(npx turbo ls --filter="...[origin/${{ inputs.base-branch }}]" --targets='lint' --json | jq -c '.packages | map(.name)')
         if [ "$CHANGES" == "[]" ] || [ -z "$CHANGES" ]; then
           echo "has_changes=false" >> $GITHUB_OUTPUT
