@@ -1,35 +1,131 @@
 name: Build and push Docker image to ECR
-description: Build a Docker image and push it to Amazon ECR using GitHub OIDC.
+description: >
+  Build a Docker image using the monorepo Dockerfiles, push to Amazon ECR,
+  and optionally upgrade the corresponding Helm release in EKS.
 
 inputs:
   aws-region:
-    description: AWS region where the ECR registry is located.
-    required: true
+    description: AWS region where ECR and EKS are located.
+    required: false
     default: 'eu-north-1'
   ecr-repo:
-    description: ECR repo name where to push image.
+    description: ECR repository name (e.g. users-service-graphql).
     required: true
-    default: 'animemoria-backend'
+  dockerfile:
+    description: >
+      Dockerfile filename under infra/deployment/docker/
+      (e.g. Dockerfile.nestjs, Dockerfile.vite, Dockerfile.nextjs).
+    required: true
+  app-name:
+    description: Value for the APP_NAME Docker build arg (e.g. users-service).
+    required: true
+  app-type:
+    description: >
+      Value for the APP_TYPE Docker build arg (e.g. graphql, grpc, rest).
+      Leave empty for frontend images (admin, web).
+    required: false
+    default: ''
+  entry-point:
+    description: >
+      Value for the ENTRY_POINT Docker build arg (e.g. graphql.main).
+      Leave empty for frontend images.
+    required: false
+    default: ''
+  image-tag:
+    description: Docker image tag. Defaults to the commit SHA.
+    required: false
+    default: ${{ github.sha }}
+  deploy:
+    description: Set to 'true' to run helm upgrade after pushing the image.
+    required: false
+    default: 'false'
+  helm-release:
+    description: Helm release name (required when deploy is true).
+    required: false
+    default: ''
+  helm-chart:
+    description: >
+      Helm chart directory name under infra/deployment/kubernetes/helm/charts/
+      (e.g. microservice, frontend). Required when deploy is true.
+    required: false
+    default: ''
+  helm-values:
+    description: >
+      Path to the service values file relative to
+      infra/deployment/kubernetes/helm/values/
+      (e.g. users-service/users-service-graphql.yaml). Required when deploy is true.
+    required: false
+    default: ''
+  eks-cluster-name:
+    description: EKS cluster name for aws eks update-kubeconfig. Required when deploy is true.
+    required: false
+    default: ''
 
 runs:
   using: composite
   steps:
-    - name: Configure AWS Credentials
+    - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
-        role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-actions-ecr-role
+        role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-actions-role-dev
         aws-region: ${{ inputs.aws-region }}
 
     - name: Login to Amazon ECR
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v2
 
-    - name: Build, Tag, and Push
+    - name: Build and push Docker image
       shell: bash
       env:
-        ECR_REGISTRY: ${{ steps.login-ecr.registry }}
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY: ${{ inputs.ecr-repo }}
-        IMAGE_TAG: ${{ github.sha }}
+        IMAGE_TAG: ${{ inputs.image-tag }}
+        DOCKERFILE: ${{ inputs.dockerfile }}
+        APP_NAME: ${{ inputs.app-name }}
+        APP_TYPE: ${{ inputs.app-type }}
+        ENTRY_POINT: ${{ inputs.entry-point }}
       run: |
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        BUILD_ARGS="--build-arg APP_NAME=${APP_NAME}"
+        if [ -n "${APP_TYPE}" ]; then
+          BUILD_ARGS="${BUILD_ARGS} --build-arg APP_TYPE=${APP_TYPE}"
+        fi
+        if [ -n "${ENTRY_POINT}" ]; then
+          BUILD_ARGS="${BUILD_ARGS} --build-arg ENTRY_POINT=${ENTRY_POINT}"
+        fi
+
+        docker build \
+          -f "infra/deployment/docker/${DOCKERFILE}" \
+          ${BUILD_ARGS} \
+          -t "${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}" \
+          .
+
+        docker push "${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}"
+
+    - name: Update kubeconfig
+      if: ${{ inputs.deploy == 'true' }}
+      shell: bash
+      env:
+        AWS_REGION: ${{ inputs.aws-region }}
+        EKS_CLUSTER_NAME: ${{ inputs.eks-cluster-name }}
+      run: |
+        aws eks update-kubeconfig \
+          --name "${EKS_CLUSTER_NAME}" \
+          --region "${AWS_REGION}"
+
+    - name: Helm upgrade
+      if: ${{ inputs.deploy == 'true' }}
+      shell: bash
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ inputs.image-tag }}
+        HELM_RELEASE: ${{ inputs.helm-release }}
+        HELM_CHART: ${{ inputs.helm-chart }}
+        HELM_VALUES: ${{ inputs.helm-values }}
+      run: |
+        helm upgrade --install "${HELM_RELEASE}" \
+          "infra/deployment/kubernetes/helm/charts/${HELM_CHART}" \
+          -f infra/deployment/kubernetes/helm/values/cluster.yaml \
+          -f infra/deployment/kubernetes/helm/values/aws.yaml \
+          -f "infra/deployment/kubernetes/helm/values/${HELM_VALUES}" \
+          --set "imageRepository=${ECR_REGISTRY}" \
+          --set "image.tag=${IMAGE_TAG}"
