@@ -1,27 +1,22 @@
-name: Pull Request
+name: CI — Merge
 
 on:
-  pull_request:
+  push:
     branches:
       - master
-    types:
-      - opened
-      - synchronize
-      - reopened
-      - ready_for_review
 
 permissions:
   contents: read
 
 concurrency:
-  group: pr-${{ github.event.pull_request.number }}
+  group: merge-master
   cancel-in-progress: true
 
 jobs:
   detect-changes:
     uses: ./.github/workflows/_detect-changes.yml
     with:
-      base-branch: ${{ github.base_ref }}
+      base-branch: master
 
   quality-checks:
     needs: detect-changes
@@ -29,7 +24,7 @@ jobs:
     uses: ./.github/workflows/_quality-checks.yml
     with:
       matrix: ${{ needs.detect-changes.outputs.matrix }}
-      base-ref: ${{ github.base_ref }}
+      base-ref: master
       node-version: '24.x'
       pnpm-version: '9.15.3'
 
