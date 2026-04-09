@@ -15,3 +15,7 @@ variable "github_repo" {
   default = "SatanaCSharp/animemoria"
 }
 
+variable "eks_cluster_name" {
+  type        = string
+  description = "Name of the EKS cluster to grant the GitHub Actions role access to"
+}
