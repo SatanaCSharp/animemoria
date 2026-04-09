@@ -4,19 +4,20 @@ on:
   push:
     branches:
       - master
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
   group: merge-master
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   detect-changes:
     uses: ./.github/workflows/_detect-changes.yml
     with:
-      base-branch: master
+      base-sha: ${{ github.event.before }}
 
   quality-checks:
     needs: detect-changes
@@ -25,14 +26,50 @@ jobs:
     with:
       matrix: ${{ needs.detect-changes.outputs.matrix }}
       base-ref: master
-      node-version: '24.x'
-      pnpm-version: '9.15.3'
 
   tests:
     needs: [detect-changes, quality-checks]
-    if: needs.detect-changes.outputs.has_changes == 'true' && needs.quality-checks.result == 'success'
+    if: |
+      needs.detect-changes.outputs.has_changes == 'true' &&
+      (needs.quality-checks.result == 'success' || needs.quality-checks.result == 'skipped')
     uses: ./.github/workflows/_tests.yml
     with:
       matrix: ${{ needs.detect-changes.outputs.matrix }}
-      node-version: '24.x'
-      pnpm-version: '9.15.3'
+
+  expand-build-matrix:
+    name: Expand build matrix
+    needs: [detect-changes, quality-checks, tests]
+    if: |
+      needs.detect-changes.outputs.has_changes == 'true' &&
+      needs.tests.result == 'success'
+    runs-on: ubuntu-latest
+    outputs:
+      build_matrix: ${{ steps.filter.outputs.build_matrix }}
+      has_builds: ${{ steps.filter.outputs.has_builds }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Filter build matrix
+        id: filter
+        env:
+          CHANGED_WORKSPACES: ${{ needs.detect-changes.outputs.matrix }}
+        run: |
+          BUILD_MATRIX=$(cat .github/build-matrix.json)
+          RESULT=$(echo "$CHANGED_WORKSPACES" | \
+            jq -c --argjson bm "$BUILD_MATRIX" '[.[] | $bm[.] // [] | .[]]')
+
+          if [ "$(echo "$RESULT" | jq 'length')" -eq 0 ]; then
+            echo "has_builds=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_builds=true" >> "$GITHUB_OUTPUT"
+          fi
+          echo "build_matrix=$RESULT" >> "$GITHUB_OUTPUT"
+
+  build-and-push:
+    needs: [expand-build-matrix]
+    if: needs.expand-build-matrix.outputs.has_builds == 'true'
+    uses: ./.github/workflows/_build-and-push.yml
+    with:
+      build-matrix: ${{ needs.expand-build-matrix.outputs.build_matrix }}
+    secrets: inherit
