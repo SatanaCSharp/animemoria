@@ -10,6 +10,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint",
+    "typecheck": "tsc --noEmit",
     "check": "eslint --fix",
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",

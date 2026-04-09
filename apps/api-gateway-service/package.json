@@ -15,6 +15,7 @@
     "rest:dev": "nest start --watch --entryFile rest.main",
     "rest:prod": "node dist/rest.main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    "typecheck": "tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
