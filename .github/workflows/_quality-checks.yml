@@ -1,0 +1,49 @@
+name: Reusable — Quality Checks
+
+on:
+  workflow_call:
+    inputs:
+      matrix:
+        description: JSON array of workspace names to check
+        type: string
+        required: true
+      base-ref:
+        description: Base ref for lint/type-check comparisons
+        type: string
+        required: false
+        default: ''
+      node-version:
+        description: Node.js version to use
+        type: string
+        required: false
+        default: '24.x'
+      pnpm-version:
+        description: pnpm version to use
+        type: string
+        required: false
+        default: '9.15.3'
+
+permissions:
+  contents: read
+
+jobs:
+  quality-checks:
+    name: 'Quality: ${{ matrix.workspace }}'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        workspace: ${{ fromJson(inputs.matrix) }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run quality checks
+        uses: ./.github/actions/quality-checks
+        with:
+          workspace: ${{ matrix.workspace }}
+          base-ref: ${{ inputs.base-ref }}
+          node-version: ${{ inputs.node-version }}
+          pnpm-version: ${{ inputs.pnpm-version }}

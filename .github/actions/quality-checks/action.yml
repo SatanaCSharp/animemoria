@@ -35,6 +35,12 @@ runs:
         WORKSPACE: ${{ inputs.workspace }}
       run: pnpm turbo run lint --filter="$WORKSPACE"
 
+    - name: Type check
+      shell: bash
+      env:
+        WORKSPACE: ${{ inputs.workspace }}
+      run: pnpm turbo run typecheck --filter="$WORKSPACE"
+
     - name: Prettier check
       shell: bash
       env:
@@ -49,14 +55,14 @@ runs:
           exit 0
         fi
         REL_PATH="${WORKSPACE_DIR#$GITHUB_WORKSPACE/}"
-        CHANGED=$(git diff --name-only "origin/${BASE_REF}...HEAD" \
+        mapfile -t CHANGED < <(git diff --name-only "origin/${BASE_REF}...HEAD" \
           -- "${REL_PATH}/**/*.ts" "${REL_PATH}/**/*.tsx" \
              "${REL_PATH}/**/*.js" "${REL_PATH}/**/*.jsx" \
              "${REL_PATH}/**/*.json" "${REL_PATH}/**/*.css" \
-             "${REL_PATH}/**/*.md" | xargs)
-        if [ -n "$CHANGED" ]; then
-          echo "Checking prettier for: $CHANGED"
-          npx prettier --check $CHANGED
+             "${REL_PATH}/**/*.md")
+        if [ "${#CHANGED[@]}" -gt 0 ]; then
+          echo "Checking prettier for: ${CHANGED[*]}"
+          npx prettier --check "${CHANGED[@]}"
         else
           echo "No prettier-eligible files changed in $WORKSPACE"
         fi

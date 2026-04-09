@@ -1,0 +1,113 @@
+{
+  "registry-service": [
+    {
+      "image": "registry-service-rest",
+      "dockerfile": "Dockerfile.nestjs",
+      "app_name": "registry-service",
+      "app_type": "rest",
+      "entry_point": "rest.main",
+      "helm_release": "registry-service-rest",
+      "helm_chart": "microservice",
+      "helm_values": "registry-service/registry-service-rest.yaml",
+      "deploy": true
+    }
+  ],
+  "users-service": [
+    {
+      "image": "users-service-graphql",
+      "dockerfile": "Dockerfile.nestjs",
+      "app_name": "users-service",
+      "app_type": "graphql",
+      "entry_point": "graphql.main",
+      "helm_release": "users-service-graphql",
+      "helm_chart": "microservice",
+      "helm_values": "users-service/users-service-graphql.yaml",
+      "deploy": true
+    },
+    {
+      "image": "users-service-grpc",
+      "dockerfile": "Dockerfile.nestjs",
+      "app_name": "users-service",
+      "app_type": "grpc",
+      "entry_point": "grpc.main",
+      "helm_release": "users-service-grpc",
+      "helm_chart": "microservice",
+      "helm_values": "users-service/users-service-grpc.yaml",
+      "deploy": true
+    }
+  ],
+  "auth-service": [
+    {
+      "image": "auth-service-graphql",
+      "dockerfile": "Dockerfile.nestjs",
+      "app_name": "auth-service",
+      "app_type": "graphql",
+      "entry_point": "graphql.main",
+      "helm_release": "auth-service-graphql",
+      "helm_chart": "microservice",
+      "helm_values": "auth-service/auth-service-graphql.yaml",
+      "deploy": true
+    },
+    {
+      "image": "auth-service-grpc",
+      "dockerfile": "Dockerfile.nestjs",
+      "app_name": "auth-service",
+      "app_type": "grpc",
+      "entry_point": "grpc.main",
+      "helm_release": "auth-service-grpc",
+      "helm_chart": "microservice",
+      "helm_values": "auth-service/auth-service-grpc.yaml",
+      "deploy": true
+    }
+  ],
+  "api-gateway-service": [
+    {
+      "image": "api-gateway-service-graphql",
+      "dockerfile": "Dockerfile.nestjs",
+      "app_name": "api-gateway-service",
+      "app_type": "graphql",
+      "entry_point": "graphql.main",
+      "helm_release": "api-gateway-service-graphql",
+      "helm_chart": "microservice",
+      "helm_values": "api-gateway-service/api-gateway-service-graphql.yaml",
+      "deploy": true
+    },
+    {
+      "image": "api-gateway-service-rest",
+      "dockerfile": "Dockerfile.nestjs",
+      "app_name": "api-gateway-service",
+      "app_type": "rest",
+      "entry_point": "rest.main",
+      "helm_release": "api-gateway-service-rest",
+      "helm_chart": "microservice",
+      "helm_values": "api-gateway-service/api-gateway-service-rest.yaml",
+      "deploy": true
+    }
+  ],
+  "admin": [
+    {
+      "image": "admin",
+      "dockerfile": "Dockerfile.vite",
+      "app_name": "admin",
+      "app_type": "",
+      "entry_point": "",
+      "helm_release": "admin",
+      "helm_chart": "frontend",
+      "helm_values": "admin/admin.yaml",
+      "deploy": true
+    }
+  ],
+  "web": [
+    {
+      "image": "web",
+      "dockerfile": "Dockerfile.nextjs",
+      "app_name": "web",
+      "app_type": "",
+      "entry_point": "",
+      "helm_release": "",
+      "helm_chart": "",
+      "helm_values": "",
+      "deploy": false
+    }
+  ]
+}

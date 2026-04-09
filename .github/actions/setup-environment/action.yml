@@ -4,7 +4,7 @@ description: This reusable action installs dependencies are required by other ac
 inputs:
   pnpm-version:
     description: pnpm version to install.
-    required: true
+    required: false
     default: '9.15.3'
   pnpm:
     description: installation pnpm package manager
@@ -12,7 +12,7 @@ inputs:
     default: 'true'
   node-version:
     description: Node.js version to use.
-    required: true
+    required: false
     default: '24.x'
   node:
     description: installation nodejs

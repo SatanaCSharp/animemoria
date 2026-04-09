@@ -1,0 +1,43 @@
+name: Reusable — Tests
+
+on:
+  workflow_call:
+    inputs:
+      matrix:
+        description: JSON array of workspace names to test
+        type: string
+        required: true
+      node-version:
+        description: Node.js version to use
+        type: string
+        required: false
+        default: '24.x'
+      pnpm-version:
+        description: pnpm version to use
+        type: string
+        required: false
+        default: '9.15.3'
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    name: 'Tests: ${{ matrix.workspace }}'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        workspace: ${{ fromJson(inputs.matrix) }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run tests
+        uses: ./.github/actions/tests
+        with:
+          workspace: ${{ matrix.workspace }}
+          node-version: ${{ inputs.node-version }}
+          pnpm-version: ${{ inputs.pnpm-version }}

@@ -26,6 +26,7 @@
     "build": "tsc && tsc-alias",
     "start:dev": "tsc && (concurrently \"tsc -w\" \"tsc-alias -w\")",
     "lint": "eslint 'src/**/*.ts' --max-warnings=0",
+    "typecheck": "tsc --noEmit",
     "lint:fix": "eslint 'src/**/*.ts' --max-warnings=0 --fix"
   },
   "devDependencies": {

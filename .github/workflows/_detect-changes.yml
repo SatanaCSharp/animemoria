@@ -1,0 +1,45 @@
+name: Reusable — Detect Changed Workspaces
+
+on:
+  workflow_call:
+    inputs:
+      base-branch:
+        description: Base branch to compare changes against. Used for PR context.
+        type: string
+        required: false
+        default: ''
+      base-sha:
+        description: Explicit base SHA to compare against. Use github.event.before for push-to-master context to avoid comparing master against itself.
+        type: string
+        required: false
+        default: ''
+    outputs:
+      has_changes:
+        description: Whether any workspaces have changed
+        value: ${{ jobs.detect-changes.outputs.has_changes }}
+      matrix:
+        description: JSON array of changed workspace names
+        value: ${{ jobs.detect-changes.outputs.matrix }}
+
+permissions:
+  contents: read
+
+jobs:
+  detect-changes:
+    name: Detect changed workspaces
+    runs-on: ubuntu-latest
+    outputs:
+      has_changes: ${{ steps.changes.outputs.has_changes }}
+      matrix: ${{ steps.changes.outputs.matrix }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run change detection
+        id: changes
+        uses: ./.github/actions/change-detection
+        with:
+          base-branch: ${{ inputs.base-branch }}
+          base-sha: ${{ inputs.base-sha }}

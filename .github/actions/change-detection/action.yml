@@ -4,9 +4,13 @@ description: This reusable action for tracking changes of packages and apps
 
 inputs:
   base-branch:
-    description: Base branch to compare against (e.g. master).
+    description: Base branch to compare against (e.g. master). Used for PR context.
     required: false
     default: 'master'
+  base-sha:
+    description: Explicit base SHA to compare against. When provided, overrides base-branch. Use github.event.before for push-to-master context.
+    required: false
+    default: ''
 
 outputs:
   has_changes:
@@ -26,9 +30,20 @@ runs:
         set -e
         set -o pipefail
 
+        # Resolve the comparison base: prefer explicit SHA over branch name.
+        # For push-to-master, pass github.event.before as base-sha to avoid
+        # comparing master against itself (which always yields an empty diff).
+        if [ -n "${{ inputs.base-sha }}" ]; then
+          BASE_REF="${{ inputs.base-sha }}"
+          TURBO_FILTER="...[${BASE_REF}]"
+        else
+          BASE_REF="origin/${{ inputs.base-branch }}"
+          TURBO_FILTER="...[origin/${{ inputs.base-branch }}]"
+        fi
+
         # Check if any files inside apps/ or packages/ changed.
         # If only infra/docs/ci/root-config files were touched, skip lint and tests entirely.
-        WORKSPACE_FILES=$(git diff --name-only "origin/${{ inputs.base-branch }}...HEAD" -- apps/ packages/ 2>/dev/null || true)
+        WORKSPACE_FILES=$(git diff --name-only "${BASE_REF}...HEAD" -- apps/ packages/ 2>/dev/null || true)
 
         if [ -z "$WORKSPACE_FILES" ]; then
           echo "No changes in apps/ or packages/ — skipping quality checks and tests."
@@ -37,7 +52,7 @@ runs:
           exit 0
         fi
 
-        CHANGES=$(npx turbo ls --filter="...[origin/${{ inputs.base-branch }}]" --targets='lint' --json | jq -c '.packages | map(.name)')
+        CHANGES=$(npx turbo ls --filter="${TURBO_FILTER}" --targets='lint' --json | jq -c '.packages | map(.name)')
         if [ "$CHANGES" == "[]" ] || [ -z "$CHANGES" ]; then
           echo "has_changes=false" >> $GITHUB_OUTPUT
           echo "matrix=[]" >> $GITHUB_OUTPUT
