@@ -4,6 +4,9 @@ description: >
   and optionally upgrade the corresponding Helm release in EKS.
 
 inputs:
+  aws-account-id:
+    description: AWS account ID for the ECR/EKS role ARN.
+    required: true
   aws-region:
     description: AWS region where ECR and EKS are located.
     required: false
@@ -67,7 +70,7 @@ runs:
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
-        role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-actions-role-dev
+        role-to-assume: arn:aws:iam::${{ inputs.aws-account-id }}:role/github-actions-role-dev
         aws-region: ${{ inputs.aws-region }}
 
     - name: Login to Amazon ECR
@@ -85,17 +88,19 @@ runs:
         APP_TYPE: ${{ inputs.app-type }}
         ENTRY_POINT: ${{ inputs.entry-point }}
       run: |
-        BUILD_ARGS="--build-arg APP_NAME=${APP_NAME}"
+        set -euo pipefail
+
+        BUILD_ARGS=(--build-arg "APP_NAME=${APP_NAME}")
         if [ -n "${APP_TYPE}" ]; then
-          BUILD_ARGS="${BUILD_ARGS} --build-arg APP_TYPE=${APP_TYPE}"
+          BUILD_ARGS+=(--build-arg "APP_TYPE=${APP_TYPE}")
         fi
         if [ -n "${ENTRY_POINT}" ]; then
-          BUILD_ARGS="${BUILD_ARGS} --build-arg ENTRY_POINT=${ENTRY_POINT}"
+          BUILD_ARGS+=(--build-arg "ENTRY_POINT=${ENTRY_POINT}")
         fi
 
         docker build \
           -f "infra/deployment/docker/${DOCKERFILE}" \
-          ${BUILD_ARGS} \
+          "${BUILD_ARGS[@]}" \
           -t "${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}" \
           .
 
@@ -108,6 +113,7 @@ runs:
         AWS_REGION: ${{ inputs.aws-region }}
         EKS_CLUSTER_NAME: ${{ inputs.eks-cluster-name }}
       run: |
+        set -euo pipefail
         aws eks update-kubeconfig \
           --name "${EKS_CLUSTER_NAME}" \
           --region "${AWS_REGION}"
@@ -122,6 +128,7 @@ runs:
         HELM_CHART: ${{ inputs.helm-chart }}
         HELM_VALUES: ${{ inputs.helm-values }}
       run: |
+        set -euo pipefail
         helm upgrade --install "${HELM_RELEASE}" \
           "infra/deployment/kubernetes/helm/charts/${HELM_CHART}" \
           -f infra/deployment/kubernetes/helm/values/cluster.yaml \
