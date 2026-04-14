@@ -123,3 +123,7 @@ override.tf.json
 # Ignore CLI configuration files
 .terraformrc
 terraform.rc
+
+#agents
+*.local.md
+!*.example.local.md
