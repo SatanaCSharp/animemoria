@@ -1,0 +1,52 @@
+name: Reusable — Build, Push, and Deploy Images
+
+on:
+  workflow_call:
+    inputs:
+      build-matrix:
+        description: JSON array of image build configs from build-matrix.json.
+        type: string
+        required: true
+      aws-region:
+        description: AWS region for ECR and EKS.
+        type: string
+        required: false
+        default: 'eu-north-1'
+    secrets:
+      AWS_ACCOUNT_ID:
+        required: true
+      EKS_CLUSTER_NAME:
+        required: true
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-and-push:
+    name: 'Build: ${{ matrix.image }}'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(inputs.build-matrix) }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build, push, and deploy
+        uses: ./.github/actions/build-and-push-ecr
+        with:
+          aws-account-id: ${{ secrets.AWS_ACCOUNT_ID }}
+          aws-region: ${{ inputs.aws-region }}
+          ecr-repo: ${{ matrix.image }}
+          dockerfile: ${{ matrix.dockerfile }}
+          app-name: ${{ matrix.app_name }}
+          app-type: ${{ matrix.app_type }}
+          entry-point: ${{ matrix.entry_point }}
+          image-tag: ${{ github.sha }}
+          deploy: ${{ matrix.deploy }}
+          helm-release: ${{ matrix.helm_release }}
+          helm-chart: ${{ matrix.helm_chart }}
+          helm-values: ${{ matrix.helm_values }}
+          eks-cluster-name: ${{ secrets.EKS_CLUSTER_NAME }}

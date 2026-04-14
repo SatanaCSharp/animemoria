@@ -5,10 +5,10 @@ provider "aws" {
 module "gh_oidc" {
   source = "../../modules/iam"
 
-  env         = "dev"
+  env              = "dev"
+  eks_cluster_name = "animemoria-dev" # replace with your actual EKS cluster name
 }
 
 module "ecr_repos" {
   source = "../../modules/ecr"
-
 }

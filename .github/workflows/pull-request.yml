@@ -9,10 +9,7 @@ on:
       - synchronize
       - reopened
       - ready_for_review
-
-env:
-  NODE_VERSION: '24.x'
-  PNPM_VERSION: '9.15.3'
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -23,64 +20,23 @@ concurrency:
 
 jobs:
   detect-changes:
-    name: Detect changed workspaces
-    runs-on: ubuntu-latest
-    outputs:
-      has_changes: ${{ steps.changes.outputs.has_changes }}
-      matrix: ${{ steps.changes.outputs.matrix }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Run change detection
-        id: changes
-        uses: ./.github/actions/change-detection
-        with:
-          base-branch: ${{ github.base_ref }}
+    uses: ./.github/workflows/_detect-changes.yml
+    with:
+      base-branch: ${{ github.base_ref }}
 
   quality-checks:
-    name: 'Quality: ${{ matrix.workspace }}'
     needs: detect-changes
     if: needs.detect-changes.outputs.has_changes == 'true'
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        workspace: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Run quality checks
-        uses: ./.github/actions/quality-checks
-        with:
-          workspace: ${{ matrix.workspace }}
-          base-ref: ${{ github.base_ref }}
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
+    uses: ./.github/workflows/_quality-checks.yml
+    with:
+      matrix: ${{ needs.detect-changes.outputs.matrix }}
+      base-ref: ${{ github.base_ref }}
 
   tests:
-    name: 'Tests: ${{ matrix.workspace }}'
     needs: [detect-changes, quality-checks]
-    if: needs.detect-changes.outputs.has_changes == 'true' && needs.quality-checks.result == 'success'
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        workspace: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Run tests
-        uses: ./.github/actions/tests
-        with:
-          workspace: ${{ matrix.workspace }}
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
+    if: |
+      needs.detect-changes.outputs.has_changes == 'true' &&
+      (needs.quality-checks.result == 'success' || needs.quality-checks.result == 'skipped')
+    uses: ./.github/workflows/_tests.yml
+    with:
+      matrix: ${{ needs.detect-changes.outputs.matrix }}
