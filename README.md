@@ -134,9 +134,3 @@ docker build \
 - **Kubernetes:** `infra/deployment/kubernetes/` — Helm charts (`charts/frontend/`, `charts/microservice/`) with per-service values under `values/<service-name>/`
 
 ---
-
-## Documentation
-
-Full table of contents with per-service and per-package READMEs:
-
-[\_docs/TABLE_OF_CONTENTS.md](_docs/TABLE_OF_CONTENTS.md)
