@@ -12,14 +12,13 @@ Database: PostgreSQL via TypeORM.
 
 ## Session / token conventions
 
-- Access tokens: short-lived JWT signed with `AUTH_JWT_SECRET`.
-- Refresh tokens: stored in the database (`RefreshToken` entity) and rotated on use.
-- On rotation, invalidate the previous token immediately — do not leave a window.
-- Never store raw tokens; store only hashed refresh tokens in the DB.
+- Access tokens: short-lived JWT signed with `AT_SECRET`.
+- Refresh tokens: signed with `RT_SECRET`, stored as-is in `Session.refreshTokenHash` (field name is misleading — value is not hashed), and rotated on every use.
+- On rotation, the incoming cookie value is compared by equality against the stored field; the previous token is invalidated immediately — do not leave a window.
 
 ## TypeORM
 
-- Entities: `src/modules/sessions/session.entity.ts`, `src/modules/tokens/refresh-token.entity.ts`.
+- Entities: `src/shared/domain/entities/` (`Account`, `Session`).
 - Migrations in `src/migrations/`. Use `DB_CONNECTION_URL` for the auth database (separate from users DB).
 
 ## gRPC contracts

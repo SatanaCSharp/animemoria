@@ -5,24 +5,46 @@ React 19 + Vite + TanStack Router. Admin SPA. Port: determined by Vite dev serve
 ## Hard constraints — no exceptions
 
 - **No SSR.** No `getServerSideProps`, no Server Actions, no RSC. This is a pure client SPA.
-- **No direct GraphQL string queries.** Use only the generated typed hooks from `@packages/graphql-generated`.
+- **No raw GraphQL strings.** Always use colocated `.graphql` files and import the generated typed documents.
 
 ## Routing
 
-TanStack Router with file-based routes under `src/routes/`. Route files export `createFileRoute(...)`.  
-Add new pages by creating a new file in `src/routes/` — do not register routes manually in a central file.
+TanStack Router with module-owned routes. Each module declares its own `route.tsx` using `createRoute(...)`.  
+Routes are registered manually in `src/router.tsx` via `rootRoute.addChildren([...])`.  
+Do not use `createFileRoute` or file-based routing conventions.
+
+```ts
+// src/modules/dashboard/route.tsx
+export const dashboardRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: ROUTES.DASHBOARD,
+  component: lazyRouteComponent(() => import('./page'), 'Dashboard'),
+  beforeLoad: ({ context }) => requireAuth(context),
+});
+
+// src/router.tsx
+const routeTree = rootRoute.addChildren([
+  dashboardRoute,
+  usersRoute,
+  signInRoute,
+]);
+```
 
 ## Data fetching
 
+Use `useQuery` / `useMutation` from `@apollo/client/react` with colocated generated documents:
+
 ```ts
 // Correct
-import { useGetUsersQuery } from '@packages/graphql-generated';
+import { useQuery } from '@apollo/client/react';
+import { GetUsersDocument } from 'modules/users/gql/queries/get-users.graphql.generated';
 
-// Wrong — never hand-write Apollo Client calls
-import { useQuery, gql } from '@apollo/client';
+const { data, loading, error } = useQuery(GetUsersDocument);
 ```
 
-Run `pnpm codegen --watch` during active development so generated hooks stay in sync with schema changes.
+Place `.graphql` files under `modules/<module>/gql/queries/` or `gql/mutations/`. Regenerate and commit `*.graphql.generated.ts` files alongside them.
+
+Run `pnpm codegen --watch` during active development so generated types stay in sync with schema changes.
 
 ## Styling
 

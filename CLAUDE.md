@@ -47,42 +47,49 @@ Types: `feat`, `core`, `fix`, `refactor`, `chore`, `docs`, `test`, `ci`
 
 ## Wiki
 
-This project uses an LLM-maintained wiki in `/wiki/`. Rules:
+This project maintains a compounding knowledge base in `/wiki/`.
+Claude owns the wiki layer entirely. You read it; Claude writes it.
 
-### Layers
+### Source hierarchy (for ingest)
 
-- `raw/` — immutable source documents. Never modify.
-- `wiki/` — you own this entirely. Create, update, cross-reference.
-- `CLAUDE.md` — schema and conventions (this file).
+1. **Local CLAUDE.md** (apps/_/CLAUDE.md, packages/_/CLAUDE.md) —
+   authoritative for service/package conventions, patterns, constraints.
+   Treat as the primary source when ingesting a service or package.
+2. **docs/wiki/raw/** — background reference docs (apps-_, package-_,
+   infra-\* files). Secondary: use to fill in context not covered by CLAUDE.md.
+3. **Source code itself** — ground truth for anything not documented.
+
+Never treat docs/wiki/raw/ as authoritative over a local CLAUDE.md.
 
 ### Conventions
 
-- Every wiki page uses wikilinks: [[users-service]], [[user-entity]]
-- Entity pages live in wiki/entities/, service pages in wiki/services/
-- Decisions go in wiki/decisions/ with date prefix: YYYY-MM-decision-title.md
-- Add YAML frontmatter to every page:
+- Wikilinks: [[users-service]], [[user-entity]]
+- services/ → one page per app; packages/ → one page per package
+- decisions/ → date-prefixed: YYYY-MM-decision-title.md
+- YAML frontmatter on every page:
 
 ```yaml
   ---
-  updated: 2026-04-14
-  sources: [apps/users-service/README.md]
+  updated: YYYY-MM-DD
+  sources: [apps/users-service/CLAUDE.md, docs/wiki/raw/apps-users-service.md]
   tags: [service, graphql, grpc]
   ---
 ```
 
 ### Operations
 
-**Ingest** — when I say "ingest [file/feature]":
+**Ingest** `ingest [service/package/infra area]`:
 
-1. Read the source
-2. Write/update the relevant wiki pages (service, entity, packages touched)
-3. Update wiki/index.md
-4. Append entry to wiki/log.md: `## [YYYY-MM-DD] ingest | <title>`
-5. Note contradictions with existing pages explicitly
+1. Read the local CLAUDE.md first (if it exists)
+2. Read the corresponding docs/wiki/raw/ file for additional context
+3. Write/update wiki page, noting which source each claim came from
+4. Update wiki/index.md and append to wiki/log.md:
+   `## [YYYY-MM-DD] ingest | <name>`
+5. Flag contradictions between CLAUDE.md and raw docs explicitly in the page
 
-**Query** — answer from wiki pages, cite them. If a good answer
-emerges, offer to file it as a new wiki page.
+**Query** — answer from wiki pages with citations. File valuable
+answers back as new wiki pages.
 
 **Lint** — check for: orphan pages, stale claims, missing cross-refs,
-concepts mentioned but lacking their own page, gaps to investigate.
+gaps between what CLAUDE.md documents and what the wiki reflects.
 Add findings to wiki/gaps.md.

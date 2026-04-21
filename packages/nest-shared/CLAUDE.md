@@ -1,7 +1,7 @@
 # @packages/nest-shared
 
-Shared NestJS infrastructure package. Consumed by `users-service` and `auth-service` only.  
-**Do not import this package into `api-gateway-service`, `registry-service`, or any frontend app.**
+Shared NestJS infrastructure package. Consumed by `*-service` only.  
+**Do not import this package into any frontend app.**
 
 ## What's in here
 
