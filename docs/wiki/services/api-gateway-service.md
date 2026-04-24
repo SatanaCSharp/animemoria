@@ -100,12 +100,12 @@ Both transports support `credentials: true`. The GraphQL transport additionally 
 
 ## Package Dependencies
 
-| Package                  | Used for                                                                                                                                                                           |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [[packages/nest-shared]] | `AppLoggerModule`, `ConfigModule`, `HealthModule`, `JwtRtGuard`, `@CurrentUser`, `setRefreshTokenCookie`, `InjectGrpcServiceClient`, `GraphQLContext`, `AppType`, `QueryProcessor` |
-| `@packages/grpc`         | `AuthServiceClient`, `AUTH_SERVICE_NAME`, `RefreshTokensRequest/Response` types                                                                                                    |
-| `@packages/shared-types` | `ApplicationError`, `SystemError`                                                                                                                                                  |
-| `@packages/utils`        | `assertDefined`, `isProd`                                                                                                                                                          |
+| Package                   | Used for                                                                                                                                                                           |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [[packages/nest-shared]]  | `AppLoggerModule`, `ConfigModule`, `HealthModule`, `JwtRtGuard`, `@CurrentUser`, `setRefreshTokenCookie`, `InjectGrpcServiceClient`, `GraphQLContext`, `AppType`, `QueryProcessor` |
+| [[packages/grpc]]         | `AuthServiceClient`, `AUTH_SERVICE_NAME`, `RefreshTokensRequest/Response` types                                                                                                    |
+| [[packages/shared-types]] | `ApplicationError`, `SystemError`                                                                                                                                                  |
+| [[packages/utils]]        | `assertDefined`, `isProd`                                                                                                                                                          |
 
 ## What This Service Does NOT Do
 

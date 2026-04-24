@@ -110,11 +110,11 @@ Checklist for a new route-based module:
 
 ## Monorepo Dependencies
 
-| Package                  | Role                                               |
-| ------------------------ | -------------------------------------------------- |
-| [[packages/ui-shared]]   | UI provider, HeroUI components, Tailwind v4 styles |
-| `@packages/shared-types` | Shared error classes and TypeScript types          |
-| `@packages/utils`        | Assertions and helpers                             |
+| Package                   | Role                                               |
+| ------------------------- | -------------------------------------------------- |
+| [[packages/ui-shared]]    | UI provider, HeroUI components, Tailwind v4 styles |
+| [[packages/shared-types]] | Shared error classes and TypeScript types          |
+| [[packages/utils]]        | Assertions and helpers                             |
 
 > Do not install HeroUI or Tailwind directly into `apps/admin` — consume exclusively through `@packages/ui-shared`.
 

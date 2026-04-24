@@ -149,5 +149,5 @@ Centralises cross-cutting infrastructure concerns (logging, DB, auth, gRPC, heal
 
 - [[users-service]] — primary consumer
 - [[auth-service]] — primary consumer
-- `@packages/grpc` — generated proto stubs imported by gRPC utilities here
-- `@packages/shared-types` — `SystemError`, enums shared across packages
+- [[packages/grpc]] — generated proto stubs imported by gRPC utilities here
+- [[packages/shared-types]] — `SystemError`, enums shared across packages

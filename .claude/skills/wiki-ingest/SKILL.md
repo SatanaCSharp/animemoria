@@ -55,16 +55,28 @@ Collect what's available for this ingest target. **Priority order:**
 
 ### Step 2 — Determine target wiki page(s)
 
-Map the source to wiki locations:
+Map the source to wiki locations. All pages live under `docs/wiki/`:
 
-| Source type | Primary page                        | Possible secondary pages                                 |
-| ----------- | ----------------------------------- | -------------------------------------------------------- |
-| `service`   | `wiki/services/<name>.md`           | `wiki/entities/`, `wiki/decisions/`                      |
-| `frontend`  | `wiki/frontend/<name>.md`           | `wiki/packages/` (shared UI packages), `wiki/decisions/` |
-| `package`   | `wiki/packages/<name>.md`           | `wiki/services/`, `wiki/frontend/` (update consumers)    |
-| `infra`     | `wiki/infra/<name>.md`              | `wiki/overview.md`                                       |
-| `article`   | `wiki/references/<slug>.md`         | `wiki/decisions/` if it informed a choice                |
-| `decision`  | `wiki/decisions/YYYY-MM-<title>.md` | relevant service/package pages                           |
+| Source type | Primary page                             | Possible secondary pages                                                                    |
+| ----------- | ---------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `service`   | `docs/wiki/services/<name>.md`           | `docs/wiki/service-entities/<name>/`, `docs/wiki/graphql-entities/`, `docs/wiki/decisions/` |
+| `frontend`  | `docs/wiki/frontend/<name>.md`           | `docs/wiki/packages/` (shared UI packages), `docs/wiki/decisions/`                          |
+| `package`   | `docs/wiki/packages/<name>.md`           | `docs/wiki/services/`, `docs/wiki/frontend/` (update consumers)                             |
+| `infra`     | `docs/wiki/infra/<name>.md`              | `docs/wiki/overview.md`                                                                     |
+| `article`   | `docs/wiki/references/<slug>.md`         | `docs/wiki/decisions/` if it informed a choice                                              |
+| `decision`  | `docs/wiki/decisions/YYYY-MM-<title>.md` | relevant service/package pages                                                              |
+
+**Entity sub-directories:**
+
+- `docs/wiki/graphql-entities/<entity-name>.md` — describes a GraphQL entity
+  (fields, type, federation directives, resolver contract). Documents the
+  _schema shape_, not service business logic. One file per entity type.
+- `docs/wiki/service-entities/<service-name>/<entity-name>.md` — describes a
+  database/domain entity owned by a specific service (TypeORM entity, columns,
+  relations, constraints). One file per entity per service.
+
+Create entity pages as stubs if they don't exist yet; flesh them out during the
+ingest of the owning service.
 
 If a page already exists, update it. Never replace — integrate new information,
 flag contradictions, mark superseded claims.
@@ -73,12 +85,34 @@ flag contradictions, mark superseded claims.
 
 Read all collected sources. Extract:
 
-- **For services/packages**: purpose, ports/interfaces, dependencies, patterns used,
-  known constraints, cross-service relationships
-- **For frontend apps**: framework, routing strategy, data fetching approach, shared
-  UI packages consumed, SSR/CSR constraints, key routes and pages, state management,
-  codegen dependencies
-- **For infra**: components, configuration conventions, environment specifics
+- **For services**: purpose, ports/interfaces, dependencies, patterns used, known
+  constraints, cross-service relationships. Additionally document architecture:
+  - How source files are laid out (`src/modules/`, `src/shared/`, entrypoints)
+  - What functionality is delegated to shared packages (e.g. `@packages/nest-shared`,
+    `@packages/grpc`) vs. implemented locally
+  - How the service implements its core features (gRPC transport, GraphQL transport,
+    dual-transport split, federation entity resolvers, etc.)
+  - Which TypeORM entities exist and how they relate
+- **For packages**: purpose, public API surface, which services/apps consume it.
+  Additionally document architecture:
+  - File layout and barrel exports
+  - What is intentionally shared vs. what is internal
+  - How consumers are expected to extend or configure it
+- **For frontend apps — SSR (Next.js / apps/web)**:
+  - App Router structure, Server Component boundaries, `"use client"` usage
+  - Server Actions for mutations
+  - Data fetching pattern in RSC mode (Apollo Client RSC)
+  - Shared UI packages consumed and Tailwind config inheritance
+  - Key routes and pages, state management approach
+- **For frontend apps — SPA (Vite / apps/admin)**:
+  - TanStack Router file-based route structure
+  - Apollo Client hooks via `@packages/graphql-generated` generated types
+  - No SSR constraints — pure client rendering
+  - Codegen workflow and how generated hooks are consumed
+  - Shared UI packages consumed and Tailwind config inheritance
+- **For infra**: how files are organized (chart templates vs. per-service values,
+  global overrides), the templating approach (Helm chart reuse, Terraform modules),
+  environment-specific configuration strategy, any notable conventions or gotchas
 - **For articles/approaches**: core idea, key claims, applicability to this project,
   contradictions with existing wiki content
 
@@ -92,7 +126,7 @@ Use this frontmatter on every page:
 ```yaml
 ---
 updated: YYYY-MM-DD
-type: service | frontend | package | infra | reference | decision
+type: service | frontend | package | infra | reference | decision | graphql-entity | service-entity
 sources:
   - apps/users-service/CLAUDE.md
   - docs/wiki/raw/apps-users-service.md # only if used as supplementary
@@ -101,8 +135,17 @@ tags: [graphql, grpc, nestjs]
 ```
 
 **Wikilinks**: cross-reference related pages using `[[page-name]]` syntax.
-Every page should link to at least one other page. Entities referenced by a
-service should have their own page in `wiki/entities/` — create a stub if missing.
+Every page should link to at least one other page.
+
+- GraphQL types referenced by a service → `docs/wiki/graphql-entities/<entity>.md`
+  (create a stub if missing; include fields, federation directives, resolver contract)
+- Database/domain entities owned by a service → `docs/wiki/service-entities/<service-name>/<entity>.md`
+  (create a stub if missing; include columns, relations, constraints)
+
+**Architecture section**: for `service`, `package`, and `infra` pages always
+include an `## Architecture` section covering the points extracted in Step 3
+(file layout, delegation to packages, transport approach for services;
+file organization, templating strategy, environment config for infra).
 
 **Contradictions**: if sources disagree, add a blockquote callout:
 
@@ -113,13 +156,13 @@ service should have their own page in `wiki/entities/` — create a stub if miss
 
 ### Step 5 — Update index and log
 
-**wiki/index.md** — add or update the entry for this page:
+**docs/wiki/index.md** — add or update the entry for this page:
 
 ```markdown
 | [[services/users-service]] | User domain — GraphQL subgraph + gRPC | 2026-04-14 |
 ```
 
-**wiki/log.md** — append one line (grep-parseable):
+**docs/wiki/log.md** — append one line (grep-parseable):
 
 ```
 ## [YYYY-MM-DD] ingest | <source-name> → <wiki-page-path>
@@ -146,22 +189,6 @@ When ingesting multiple sources at once, process them in dependency order:
 5. Frontend apps
 6. External articles / decisions (any order)
 
-After batch ingest, always run a lint pass.
-
----
-
-## Lint (run periodically or after batch ingest)
-
-Check for:
-
-- Orphan pages (no inbound wikilinks)
-- Stale claims (port, pattern, or dependency changed in CLAUDE.md but not wiki)
-- Entities mentioned across pages without their own `wiki/entities/` page
-- Services consuming a package not linked from the package page
-- docs/wiki/raw/ files with no corresponding wiki page yet
-
-Write findings to `wiki/gaps.md` with priority (high / medium / low).
-
 ---
 
 ## Filing query results back
@@ -169,7 +196,7 @@ Write findings to `wiki/gaps.md` with priority (high / medium / low).
 If a question against the wiki produces a valuable synthesis, offer to file it:
 
 ```
-## [YYYY-MM-DD] query-filed | <topic> → wiki/references/<slug>.md
+## [YYYY-MM-DD] query-filed | <topic> → docs/wiki/references/<slug>.md
 ```
 
 ---
@@ -178,5 +205,5 @@ If a question against the wiki produces a valuable synthesis, offer to file it:
 
 - **Never modify** anything under `docs/wiki/raw/` — read-only reference material
 - **Never overwrite** existing wiki pages — integrate and flag conflicts
-- **Never create** wiki pages outside the `wiki/` directory
+- **Never create** wiki pages outside the `docs/wiki/` directory
 - **Never skip** the log entry — the log is the audit trail

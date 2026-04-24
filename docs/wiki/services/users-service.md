@@ -75,7 +75,8 @@ src/
 
 ### GraphQL
 
-- Schema contracts: `packages/graphql-definitions/src/users/*`
+- Schema contracts: [[packages/graphql-definitions]] (`src/user/`)
+- GraphQL entity: [[graphql-entities/user]] — `User` type (`id @key`, `email @shareable`, `nickname @shareable`)
 - Endpoints: `src/modules/users/` (resolver)
 - **Not yet wired to persistence** — `createUser` returns a mock id; `getUsers` returns hard-coded list
 
@@ -84,7 +85,7 @@ src/
 - **Entity:** `User` (`id`, `accountId`, `email`, `nickname`)
 - **Repository:** `UserRepository`
 - Location: `src/shared/domain/` (per raw doc; verify against source)
-- Migrations: `src/migrations/` — see [[migrations]] rules for CLI commands
+- Migrations: `src/migrations/` — see project migrations rules (`.claude/rules/migrations.md`) for CLI commands
 - `migrationsRun: false` — migrations must be run explicitly in deployment workflows
 
 ## Configuration

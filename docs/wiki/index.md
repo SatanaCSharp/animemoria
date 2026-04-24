@@ -15,11 +15,24 @@
 
 ## Packages
 
+- [[packages/ui-shared]] — shared React component library (HeroUI + Tailwind); Button, inputs, dropdowns, icons, UIProvider; consumed by admin, web, storybook
 - [[packages/nest-shared]] — shared NestJS infra (logging, ORM, auth, gRPC, health, graceful shutdown); consumed by users-service and auth-service only
+- [[packages/graphql-definitions]] — single source of truth for all GraphQL contracts; defines entities, DTOs, resolver interfaces, and generates schema.gql
+- [[packages/graphql-generated]] — compiled schema.gql + shared codegen config for frontend apps; bridge between backend contracts and frontend types
+- [[packages/eslint-config-base]] — foundation ESLint flat config (TS strict + Prettier + import hygiene); extended by all other ESLint config packages
+- [[packages/eslint-config-ui]] — ESLint config for React/Next.js frontends; extends base + React, Hooks, a11y, import/order
+- [[packages/eslint-config-service]] — ESLint config for NestJS services; extends base with relaxed DI/decorator rules
+- [[packages/grpc]] — generated TypeScript gRPC bindings (ts-proto); AuthService, UsersService, Health contracts for all NestJS services
+- [[packages/jest-config-preset]] — shared Jest preset (ts-jest, node env, spec.ts pattern); extended by all services and packages
+- [[packages/tsconfig]] — shared TypeScript base configs (`tsconfig.base.json` + `tsconfig.node.json`); extended by all workspaces
+- [[packages/shared-types]] — cross-service enums, typed error hierarchy, and utility types (`Maybe<T>`); sub-path exports; consumed by every service and package
+- [[packages/utils]] — runtime utility functions (asserts, predicates, type-guards, async primitives); sub-path exports; consumed by all services and apps
 
-## Entities
+## GraphQL Entities
 
-<!-- one link per entity page -->
+- [[graphql-entities/user]] — federated `User` type; `id @key`, `email @shareable`, `nickname @shareable`; owned by users-service
+- [[graphql-entities/account]] — federated `Account` type; `id @key`, `email`, `user: User`; owned by auth-service
+- [[graphql-entities/account-response]] — auth mutation response; carries `accessToken`; returned by signUp/signIn
 
 ## Infrastructure
 

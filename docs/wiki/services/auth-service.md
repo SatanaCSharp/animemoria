@@ -78,9 +78,10 @@ src/
 
 ### GraphQL
 
-- Schema contracts: `packages/graphql-definitions/src/account/*`
+- Schema contracts: [[packages/graphql-definitions]] (`src/account/`)
+- GraphQL entities: [[graphql-entities/account]] — `Account` type (`id @key`); [[graphql-entities/account-response]] — returned by `signUp`/`signIn`
 - Transport adapters: `src/account/graphql/mutations/*`
-- Operations: `signUp`, `signIn` mutations
+- Operations: `signUp`, `signIn`, `blockAccount`, `unblockAccount` mutations; `me` query
 
 ### gRPC
 

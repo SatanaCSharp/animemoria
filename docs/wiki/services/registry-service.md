@@ -126,9 +126,9 @@ No integration or E2E tests exist.
 - [[packages/nest-shared]] — provides `ModuleInitializerClientService` (registry client), health, config, and logger modules
 - [[services/users-service]] — registers gRPC and GraphQL runtimes with this service on startup
 - [[services/auth-service]] — registers gRPC and GraphQL runtimes with this service on startup
-- `apps/api-gateway-service` — consumes this registry to resolve upstream service URLs at runtime
-- `packages/shared-types` — provides `SystemError` used in error handling
-- `packages/utils` — provides assertion utilities used in bootstrap and processors
+- [[services/api-gateway-service]] — consumes this registry to resolve upstream service URLs at runtime
+- [[packages/shared-types]] — provides `SystemError` used in error handling
+- [[packages/utils]] — provides assertion utilities used in bootstrap and processors
 
 ## How to Extend
 
