@@ -1,1 +1,1 @@
-export { Maybe } from './maybe';
+export type { Maybe } from './maybe';

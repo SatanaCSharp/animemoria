@@ -66,6 +66,13 @@ runs:
         restore-keys: |
          ${{ runner.os }}-pnpm-store-
 
+    - name: Install Protocol Buffer Compiler
+      if: inputs.app-dependencies == 'true'
+      shell: bash
+      run: |
+        sudo apt-get update -q
+        sudo apt-get install -y protobuf-compiler
+
     - name: Install dependencies
       if: inputs.app-dependencies == 'true'
       shell: bash
