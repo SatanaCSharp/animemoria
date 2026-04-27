@@ -127,3 +127,6 @@ terraform.rc
 #agents
 *.local.md
 !*.example.local.md
+
+#obsidian
+.obsidian/
