@@ -1,4 +1,4 @@
-# @packages/eslint-config-base
+    # @packages/eslint-config-base
 
 Foundation ESLint flat config shared by all AniMemoria workspaces.
 Bundles TypeScript-ESLint (strict + type-checked), Prettier, import sorting, unused-import removal,

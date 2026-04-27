@@ -4,7 +4,7 @@ description: This reusable action installs dependencies are required by other ac
 inputs:
   pnpm-version:
     description: pnpm version to install.
-    required: true
+    required: false
     default: '9.15.3'
   pnpm:
     description: installation pnpm package manager
@@ -12,7 +12,7 @@ inputs:
     default: 'true'
   node-version:
     description: Node.js version to use.
-    required: true
+    required: false
     default: '24.x'
   node:
     description: installation nodejs
@@ -65,6 +65,13 @@ runs:
         key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
         restore-keys: |
          ${{ runner.os }}-pnpm-store-
+
+    - name: Install Protocol Buffer Compiler
+      if: inputs.app-dependencies == 'true'
+      shell: bash
+      run: |
+        sudo apt-get update -q
+        sudo apt-get install -y protobuf-compiler
 
     - name: Install dependencies
       if: inputs.app-dependencies == 'true'

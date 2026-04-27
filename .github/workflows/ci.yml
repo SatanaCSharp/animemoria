@@ -9,7 +9,7 @@ permissions:
 
 env:
   NODE_VERSION: '24.x'
-  PNPM_VERSION: '9.15.3'
+  PNPM_VERSION: '10.32.0'
   AWS_REGION: eu-central-1
 
 jobs:
