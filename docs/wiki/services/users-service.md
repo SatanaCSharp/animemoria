@@ -49,21 +49,28 @@ Source: `docs/raw/apps-users-service.md §3`
 
 ### Module layout
 
-Per `apps/users-service/CLAUDE.md` (primary):
-
 ```
 src/
-  modules/
-    users/     # CRUD, entity, resolver, gRPC controller
-    profile/   # profile-specific domain logic
-  shared/      # guards, interceptors, shared DTOs
+  app-base.module.ts
+  graphql.{main,module}.ts
+  grpc.{main,module}.ts
+  users/                     # users module
+    users.graphql.module.ts
+    users.grpc.module.ts
+    graphql/
+      mutations/             # createUser
+      queries/               # getUsers
+    grpc/controllers/        # UsersController
+    use-case/commands/       # CreateUserCommandProcessor
+  shared/
+    shared.module.ts         # @Global(); exports all domain providers
+    domain/
+      entities/              # User
+      repositories/          # UserRepository
   migrations/
 ```
 
-> **Contradiction flagged:** `docs/raw/apps-users-service.md` describes a different layout —
-> `src/users/graphql/*`, `src/users/grpc/*`, `src/users/use-case/*`, `src/shared/domain/*`.
-> The raw doc may reflect an older snapshot. Treat `apps/users-service/CLAUDE.md` as authoritative;
-> verify against source code before acting on either.
+See [[decisions/2026-04-27-intra-service-layer-architecture]] for the full layer model.
 
 ## Public interfaces
 

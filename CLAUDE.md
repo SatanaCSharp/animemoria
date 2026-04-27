@@ -47,49 +47,23 @@ Types: `feat`, `core`, `fix`, `refactor`, `chore`, `docs`, `test`, `ci`
 
 ## Wiki
 
-This project maintains a compounding knowledge base in `/wiki/`.
+This project maintains a compounding knowledge base in `docs/wiki/`.
 Claude owns the wiki layer entirely. You read it; Claude writes it.
 
-### Source hierarchy (for ingest)
+### Wiki-first: reducing token consumption
 
-1. **Local CLAUDE.md** (apps/_/CLAUDE.md, packages/_/CLAUDE.md) —
-   authoritative for service/package conventions, patterns, constraints.
-   Treat as the primary source when ingesting a service or package.
-2. **docs/wiki/raw/** — background reference docs (apps-_, package-_,
-   infra-\* files). Secondary: use to fill in context not covered by CLAUDE.md.
-3. **Source code itself** — ground truth for anything not documented.
+**Before reading any source file, CLAUDE.md, or raw doc**, always check the wiki:
 
-Never treat docs/wiki/raw/ as authoritative over a local CLAUDE.md.
+1. Open `docs/wiki/index.md` — if a page exists for the service/package/area you need, read **that specific wiki page** (not just the index) before touching any raw source. The index alone does not satisfy the wiki-first requirement.
+2. Only fall back to `apps/*/CLAUDE.md` or source code when the wiki page is missing, explicitly marked stale, or contains an unresolved conflict notice. When falling back, state the reason in your response before reading. **Never read `docs/wiki/raw/`** — that directory is for wiki generation only, not for answering queries. Reading source code is last priority and only when wiki and CLAUDE.md files are insufficient.
+3. When new knowledge is synthesized from raw sources, update the wiki page immediately so future queries are served from it. Every wiki write must include YAML frontmatter with `updated: YYYY-MM-DD` (today's date) and `sources:` listing every file read during the synthesis.
+4. Once you have read a wiki page for a topic, do **not** also read `docs/wiki/raw/*` in the same session — it is for wiki generation only, never for answering questions. Reading `apps/<service>/CLAUDE.md` is allowed when the wiki page is stale or missing. Read `docs/wiki/index.md` at most once per session; re-read only when switching to a clearly different topic.
+5. When you encounter knowledge gaps or lack context to answer confidently, use the **interviewer pattern**: ask the user targeted questions to fill the gap before proceeding, rather than guessing or reading unnecessary files.
 
-### Conventions
-
-- Wikilinks: [[users-service]], [[user-entity]]
-- services/ → one page per app; packages/ → one page per package
-- decisions/ → date-prefixed: YYYY-MM-decision-title.md
-- YAML frontmatter on every page:
-
-```yaml
-  ---
-  updated: YYYY-MM-DD
-  sources: [apps/users-service/CLAUDE.md, docs/wiki/raw/apps-users-service.md]
-  tags: [service, graphql, grpc]
-  ---
-```
+One wiki page instead of multiple raw files keeps context windows small and answers fast.
 
 ### Operations
 
-**Ingest** `ingest [service/package/infra area]`:
-
-1. Read the local CLAUDE.md first (if it exists)
-2. Read the corresponding docs/wiki/raw/ file for additional context
-3. Write/update wiki page, noting which source each claim came from
-4. Update wiki/index.md and append to wiki/log.md:
-   `## [YYYY-MM-DD] ingest | <name>`
-5. Flag contradictions between CLAUDE.md and raw docs explicitly in the page
-
-**Query** — answer from wiki pages with citations. File valuable
-answers back as new wiki pages.
-
-**Lint** — check for: orphan pages, stale claims, missing cross-refs,
-gaps between what CLAUDE.md documents and what the wiki reflects.
-Add findings to wiki/gaps.md.
+- **Ingest** a service/package/infra area → use the `wiki-ingest` skill.
+- **Query** — answer from wiki pages with citations; file valuable synthesis back as new wiki pages.
+- **Lint** — audit for orphan pages, stale claims, missing cross-refs → use the `wiki-lint` skill.

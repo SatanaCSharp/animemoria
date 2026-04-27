@@ -47,3 +47,19 @@
 ## [2026-04-24] ingest | package-shared-types → packages/shared-types.md
 
 ## [2026-04-24] lint | full wiki — findings written to gaps.md; fixed 2 broken wikilinks
+
+## [2026-04-27] ingest | service-entities/users-service/user → service-entities/users-service/user.md
+
+## [2026-04-27] ingest | service-entities/auth-service/account → service-entities/auth-service/account.md
+
+## [2026-04-27] ingest | service-entities/auth-service/session → service-entities/auth-service/session.md
+
+## [2026-04-27] ingest | overview → docs/wiki/overview.md (stub filled; inbound link added from index.md)
+
+## [2026-04-27] decisions | auth-user-separation, package-audience-scoping, cross-service-entity-reference → docs/wiki/decisions/
+
+## [2026-04-27] ingest | docs/raw/assertion-function-in-typescript.md → docs/wiki/references/assertion-functions-typescript.md
+
+## [2026-04-27] ingest | docs/raw/invariant.md → docs/wiki/references/invariant.md
+
+## [2026-04-27] decisions | intra-service-layer-architecture, scope-tiers-module-shared-package, grpc-client-services-pattern → docs/wiki/decisions/

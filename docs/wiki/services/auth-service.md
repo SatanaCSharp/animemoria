@@ -54,25 +54,37 @@ src/grpc.main.ts     →  GrpcModule
 
 ### Module layout
 
-Per `docs/raw/apps-auth-service.md §5`:
-
 ```
 src/
   app-base.module.ts         # shared runtime foundation
   graphql.module.ts          # GraphQL process composition
   grpc.module.ts             # gRPC process composition
-  account/
-    account.graphql.module.ts  # GraphQL adapter layer for account use-cases
-  session/
-    session.grpc.module.ts     # gRPC adapter layer for session use-cases
+  account/                   # account module (GraphQL transport + use-case)
+    account.graphql.module.ts
+    graphql/
+      mutations/             # signUp, signIn, blockAccount, unblockAccount
+      queries/               # me
+    use-case/
+      commands/              # SignUpCommandProcessor, SignInCommandProcessor
+  session/                   # session module (gRPC transport + use-case)
+    session.grpc.module.ts
+    grpc/controllers/        # AuthController
+    use-case/command/        # RefreshTokensCommandProcessor
   shared/
-    shared.module.ts           # domain repos, services, integration clients
+    shared.module.ts         # @Global(); exports all domain + client-service providers
     domain/
-      entities/               # Account, Session entities
-      repositories/           # AccountRepository, SessionRepository
+      entities/              # Account, Session
+      repositories/          # AccountRepository, SessionRepository
+      services/              # AuthService (token generation)
     client-services/
       users.client-service.ts # gRPC client to users-service
+    types/
+      app-type.enum.ts       # AppType (ADMIN | WEB)
+    utils/
+      extract-app-type-from-headers.ts
 ```
+
+See [[decisions/2026-04-27-intra-service-layer-architecture]] for the full layer model and [[decisions/2026-04-27-scope-tiers-module-shared-package]] for why artefacts land in `shared/` vs `packages/`.
 
 ## Public interfaces
 
