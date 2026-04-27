@@ -39,6 +39,8 @@ jobs:
         uses: ./.github/actions/change-detection
         with:
           base-branch: ${{ github.base_ref }}
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
 
   quality-checks:
     name: 'Quality: ${{ matrix.workspace }}'
